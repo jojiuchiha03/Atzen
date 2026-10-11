@@ -1,0 +1,144 @@
+{
+  "generator": "Built-in image_gen",
+  "basePrompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.",
+  "textures": [
+    {
+      "id": "river_rod",
+      "subject": "A slender rustic fishing rod, brown bamboo and copper reel with teal wrapping, diagonally from bottom-left handle to top-right tip. Thin fishing line and small hook on the right.",
+      "original": "source/river_rod.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/river_rod.png"
+    },
+    {
+      "id": "iron_rod",
+      "subject": "A sturdy reinforced fishing rod, dark graphite shaft with steel bands and a red grip and silver reel, diagonally bottom-left handle to top-right tip. Thin fishing line and small hook on right.",
+      "original": "source/iron_rod.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/iron_rod.png"
+    },
+    {
+      "id": "tide_rod",
+      "subject": "A magical ocean fishing rod, deep blue shaft with luminous cyan crystal tip, gold reel and purple grip, diagonally bottom-left handle to top-right tip. Thin fishing line and small hook on right.",
+      "original": "source/tide_rod.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/tide_rod.png"
+    },
+    {
+      "id": "worm_bait",
+      "subject": "One chunky curled reddish earthworm fishing bait, earthy pink segments and warm highlights. Simple curved worm shape.",
+      "original": "source/worm_bait.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/worm_bait.png"
+    },
+    {
+      "id": "glow_bait",
+      "subject": "One small luminous turquoise fishing grub, cyan segmented body with a pale yellow head and small cyan spark pixels close to its silhouette. No surrounding glow haze.",
+      "original": "source/glow_bait.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/glow_bait.png"
+    },
+    {
+      "id": "hearty_bait",
+      "subject": "One compact cluster of three red-orange fish roe eggs bound together with a tiny green seaweed tie, fishing bait.",
+      "original": "source/hearty_bait.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/hearty_bait.png"
+    },
+    {
+      "id": "steady_line_tome",
+      "subject": "One closed enchanted book with dark brown leather and copper corners. A bright emerald looping fishing-line rune on its green cover. Diagonal isometric inventory view.",
+      "original": "source/steady_line_tome.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/steady_line_tome.png"
+    },
+    {
+      "id": "reel_power_tome",
+      "subject": "One closed enchanted book with dark brown leather and gold corners. A bright orange double-chevron fishing-reel rune on its red cover. Diagonal isometric inventory view.",
+      "original": "source/reel_power_tome.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/reel_power_tome.png"
+    },
+    {
+      "id": "calm_waters_tome",
+      "subject": "One closed enchanted book with navy leather and silver corners. A bright cyan wave rune on its blue cover. Diagonal isometric inventory view.",
+      "original": "source/calm_waters_tome.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/calm_waters_tome.png"
+    },
+    {
+      "id": "river_trout",
+      "subject": "silvery river trout with an olive back, pink lateral stripe and small dark red spots",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One silvery river trout with an olive back, pink lateral stripe and small dark red spots. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/river_trout.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/river_trout.png"
+    },
+    {
+      "id": "perch",
+      "subject": "green-yellow perch with five dark vertical stripes and orange fins",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One green-yellow perch with five dark vertical stripes and orange fins. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/perch.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/perch.png"
+    },
+    {
+      "id": "pike",
+      "subject": "long narrow olive-green northern pike with pale yellow speckles and a pointed snout",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One long narrow olive-green northern pike with pale yellow speckles and a pointed snout. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/pike.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/pike.png"
+    },
+    {
+      "id": "carp",
+      "subject": "deep-bodied bronze carp with golden scales and dark amber fins",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One deep-bodied bronze carp with golden scales and dark amber fins. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/carp.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/carp.png"
+    },
+    {
+      "id": "catfish",
+      "subject": "large slate-purple catfish with pale belly and prominent short whiskers",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One large slate-purple catfish with pale belly and prominent short whiskers. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/catfish.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/catfish.png"
+    },
+    {
+      "id": "golden_koi",
+      "subject": "rare bright gold and ivory koi with orange patches and elegant cream fins",
+      "prompt": "Use case: stylized-concept. Asset type: Minecraft inventory item texture for a Fabric fishing mod. Create ONE isolated pixel-art item on a truly transparent square canvas. Hard square pixel edges, very low-resolution 32x32 sprite aesthetic scaled up with nearest-neighbor, compact readable silhouette, limited palette, dark one-pixel outline, no antialiasing, no text, no border, no shadow outside the item. Center item, occupy about 85% of canvas. No extra items, no UI, no labels.\nSubject: One rare bright gold and ivory koi with orange patches and elegant cream fins. Side view, head to the left, tail to the right. Item sprite, no water.",
+      "original": "source/golden_koi.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/item/golden_koi.png"
+    },
+    {
+      "id": "skin_river_trout",
+      "subject": "silvery river trout with an olive back, pink lateral stripe and small dark red spots",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: silvery river trout with an olive back, pink lateral stripe and small dark red spots. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_river_trout.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/river_trout.png"
+    },
+    {
+      "id": "skin_perch",
+      "subject": "green-yellow perch with five dark vertical stripes and orange fins",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: green-yellow perch with five dark vertical stripes and orange fins. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_perch.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/perch.png"
+    },
+    {
+      "id": "skin_pike",
+      "subject": "long narrow olive-green northern pike with pale yellow speckles and a pointed snout",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: long narrow olive-green northern pike with pale yellow speckles and a pointed snout. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_pike.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/pike.png"
+    },
+    {
+      "id": "skin_carp",
+      "subject": "deep-bodied bronze carp with golden scales and dark amber fins",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: deep-bodied bronze carp with golden scales and dark amber fins. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_carp.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/carp.png"
+    },
+    {
+      "id": "skin_catfish",
+      "subject": "large slate-purple catfish with pale belly and prominent short whiskers",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: large slate-purple catfish with pale belly and prominent short whiskers. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_catfish.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/catfish.png"
+    },
+    {
+      "id": "skin_golden_koi",
+      "subject": "rare bright gold and ivory koi with orange patches and elegant cream fins",
+      "prompt": "Create ONE SQUARE, completely OPAQUE pixel-art texture atlas for a 3D voxel fish. This is a flat material sample sheet, NOT a drawing of a fish and NOT a fish silhouette. No transparency, no outlines, no empty black background. 64 by 64 pixel aesthetic with hard square pixel blocks. Every square inch filled. TOP THREE QUARTERS: continuous flat fish skin pattern, all-over scales or spots with no eyes or fins. LOWER QUARTER: horizontal fin-color band covering full width. In bottom-right corner only: a small pure BLACK square occupying rightmost 1/8 width and bottommost 1/8 height; directly to its left a same-sized pure IVORY square. These two tiny swatches are for separate eye geometry. No perspective, no lighting gradient, no text, no labels, no body parts, no animal illustration. Material description: rare bright gold and ivory koi with orange patches and elegant cream fins. Keep the upper left half especially fully filled with the main skin pattern.",
+      "original": "source/skin_golden_koi.png",
+      "gameTexture": "../src/main/resources/assets/atzen/textures/entity/fish/golden_koi.png"
+    }
+  ]
+}

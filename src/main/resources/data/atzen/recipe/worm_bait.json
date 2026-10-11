@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:rotten_flesh",
+    "minecraft:wheat_seeds"
+  ],
+  "result": {
+    "id": "atzen:worm_bait",
+    "count": 6
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:lapis_lazuli",
+    "minecraft:prismarine_crystals",
+    "minecraft:glow_ink_sac"
+  ],
+  "result": {
+    "id": "atzen:calm_waters_tome",
+    "count": 1
+  }
+}

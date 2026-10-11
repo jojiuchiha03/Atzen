@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "atzen:river_trout",
+    "atzen:perch",
+    "atzen:pike",
+    "atzen:carp",
+    "atzen:catfish",
+    "atzen:golden_koi"
+  ]
+}

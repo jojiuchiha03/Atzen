@@ -1,0 +1,40 @@
+package io.github.jojiuchiha03.atzen;
+
+import io.github.jojiuchiha03.atzen.battle.BattleManager;
+import io.github.jojiuchiha03.atzen.item.AtzenItems;
+import io.github.jojiuchiha03.atzen.fish.AtzenFishRegistry;
+import io.github.jojiuchiha03.atzen.network.BattlePayload;
+import io.github.jojiuchiha03.atzen.network.ReelPayload;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.resources.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class Atzen implements ModInitializer {
+    public static final String MOD_ID = "atzen";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final BattleManager BATTLES = new BattleManager();
+
+    public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
+
+    @Override
+    public void onInitialize() {
+        AtzenItems.initialize();
+        AtzenFishRegistry.initialize();
+        PayloadTypeRegistry.serverboundPlay().register(ReelPayload.TYPE, ReelPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(BattlePayload.TYPE, BattlePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ReelPayload.TYPE,
+                (payload, context) -> BATTLES.input(context.player(), payload));
+        ServerTickEvents.END_SERVER_TICK.register(BATTLES::tick);
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BATTLES.disconnect(handler.getPlayer()));
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> BATTLES.clear());
+        CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> BATTLES.registerCommands(dispatcher));
+        LOGGER.info("Atzen fishing battles initialized for Minecraft 26.2");
+    }
+}

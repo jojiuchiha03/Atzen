@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:fishing_rod",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "atzen:river_rod",
+    "count": 1
+  }
+}
