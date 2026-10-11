@@ -115,7 +115,8 @@ const translations = {
   'message.atzen.help': ['Atzen: normal auswerfen und beim Biss rechtsklicken. Im Duell R halten, bei Fluchten loslassen. Köder in die andere Hand. /atzen practice startet ein Training ohne Beute, /atzen cancel bricht ab. Tasten sind einstellbar.', 'Atzen: cast normally, then right-click at a bite. Hold R to reel; release during surges. Put bait in your other hand. /atzen practice starts a no-loot training battle; /atzen cancel stops it. Keys are configurable.'],
 };
 
-const de = {}, en = {};
+const de = { 'itemGroup.atzen': 'Atzen', 'item.atzen.atzen_muenze': 'Atzen-Münze' };
+const en = { 'itemGroup.atzen': 'Atzen', 'item.atzen.atzen_muenze': 'Atzen Coin' };
 for (const [id, [german, english, germanTip, englishTip]] of Object.entries(items)) {
   de[`item.atzen.${id}`] = german; en[`item.atzen.${id}`] = english;
   de[`tooltip.atzen.${id}`] = germanTip; en[`tooltip.atzen.${id}`] = englishTip;

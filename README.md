@@ -2,14 +2,14 @@
 
 Fabric-Mod für **Minecraft Java 26.2**: Fische im Wasser beobachten, den Biss anschlagen und den Fang in einem Duell mit Schnurspannung, Fluchten und Ausdauer landen.
 
-**Stand: 0.1.0.** Enthält sechs Fischarten mit eigenen animierten 3D-Körperformen, individuellen Maßen, drei Angeln, drei Ködern und drei Verzauberungen. Deutsch und Englisch sind enthalten. Build-, Daten- und Logiktests sind eingerichtet. Ein Test in einer laufenden Minecraft-Welt steht noch aus; die EULA wurde für eine Testinstanz nicht bestätigt.
+**Stand: 0.2.0.** Enthält sechs Fischarten mit eigenen animierten 3D-Körperformen, individuellen Maßen, drei Angeln, drei Ködern und drei Verzauberungen. Deutsch und Englisch sind enthalten. Build-, Daten- und Logiktests sind eingerichtet. Ein Test in einer laufenden Minecraft-Welt steht noch aus; die EULA wurde für eine Testinstanz nicht bestätigt.
 
 ## Installation
 
 Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und eine zu 26.2 passende Fabric API. Gebaut wird gegen **Fabric API 0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `build/libs/atzen-0.1.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `build/libs/atzen-0.2.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
 Die Datei mit `-sources.jar` im Namen ist Quellcode und gehört nicht in den `mods`-Ordner.
@@ -89,7 +89,7 @@ Alle folgenden Werkbankrezepte sind formlos. Die Rutenrezepte erzeugen eine neue
 | Kurbelkraft-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Redstone, 1 Amethystscherbe |
 | Wellenruhe-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Prismarinkristalle, 1 Leuchttintenbeutel |
 
-Ruten, Köder, Bücher und Fischeimer stehen im Kreativtab Werkzeuge. Fisch-Items stehen unter Nahrung; jede Art besitzt außerdem ein Spawn-Ei.
+Die vorhandene Atzen-Münze und der Kreativtab Atzen bleiben erhalten. Zwei Goldklumpen ergeben formlos eine Münze. Ruten, Köder, Bücher und Fischeimer stehen im Kreativtab Werkzeuge. Fisch-Items stehen unter Nahrung; jede Art besitzt außerdem ein Spawn-Ei.
 
 ## Befehle
 

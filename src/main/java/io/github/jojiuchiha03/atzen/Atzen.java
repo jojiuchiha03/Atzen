@@ -25,6 +25,7 @@ public final class Atzen implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ModItems.register();
         AtzenItems.initialize();
         AtzenFishRegistry.initialize();
         PayloadTypeRegistry.serverboundPlay().register(ReelPayload.TYPE, ReelPayload.CODEC);
@@ -35,6 +36,6 @@ public final class Atzen implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BATTLES.disconnect(handler.getPlayer()));
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> BATTLES.clear());
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> BATTLES.registerCommands(dispatcher));
-        LOGGER.info("Atzen fishing battles initialized for Minecraft 26.2");
+        LOGGER.info("Atzen geladen: fishing battles initialized for Minecraft 26.2");
     }
 }

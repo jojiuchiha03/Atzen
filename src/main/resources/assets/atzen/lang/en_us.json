@@ -1,4 +1,6 @@
 {
+  "itemGroup.atzen": "Atzen",
+  "item.atzen.atzen_muenze": "Atzen Coin",
   "item.atzen.river_rod": "River Rod",
   "tooltip.atzen.river_rod": "10% less strain, 5% faster reeling.",
   "item.atzen.iron_rod": "Iron Rod",

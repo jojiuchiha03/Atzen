@@ -1,4 +1,6 @@
 {
+  "itemGroup.atzen": "Atzen",
+  "item.atzen.atzen_muenze": "Atzen-Münze",
   "item.atzen.river_rod": "Flussrute",
   "tooltip.atzen.river_rod": "10 % weniger Spannung, 5 % schnelleres Einholen.",
   "item.atzen.iron_rod": "Eisenrute",

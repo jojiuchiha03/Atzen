@@ -4,9 +4,14 @@
   "version": "${version}",
   "name": "Atzen – Fishing Battles",
   "description": "Fight your catch: reel, manage line tension, and survive the fish's escape bursts.",
-  "authors": ["jojiuchiha03"],
-  "contact": {"sources": "https://github.com/jojiuchiha03/Atzen"},
+  "authors": ["jojiuchiha03", "Dschonas04"],
+  "contact": {
+    "homepage": "https://github.com/jojiuchiha03/Atzen",
+    "sources": "https://github.com/jojiuchiha03/Atzen",
+    "issues": "https://github.com/jojiuchiha03/Atzen/issues"
+  },
   "license": "MIT",
+  "icon": "assets/atzen/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": ["io.github.jojiuchiha03.atzen.Atzen"],

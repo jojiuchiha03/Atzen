@@ -90,10 +90,10 @@ class ResourceIntegrityTest {
     @Test void inventorySpritesHaveTransparencyAndFishSkinsCoverTheirWholeAtlas() throws IOException {
         for (Path sprite : files(ASSETS.resolve("textures/item"), ".png")) {
             var image = ImageIO.read(sprite.toFile());
-            assertEquals(64, image.getWidth(), sprite.toString());
-            assertEquals(64, image.getHeight(), sprite.toString());
+            assertTrue(Set.of(16, 32, 64).contains(image.getWidth()), sprite.toString());
+            assertEquals(image.getWidth(), image.getHeight(), sprite.toString());
             int opaque = 0, transparent = 0;
-            for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) {
+            for (int y = 0; y < image.getHeight(); y++) for (int x = 0; x < image.getWidth(); x++) {
                 int alpha = image.getRGB(x, y) >>> 24;
                 if (alpha == 0) transparent++;
                 if (alpha >= 250) opaque++;
