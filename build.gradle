@@ -1,0 +1,81 @@
+// Minecraft 26.2 ships with readable class names, so this mod is compiled straight
+// against the game jars — no mappings, no Loom, plain Gradle.
+//
+//   libs/server.jar   the dedicated server jar (common code is checked against it)
+//   libs/client.jar   the client jar (only the client source set sees it)
+//   libs/mc/          the libraries listed in the 26.2 version manifest
+//   libs/fabric/      the modules nested in the fabric-api jar (META-INF/jars/)
+//
+// tools/fetch-libs.sh fills libs/. Common code that touches a client class does not
+// compile: the source sets keep client and server apart the same way Loom's
+// splitEnvironmentSourceSets() does. The jar it produces goes into the mods
+// directory as it is.
+plugins {
+    id 'java'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+    mavenCentral()
+    maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+}
+
+sourceSets {
+    client {
+        compileClasspath += main.output
+        runtimeClasspath += main.output
+    }
+}
+
+def gameLibraries = fileTree(dir: 'libs/mc', include: '*.jar')
+def fabricApi = fileTree(dir: 'libs/fabric', include: '*.jar')
+
+dependencies {
+    compileOnly files('libs/server.jar')
+    compileOnly gameLibraries
+    compileOnly fabricApi
+    compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
+    compileOnly "net.fabricmc:sponge-mixin:${project.mixin_version}"
+
+    clientCompileOnly files('libs/client.jar')
+    clientCompileOnly gameLibraries
+    clientCompileOnly fabricApi
+    clientCompileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
+    clientCompileOnly "net.fabricmc:sponge-mixin:${project.mixin_version}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('compileJava') {
+    doFirst {
+        if (!file('libs/server.jar').exists()) {
+            throw new GradleException("libs/server.jar not found. Run tools/fetch-libs.sh first.")
+        }
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+jar {
+    archiveBaseName = project.archives_base_name
+    from sourceSets.client.output
+}
+
+sourcesJar {
+    from sourceSets.client.allSource
+}

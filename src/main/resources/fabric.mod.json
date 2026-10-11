@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "atzen",
+  "version": "${version}",
+  "name": "Atzen",
+  "description": "Mod für Minecraft 26.2 (Fabric).",
+  "authors": [
+    "jojiuchiha03",
+    "Dschonas04"
+  ],
+  "contact": {
+    "homepage": "https://github.com/jojiuchiha03/Atzen",
+    "sources": "https://github.com/jojiuchiha03/Atzen",
+    "issues": "https://github.com/jojiuchiha03/Atzen/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/atzen/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.jojiuchiha03.atzen.Atzen"
+    ],
+    "client": [
+      "io.github.jojiuchiha03.atzen.client.AtzenClient"
+    ]
+  },
+  "mixins": [
+    "atzen.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "fabric-api": "*",
+    "minecraft": ">=26.2",
+    "java": ">=21"
+  }
+}
