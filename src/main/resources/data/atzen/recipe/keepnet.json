@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:stick",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "atzen:keepnet",
+    "count": 1
+  }
+}

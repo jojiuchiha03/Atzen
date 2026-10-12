@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:iron_chain"
+  ],
+  "result": {
+    "id": "atzen:reinforced_hook_mount_module",
+    "count": 1
+  }
+}

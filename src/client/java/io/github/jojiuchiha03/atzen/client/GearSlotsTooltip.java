@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 final class GearSlotsTooltip implements ClientTooltipComponent {
     private static final int SLOT = 18;
     private static final int ROW = 20;
-    private static final int LINES = 3;
     private final AtzenRodItem.GearTooltip data;
 
     GearSlotsTooltip(AtzenRodItem.GearTooltip data) { this.data = data; }
@@ -38,16 +37,24 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
     private Component[] summary() {
         var rig = data.rig();
         var rod = data.rod();
+        Component modules = Component.empty();
+        for (int i = 0; i < data.modules().size(); i++) {
+            if (i > 0) modules = modules.copy().append(", ");
+            modules = modules.copy().append(Component.translatable(data.modules().get(i).translationKey()));
+        }
+        Component extras = Component.translatable("tooltip.atzen.gear.modules",
+                data.modules().isEmpty() ? Component.translatable("tooltip.atzen.gear.empty") : modules, data.upgrades());
         return new Component[] {
                 Component.translatable("tooltip.atzen.gear.rod", number(rod.load()), number(rod.power()),
                         Math.round(rod.flex() * 100), Math.round(rod.sensitivity() * 100), number(rod.castMin()),
                         number(rod.castMax()), number(rod.fishMin()), number(rod.fishMax()), number(data.cast())),
                 Component.translatable("tooltip.atzen.gear.stats", number(rig.lineStrength()), number(rig.capacity()),
                         number(rig.reelSpeed() * 20), number(rig.reelForce())),
-                Component.translatable("tooltip.atzen.gear.ability", Component.translatable(rig.ability().translationKey()))};
+                Component.translatable("tooltip.atzen.gear.ability", Component.translatable(rig.ability().translationKey())),
+                extras};
     }
 
-    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + LINES * 10 + 2; }
+    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + summary().length * 10 + 2; }
 
     @Override
     public int getWidth(Font font) {
@@ -81,7 +88,7 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
             boolean empty = stack(slot).isEmpty();
             graphics.text(font, label(slot), x + SLOT + 5, y + slot.ordinal() * ROW + 6, empty ? 0xFF9A9A9A : 0xFFFFFFFF, true);
         }
-        int[] colours = {0xFFB8C4CC, 0xFF7FD8C8, 0xFFE8C860};
+        int[] colours = {0xFFB8C4CC, 0xFF7FD8C8, 0xFFE8C860, 0xFFC8A0F0};
         Component[] lines = summary();
         for (int i = 0; i < lines.length; i++) {
             graphics.text(font, lines[i], x, y + GearSlot.values().length * ROW + 2 + i * 10, colours[i], true);

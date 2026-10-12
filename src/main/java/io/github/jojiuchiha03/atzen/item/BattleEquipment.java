@@ -19,12 +19,45 @@ public final class BattleEquipment {
 
     /** The rig without enchantments, for the tooltip. */
     public static Rig preview(ItemStack rod) {
-        return rig(rod, AtzenRodItem.bait(rod), 0, 0, 0);
+        return modded(rig(rod, AtzenRodItem.bait(rod), 0, 0, 0), rod, false);
     }
 
-    public static Rig rig(ServerPlayer player, ItemStack rod, ItemStack bait) {
-        return rig(rod, bait, enchantmentLevel(player, rod, "steady_line"), enchantmentLevel(player, rod, "reel_power"),
+    public static Rig rig(ServerPlayer player, ItemStack rod, ItemStack bait) { return rig(player, rod, bait, false); }
+
+    /** The full rig: gear, enchantments (Steady Line, Reel Power, Calm Waters, Calm Mind, Fight Control), modules, upgrades. */
+    public static Rig rig(ServerPlayer player, ItemStack rod, ItemStack bait, boolean boss) {
+        Rig rig = rig(rod, bait, enchantmentLevel(player, rod, "steady_line"), enchantmentLevel(player, rod, "reel_power"),
                 enchantmentLevel(player, rod, "calm_waters"));
+        int calmMind = enchantmentLevel(player, rod, "calm_mind");
+        if (calmMind > 0) rig = rig.calmer(1 - 0.2 * calmMind);
+        int control = enchantmentLevel(player, rod, "fight_control");
+        if (control > 0) rig = rig.with(rig.lineStrength(), rig.stretch(), rig.abrasion(), rig.rodLoad(), rig.reelSpeed(),
+                rig.reelForce(), rig.capacity(), rig.hookStrength(), rig.snagFactor(), rig.runDamping() * (1 - 0.06 * control));
+        return modded(rig, rod, boss);
+    }
+
+    private static Rig modded(Rig rig, ItemStack rod, boolean boss) {
+        rig = rig.upgraded(RodMods.upgrades(rod));
+        for (ModuleType module : RodMods.modules(rod)) rig = module.apply(rig, boss);
+        return rig;
+    }
+
+    /** Strike sensitivity: the rod's feel, a bite sensor and Precision Cast. */
+    public static double sensitivity(ServerPlayer player, ItemStack rod) {
+        double feel = rodType(rod).sensitivity();
+        if (RodMods.has(rod, ModuleType.BITE_SENSOR)) feel += 0.2;
+        if (RodMods.has(rod, ModuleType.FLOAT)) feel += 0.1;
+        return Math.min(1, feel + 0.05 * enchantmentLevel(player, rod, "precision_cast"));
+    }
+
+    /** Luck of the Sea (vanilla) makes rare fish likelier. */
+    public static int luck(ServerPlayer player, ItemStack rod) { return vanillaLevel(player, rod, "luck_of_the_sea"); }
+
+    /** Lure (vanilla) shortens the wait at a rod holder. */
+    public static int lure(ServerPlayer player, ItemStack rod) { return vanillaLevel(player, rod, "lure"); }
+
+    public static double castFactor(ServerPlayer player, ItemStack rod) {
+        return castFactor(rod) * (1 + 0.06 * enchantmentLevel(player, rod, "precision_cast"));
     }
 
     private static Rig rig(ItemStack rod, ItemStack bait, int steadyLine, int reelPower, int calmWaters) {
@@ -69,6 +102,7 @@ public final class BattleEquipment {
         if (!(rod.getItem() instanceof AtzenRodItem)) return factor;
         SpoolType spool = AtzenItems.spool(AtzenRodItem.get(rod, GearSlot.SPOOL));
         if (spool != null) factor *= spool.cast();
+        if (RodMods.has(rod, ModuleType.LIGHT_BEARING)) factor *= 1.1;
         BaitType bait = AtzenItems.bait(AtzenRodItem.bait(rod));
         if (bait != null) {
             if (bait.fly()) {
@@ -110,6 +144,12 @@ public final class BattleEquipment {
             else if (size > mouth && species.shy()) appeal *= 0.75;
         }
         return appeal;
+    }
+
+    private static int vanillaLevel(ServerPlayer player, ItemStack rod, String name) {
+        return player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                .get(ResourceKey.create(Registries.ENCHANTMENT, net.minecraft.resources.Identifier.withDefaultNamespace(name)))
+                .map(holder -> Math.clamp(EnchantmentHelper.getItemEnchantmentLevel(holder, rod), 0, 5)).orElse(0);
     }
 
     private static int enchantmentLevel(ServerPlayer player, ItemStack rod, String name) {

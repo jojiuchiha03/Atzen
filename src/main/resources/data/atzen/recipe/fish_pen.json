@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:keepnet",
+    "atzen:keepnet",
+    "minecraft:iron_bars",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "atzen:fish_pen",
+    "count": 1
+  }
+}

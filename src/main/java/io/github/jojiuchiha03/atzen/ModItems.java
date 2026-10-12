@@ -25,6 +25,7 @@ public final class ModItems {
 
     static List<Item> ordered() {
         List<Item> items = new ArrayList<>(AtzenItems.ALL);
+        items.addAll(io.github.jojiuchiha03.atzen.block.AtzenBlocks.ITEMS);
         for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.fishItem(species));
         for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.bucket(species));
         for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.spawnEgg(species));

@@ -12,14 +12,23 @@ import net.minecraft.world.item.component.ItemLore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public final class FishCatch {
     private FishCatch() { }
 
 
     public static ItemStack create(FishSpecimen fish, ServerLevel level, BlockPos pos, int quality, String angler) {
+        return create(fish, level, pos, quality, angler, UUID.randomUUID(), 100);
+    }
+
+    /** A caught fish as an item: measurements, where and when, by whom, its identity and its condition (0..100). */
+    public static ItemStack create(FishSpecimen fish, ServerLevel level, BlockPos pos, int quality, String angler, UUID id,
+                                   double condition) {
         ItemStack stack = new ItemStack(AtzenFishRegistry.fishItem(fish.species()));
         CompoundTag data = measurements(fish);
+        data.putString("id", id.toString());
+        data.putDouble("condition", Math.clamp(condition, 0, 100));
         data.putInt("quality", quality);
         data.putString("angler", angler);
         data.putString("biome", level.getBiome(pos).unwrapKey().map(key -> key.identifier().toString()).orElse("unknown"));
@@ -33,8 +42,35 @@ public final class FishCatch {
         lines.add(Component.translatable("catch.atzen.day", level.getOverworldClockTime() / 24000 + 1).withStyle(ChatFormatting.GRAY));
         lines.add(quality < 0 ? Component.translatable("catch.atzen.wild").withStyle(ChatFormatting.DARK_GRAY)
                 : Component.translatable("catch.atzen.quality", quality, angler).withStyle(ChatFormatting.AQUA));
+        lines.add(Component.translatable("catch.atzen.condition", Math.round(condition)).withStyle(
+                condition >= 60 ? ChatFormatting.GREEN : condition >= 25 ? ChatFormatting.YELLOW : ChatFormatting.RED));
         stack.set(DataComponents.LORE, new ItemLore(lines));
         return stack;
+    }
+
+    /** A caught fish read back from its item: specimen, identity, condition, control and angler. */
+    public record Catch(FishSpecimen specimen, UUID id, double condition, int quality, String angler) { }
+
+    /** Reads an Atzen fish item; null for anything else. Older items without identity get a fresh one. */
+    public static Catch read(ItemStack stack) {
+        CustomData custom = stack.get(DataComponents.CUSTOM_DATA);
+        if (custom == null) return null;
+        CompoundTag data = custom.copyTag().getCompoundOrEmpty("atzen_fish");
+        if (data.isEmpty()) return null;
+        FishSpecies species = null;
+        for (FishSpecies candidate : FishSpecies.values()) if (candidate.id().equals(data.getStringOr("species", ""))) species = candidate;
+        if (species == null) return null;
+        double length = Math.clamp(data.getDoubleOr("length_cm", species.minLength()), species.minLength(), species.maxLength());
+        double weight = data.getDoubleOr("weight_kg", 1);
+        if (!(weight > 0) || !Double.isFinite(weight)) return null;
+        UUID id;
+        try {
+            id = UUID.fromString(data.getStringOr("id", ""));
+        } catch (IllegalArgumentException e) {
+            id = UUID.nameUUIDFromBytes((species.id() + length + weight + data.getLongOr("day", 0)).getBytes());
+        }
+        return new Catch(new FishSpecimen(species, length, weight), id, data.getDoubleOr("condition", 100),
+                data.getIntOr("quality", -1), data.getStringOr("angler", ""));
     }
 
     public static CompoundTag measurements(FishSpecimen fish) {

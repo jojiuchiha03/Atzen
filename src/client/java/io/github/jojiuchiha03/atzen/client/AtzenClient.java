@@ -7,6 +7,7 @@ import io.github.jojiuchiha03.atzen.battle.FishAction;
 import io.github.jojiuchiha03.atzen.battle.FishingBattle;
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
+import io.github.jojiuchiha03.atzen.network.LexiconPayload;
 import io.github.jojiuchiha03.atzen.network.ReelPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -39,7 +40,7 @@ public final class AtzenClient implements ClientModInitializer {
     private static int outroTicks;
     private static boolean hintShown;
     private static int ticks;
-    private static int packetAge;
+    static int packetAge;
 
     @Override
     public void onInitializeClient() {
@@ -54,6 +55,8 @@ public final class AtzenClient implements ClientModInitializer {
         cancelKey = key("cancel", GLFW.GLFW_KEY_X, category);
         cameraKey = key("camera", GLFW.GLFW_KEY_C, category);
         ClientPlayNetworking.registerGlobalReceiver(BattlePayload.TYPE, (payload, context) -> receive(payload, context.client()));
+        ClientPlayNetworking.registerGlobalReceiver(LexiconPayload.TYPE,
+                (payload, context) -> context.client().gui.setScreen(new LexiconScreen(payload.data())));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> clear());
         ClientTickEvents.END_CLIENT_TICK.register(AtzenClient::tick);
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Atzen.id("fight"), FightHud::render);

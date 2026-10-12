@@ -1091,6 +1091,9 @@ TOMES = {
     "steady_line_tome": dict(cover="#2f7a4a", emblem="knot"),
     "reel_power_tome":  dict(cover="#a8322a", emblem="spiral"),
     "calm_waters_tome": dict(cover="#2f55a8", emblem="wave"),
+    "calm_mind_tome": dict(cover="#6a3a8a", emblem="wave"),
+    "precision_cast_tome": dict(cover="#c88a2a", emblem="target"),
+    "fight_control_tome": dict(cover="#3a3d44", emblem="spiral"),
 }
 
 
@@ -1118,6 +1121,13 @@ def tome(name):
                 y = ey - 6 + k * 6 + 2.4 * math.sin(i / 2.6)
                 put(px, x, y, gold[4] if k == 1 else gold[3])
                 put(px, x, y + 1, gold[1])
+    elif spec["emblem"] == "target":
+        for r, k in ((11, 4), (7, 1), (3, 4)):
+            for i in range(90):
+                a = i / 90 * math.tau
+                put(px, ex + r * math.cos(a), ey + r * math.sin(a), gold[k])
+        line(px, ex - 15, ey, ex + 15, ey, gold[3])
+        line(px, ex, ey - 15, ex, ey + 15, gold[3])
     elif spec["emblem"] == "spiral":
         for i in range(160):
             a = i / 12
@@ -1264,7 +1274,276 @@ def main():
         save(os.path.join(item, name + ".png"), leader(name))
     for name in HOOKS:
         save(os.path.join(item, name + ".png"), hook_item(name))
+    extras()
     print("textures written to", os.path.normpath(ROOT))
+
+
+# ---------------------------------------------------------------- 0.8–0.14: nets, aids, modules, blocks
+
+def landing_net(name):
+    px = canvas()
+    size = {"small_landing_net": 0.75, "carp_landing_net": 0.9, "big_game_landing_net": 1.0}[name]
+    frame = ramp({"small_landing_net": "#8a5a2a", "carp_landing_net": "#6a6e78", "big_game_landing_net": "#3a3c42"}[name])
+    mesh = ramp("#d8dccc" if name != "big_game_landing_net" else "#5a8a6a")
+    cx, cy, r = 40, 22, 18 * size
+    # the bag: a mesh hanging below the hoop
+    for y in range(N):
+        for x in range(N):
+            dx, dy = (x + 0.5 - cx) / r, (y + 0.5 - cy) / (r * 1.5)
+            if dx * dx + dy * dy <= 1 and y >= cy - 2 and ((x + y) % 4 == 0 or (x - y) % 4 == 0):
+                px[y][x] = mesh[3] if (x + y) % 8 else mesh[2]
+    for i in range(160):
+        a = i / 160 * math.tau
+        put(px, cx + r * math.cos(a), cy + r * 0.45 * math.sin(a), frame[3])
+        put(px, cx + r * math.cos(a), cy + r * 0.45 * math.sin(a) + 1, frame[1])
+    line(px, cx - r * 0.9, cy + 2, 6, 58, frame[2], 2.6)
+    line(px, cx - r * 0.9, cy + 1, 6, 57, frame[4], 1)
+    outline(px)
+    return px
+
+
+def pearl():
+    px = canvas()
+    shell = ramp("#e8e4f4")
+    polygon(px, [(10, 40), (20, 16), (32, 10), (46, 14), (56, 36), (48, 52), (22, 54)],
+            lambda x, y: shade(shell, 0.95 - ((x - 32) ** 2 + (y - 30) ** 2) / 900))
+    for k, colour in enumerate(("#f4b8d8", "#b8e8f4", "#f4e8a8")):
+        for i in range(30):
+            a = i / 30 * 2.2 + 0.6
+            put(px, 32 + (8 + k * 5) * math.cos(a + 2), 34 + (8 + k * 5) * math.sin(a + 2) * 0.7, hexc(colour) + (255,))
+    disc(px, 34, 30, 5, ramp("#ffffff"))
+    outline(px)
+    return px
+
+
+def groundbait():
+    px = canvas()
+    disc(px, 32, 36, 18, ramp("#8a6a3a"))
+    rnd = random.Random(7)
+    for _ in range(70):
+        a, d = rnd.random() * math.tau, rnd.random() * 15
+        put(px, 32 + d * math.cos(a), 36 + d * math.sin(a), rnd.choice((ramp("#e8c860")[3], ramp("#5a3a1a")[1], ramp("#c8a060")[4])))
+    outline(px)
+    return px
+
+
+def echo_sounder():
+    px = canvas()
+    body = ramp("#3a3d44")
+    polygon(px, [(12, 10), (52, 10), (52, 54), (12, 54)], lambda x, y: shade(body, 0.8 - (y - 10) / 120))
+    screen = ramp("#1a4a6a")
+    polygon(px, [(17, 15), (47, 15), (47, 41), (17, 41)], lambda x, y: screen[1] if (y % 4) else screen[2])
+    for x in range(18, 47):
+        y = int(34 + 4 * math.sin(x / 4))
+        for yy in range(y, 41):
+            put(px, x, yy, ramp("#c8a050")[2])
+    for fx, fy in ((24, 22), (36, 27), (41, 20)):
+        line(px, fx - 2, fy, fx + 2, fy, ramp("#5af0e6")[4], 2)
+    for bx in (20, 32, 44):
+        disc(px, bx, 48, 2.6, ramp("#c83a3a" if bx == 20 else "#9aa4ae"))
+    outline(px)
+    return px
+
+
+def bait_box():
+    px = canvas()
+    box = ramp("#3a7a5a")
+    polygon(px, [(8, 22), (56, 22), (56, 54), (8, 54)], lambda x, y: shade(box, 0.85 - (y - 22) / 70))
+    polygon(px, [(6, 16), (58, 16), (56, 24), (8, 24)], box[3])
+    for i, colour in enumerate(("#c83a3a", "#e8c040", "#e8d8b0", "#4a8ac8")):
+        x = 12 + i * 11
+        polygon(px, [(x, 27), (x + 9, 27), (x + 9, 50), (x, 50)], ramp("#2a5a40")[1])
+        disc(px, x + 4.5, 38, 3, ramp(colour))
+    polygon(px, [(28, 12), (36, 12), (36, 17), (28, 17)], ramp("#b8bec6")[3])
+    outline(px)
+    return px
+
+
+def angler_tool():
+    px = canvas()
+    steel, grip = ramp("#b8bec6"), ramp("#c83a3a")
+    line(px, 14, 50, 34, 30, grip[2], 6)
+    line(px, 13, 49, 33, 29, grip[4], 1.5)
+    line(px, 34, 30, 52, 12, steel[3], 3.5)
+    line(px, 34, 30, 54, 22, steel[2], 3)
+    line(px, 34, 30, 44, 10, steel[4], 2)
+    disc(px, 34, 30, 3, steel)
+    outline(px)
+    return px
+
+
+def lexicon():
+    px = canvas()
+    cover, pages, gold = ramp("#1e5a8a"), ramp("#efe4c4"), ramp("#e3b53c")
+    polygon(px, [(14, 12), (52, 8), (56, 50), (18, 56)], lambda x, y: pages[2] if y % 3 else pages[1])
+    polygon(px, [(8, 10), (48, 6), (52, 48), (12, 54)], lambda x, y: shade(cover, 0.75 - (x - 8) / 140 - (y - 6) / 160))
+    polygon(px, [(8, 10), (14, 9), (18, 53), (12, 54)], cover[1])
+    # a small golden fish on the cover
+    polygon(px, [(22, 30), (30, 24), (40, 26), (44, 30), (40, 34), (30, 36)], gold[3])
+    polygon(px, [(44, 30), (50, 25), (50, 35)], gold[2])
+    put(px, 27, 29, gold[0])
+    outline(px)
+    return px
+
+
+MODULES = {
+    "fine_drag": ("#4fd8d0", "dial"), "reinforced_blank": ("#8a5a2a", "bar"), "bite_sensor": ("#e84a4a", "bell"),
+    "light_bearing": ("#e8d070", "ring"), "ceramic_guides": ("#f0f0f0", "ring"), "improved_bearings": ("#b8bec6", "balls"),
+    "reinforced_hook_mount": ("#6a6e78", "hook"), "leader_system": ("#5fa04a", "wave"), "float": ("#ff8a2a", "float"),
+    "sonar": ("#3a7ad8", "waves"), "line_counter": ("#c8c8a0", "dial"), "boss_rig": ("#c9a03a", "crown"),
+    "feeder": ("#7a5a3a", "cage"),
+}
+
+
+def module_item(name):
+    colour, symbol = MODULES[name]
+    px = canvas()
+    plate, accent = ramp("#5a6470"), ramp(colour)
+    polygon(px, [(10, 14), (54, 14), (54, 50), (10, 50)], lambda x, y: shade(plate, 0.85 - (y - 14) / 90))
+    for sx, sy in ((14, 18), (50, 18), (14, 46), (50, 46)):
+        disc(px, sx, sy, 2, ramp("#b8bec6"))
+    cx, cy = 32, 32
+    if symbol == "dial":
+        disc(px, cx, cy, 11, accent, ring=0.7)
+        line(px, cx, cy, cx + 7, cy - 6, plate[0], 2)
+    elif symbol == "bar":
+        polygon(px, [(16, 28), (48, 28), (48, 36), (16, 36)], accent[3])
+        line(px, 16, 30, 48, 30, accent[4])
+    elif symbol == "bell":
+        polygon(px, [(24, 40), (26, 26), (32, 21), (38, 26), (40, 40)], accent[3])
+        disc(px, 32, 42, 2.5, accent)
+    elif symbol == "ring":
+        disc(px, cx, cy, 11, accent)
+        disc(px, cx, cy, 6, plate)
+    elif symbol == "balls":
+        for i in range(6):
+            a = i / 6 * math.tau
+            disc(px, cx + 8 * math.cos(a), cy + 8 * math.sin(a), 3.2, accent)
+    elif symbol == "hook":
+        for i in range(40):
+            a = i / 40 * math.pi * 1.2
+            put(px, cx + 7 * math.cos(a), cy + 6 + 7 * math.sin(a), accent[4])
+        line(px, cx + 7, cy + 6, cx + 7, cy - 12, accent[3], 2)
+    elif symbol == "wave":
+        for i in range(30):
+            line(px, 17 + i, cy + 5 * math.sin(i / 3), 18 + i, cy + 5 * math.sin((i + 1) / 3), accent[3], 2)
+    elif symbol == "float":
+        disc(px, cx, cy + 3, 7, ramp("#f0f0f0"))
+        polygon(px, [(cx - 7, cy + 2), (cx + 7, cy + 2), (cx + 5, cy - 4), (cx - 5, cy - 4)], accent[3])
+        line(px, cx, cy - 4, cx, cy - 12, accent[4], 2)
+    elif symbol == "waves":
+        for r in (5, 9, 13):
+            for i in range(40):
+                a = -0.9 + i / 40 * 1.8
+                put(px, 18 + r * math.cos(a), cy + r * math.sin(a), accent[4 if r == 5 else 3])
+        disc(px, 18, cy, 2.5, accent)
+    elif symbol == "crown":
+        polygon(px, [(18, 40), (20, 24), (26, 32), (32, 20), (38, 32), (44, 24), (46, 40)], accent[3])
+    else:  # cage
+        for x in range(20, 45, 5):
+            line(px, x, 22, x, 42, accent[3], 1.5)
+        line(px, 20, 22, 44, 22, accent[4], 2)
+        line(px, 20, 42, 44, 42, accent[4], 2)
+        disc(px, 32, 32, 3.5, ramp("#e8c860"))
+    outline(px)
+    return px
+
+
+def tile(base, pattern):
+    """A 64px block texture (opaque)."""
+    tones = ramp(base)
+    px = [[tones[2]] * N for _ in range(N)]
+    rnd = random.Random(hash(pattern) & 0xFFFF)
+    for y in range(N):
+        for x in range(N):
+            if pattern == "planks":
+                k = 1 if y % 16 in (0, 15) else 3 if (x + rnd.randrange(3)) % 23 == 0 else 2 + (rnd.random() < 0.2)
+            elif pattern == "metal":
+                k = 3 if (x + y) % 16 == 0 else 1 if y % 32 in (0, 31) or x % 32 in (0, 31) else 2
+            else:
+                k = 2 + (rnd.random() < 0.15) - (rnd.random() < 0.1)
+            px[y][x] = tones[max(0, min(4, k))]
+    return px
+
+
+def net_texture():
+    px = canvas()
+    cord = ramp("#c8ccb8")
+    for y in range(N):
+        for x in range(N):
+            if (x + y) % 8 in (0, 1) or (x - y) % 8 in (0, 1):
+                px[y][x] = cord[3] if (x + y) % 16 < 8 else cord[2]
+    return px
+
+
+def awning(px, colours):
+    for y in range(0, 18):
+        for x in range(N):
+            px[y][x] = ramp(colours[(x // 8) % 2])[3 if y < 14 else 1]
+
+
+def market_side():
+    px = tile("#8a6a3a", "planks")
+    awning(px, ("#c83a3a", "#f0f0f0"))
+    for i, fish in enumerate(("#9aa6b0", "#be8540", "#566e3a")):
+        x = 10 + i * 17
+        polygon(px, [(x, 40), (x + 6, 35), (x + 12, 40), (x + 6, 45)], ramp(fish)[3])
+        polygon(px, [(x + 12, 40), (x + 15, 37), (x + 15, 43)], ramp(fish)[2])
+    return px
+
+
+def market_top():
+    px = tile("#8a6a3a", "planks")
+    for y in range(20, 44):
+        for x in range(12, 52):
+            px[y][x] = ramp("#a8d8e8")[3 if (x + y) % 5 else 4]
+    return px
+
+
+def workshop_side():
+    px = tile("#5a4a3a", "planks")
+    steel = ramp("#b8bec6")
+    line(px, 10, 50, 30, 20, steel[3], 3)
+    line(px, 34, 20, 54, 50, ramp("#8a5a2a")[3], 3)
+    disc(px, 32, 32, 6, steel)
+    return px
+
+
+def workshop_top():
+    px = tile("#6a6e78", "metal")
+    line(px, 8, 32, 56, 32, ramp("#8a5a2a")[3], 3)
+    disc(px, 44, 32, 6, ramp("#c9783a"))
+    return px
+
+
+def solid(colour, glow=False):
+    tones = ramp(colour)
+    return [[tones[4 if glow and (x + y) % 3 else 3] for x in range(16)] for y in range(16)]
+
+
+def extras():
+    item = os.path.join(ROOT, "item")
+    block = os.path.join(ROOT, "block")
+    for name in ("small_landing_net", "carp_landing_net", "big_game_landing_net"):
+        save(os.path.join(item, name + ".png"), landing_net(name))
+    save(os.path.join(item, "mother_of_pearl.png"), pearl())
+    save(os.path.join(item, "groundbait.png"), groundbait())
+    save(os.path.join(item, "echo_sounder.png"), echo_sounder())
+    save(os.path.join(item, "bait_box.png"), bait_box())
+    save(os.path.join(item, "angler_tool.png"), angler_tool())
+    save(os.path.join(item, "fish_lexicon.png"), lexicon())
+    for name in MODULES:
+        save(os.path.join(item, name + "_module.png"), module_item(name))
+    save(os.path.join(block, "net.png"), net_texture())
+    save(os.path.join(block, "holder_wood.png"), tile("#8a6a3a", "planks"))
+    save(os.path.join(block, "holder_metal.png"), tile("#4a4e58", "metal"))
+    save(os.path.join(block, "rod_blank.png"), solid("#2a2d34"))
+    save(os.path.join(block, "alarm_off.png"), solid("#5a2a2a"))
+    save(os.path.join(block, "alarm_on.png"), solid("#ff3a3a", True))
+    save(os.path.join(block, "fish_market_side.png"), market_side())
+    save(os.path.join(block, "fish_market_top.png"), market_top())
+    save(os.path.join(block, "workshop_side.png"), workshop_side())
+    save(os.path.join(block, "workshop_top.png"), workshop_top())
 
 
 if __name__ == "__main__":

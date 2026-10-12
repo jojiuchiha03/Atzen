@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:feather",
+    "minecraft:red_dye",
+    "minecraft:oak_planks"
+  ],
+  "result": {
+    "id": "atzen:float_module",
+    "count": 1
+  }
+}

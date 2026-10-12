@@ -67,6 +67,27 @@ public final class AtzenItems {
     public static final Item STEADY_LINE_TOME = tome("steady_line", 3);
     public static final Item REEL_POWER_TOME = tome("reel_power", 3);
     public static final Item CALM_WATERS_TOME = tome("calm_waters", 2);
+    public static final Item CALM_MIND_TOME = tome("calm_mind", 2);
+    public static final Item PRECISION_CAST_TOME = tome("precision_cast", 3);
+    public static final Item FIGHT_CONTROL_TOME = tome("fight_control", 3);
+    public static final Item SMALL_LANDING_NET = net(LandingNetItem.NetType.SMALL, 96);
+    public static final Item CARP_LANDING_NET = net(LandingNetItem.NetType.CARP, 256);
+    public static final Item BIG_GAME_LANDING_NET = net(LandingNetItem.NetType.BIG_GAME, 512);
+    /** From rare catches; the material of rod upgrades in the workshop. */
+    public static final Item MOTHER_OF_PEARL = register("mother_of_pearl", Item::new, new Item.Properties().rarity(Rarity.RARE));
+    public static final Item GROUNDBAIT = register("groundbait", FishingTools.Groundbait::new, new Item.Properties());
+    public static final Item ECHO_SOUNDER = register("echo_sounder", FishingTools.EchoSounder::new, new Item.Properties().stacksTo(1));
+    public static final Item BAIT_BOX = register("bait_box", FishingTools.BaitBox::new, new Item.Properties().stacksTo(1));
+    public static final Item ANGLER_TOOL = register("angler_tool", FishingTools.AnglerTool::new, new Item.Properties().durability(250));
+    public static final Item FISH_LEXICON = register("fish_lexicon", FishingTools.Lexicon::new, new Item.Properties().stacksTo(1));
+    private static final Map<ModuleType, Item> MODULE_ITEMS = new EnumMap<>(ModuleType.class);
+    static {
+        for (ModuleType module : ModuleType.values()) {
+            MODULE_ITEMS.put(module, register(module.id(), Item::new, new Item.Properties().stacksTo(16)
+                    .rarity(module == ModuleType.BOSS_RIG ? Rarity.EPIC : Rarity.UNCOMMON)));
+        }
+    }
+    public static final List<Item> MODULES = List.copyOf(MODULE_ITEMS.values());
     public static final List<Item> REELS = List.copyOf(REEL_ITEMS.values());
     public static final List<Item> LINES = List.copyOf(LINE_ITEMS.values());
     public static final List<Item> BAITS = List.copyOf(BAIT_ITEMS.values());
@@ -87,12 +108,25 @@ public final class AtzenItems {
         items.addAll(HOOKS);
         items.addAll(BAITS);
         items.addAll(List.of(CARBON_FIBER, ANCIENT_BARBEL, REED_CROWN, STURGEON_PLATE, WARDEN_HEART,
-                STEADY_LINE_TOME, REEL_POWER_TOME, CALM_WATERS_TOME));
+                STEADY_LINE_TOME, REEL_POWER_TOME, CALM_WATERS_TOME, CALM_MIND_TOME, PRECISION_CAST_TOME, FIGHT_CONTROL_TOME,
+                SMALL_LANDING_NET, CARP_LANDING_NET, BIG_GAME_LANDING_NET, MOTHER_OF_PEARL, GROUNDBAIT, ECHO_SOUNDER, BAIT_BOX,
+                ANGLER_TOOL, FISH_LEXICON));
+        items.addAll(MODULES);
         return List.copyOf(items);
     }
 
     public static Item item(BaitType bait) { return BAIT_ITEMS.get(bait); }
     public static Item item(ReelType reel) { return REEL_ITEMS.get(reel); }
+    public static Item item(ModuleType module) { return MODULE_ITEMS.get(module); }
+
+    public static ModuleType module(ItemStack stack) {
+        for (var entry : MODULE_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
+        return null;
+    }
+
+    private static Item net(LandingNetItem.NetType type, int durability) {
+        return register(type.id(), properties -> new LandingNetItem(properties, type), new Item.Properties().durability(durability));
+    }
 
     public static ReelType reel(ItemStack stack) {
         for (var entry : REEL_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();

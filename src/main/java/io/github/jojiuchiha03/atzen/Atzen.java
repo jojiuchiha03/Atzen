@@ -1,6 +1,11 @@
 package io.github.jojiuchiha03.atzen;
 
 import io.github.jojiuchiha03.atzen.battle.BattleManager;
+import io.github.jojiuchiha03.atzen.block.AtzenBlocks;
+import io.github.jojiuchiha03.atzen.ecology.Ecology;
+import io.github.jojiuchiha03.atzen.holding.FishRelease;
+import io.github.jojiuchiha03.atzen.network.LexiconPayload;
+import io.github.jojiuchiha03.atzen.progress.Progression;
 import io.github.jojiuchiha03.atzen.item.AtzenItems;
 import io.github.jojiuchiha03.atzen.fish.AtzenFishRegistry;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
@@ -29,11 +34,19 @@ public final class Atzen implements ModInitializer {
         ModItems.register();
         AtzenItems.initialize();
         AtzenFishRegistry.initialize();
+        AtzenBlocks.initialize();
+        Ecology.initialize();
+        Progression.initialize();
         PayloadTypeRegistry.serverboundPlay().register(ReelPayload.TYPE, ReelPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(BattlePayload.TYPE, BattlePayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LexiconPayload.TYPE, LexiconPayload.CODEC);
+        FishRelease.register();
         ServerPlayNetworking.registerGlobalReceiver(ReelPayload.TYPE,
                 (payload, context) -> BATTLES.input(context.player(), payload));
         ServerTickEvents.END_SERVER_TICK.register(BATTLES::tick);
+        ServerTickEvents.END_SERVER_TICK.register(BATTLES::sonar);
+        ServerTickEvents.END_SERVER_TICK.register(server -> Progression.tick(server, false));
+        ServerLifecycleEvents.SERVER_STARTED.register(Progression::load);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BATTLES.disconnect(handler.getPlayer()));
         // Before the world is saved: hooked fish get their AI back and battle dummies are gone.
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> BATTLES.clear());

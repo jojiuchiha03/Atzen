@@ -56,6 +56,7 @@ public final class FishingBattle {
     private boolean slack;
     private boolean twisting;
     private int overloadTicks;
+    private int landableTicks;
     private boolean landable;
     private int goodTicks;
     private int ticks;
@@ -232,8 +233,10 @@ public final class FishingBattle {
         ticks++;
         if (!slack && tension >= 0.25 * dragKg && tension <= 0.95 * dragKg) goodTicks++;
         boolean lastPhase = fighter.boss() == null || bossPhase == fighter.boss().phases() - 1;
+        boolean wasLandable = landable;
         landable = lastPhase && distance <= LANDING_DISTANCE && stamina <= landingStamina() && !faking && warning == 0
                 && action != FishAction.RUN && action != FishAction.JUMP;
+        landableTicks = landable ? (wasLandable ? landableTicks + 1 : 0) : 0;
         if (elapsed >= (fighter.boss() != null ? BOSS_MAX_TICKS : MAX_TICKS)) result = Result.TIMEOUT;
     }
 
@@ -349,14 +352,16 @@ public final class FishingBattle {
 
     private double landingStamina() { return fighter.boss() != null ? 0.08 : 0.15; }
 
-    /**
-     * Landing by hand, the only way until the landing net arrives: works on a close, worn-out fish; a heavy fish
-     * or one with fight left in it can kick free and run once more.
-     */
+    /** Landing by hand (small fish): a close, worn-out fish; one with fight left in it can kick free. */
     public boolean land() {
-        if (result != Result.ACTIVE || !landable) return false;
-        double chance = Math.clamp(0.95 - fighter.weight() * 0.003 - stamina * 1.5, 0.3, 0.95);
+        double chance = Math.clamp(0.95 - fighter.weight() * 0.05 - stamina * 1.5, 0.3, 0.95);
         if (fighter.boss() != null) chance = Math.min(chance, 0.6);
+        return land(chance);
+    }
+
+    /** Landing with a given chance (the net and how well it was aimed, see {@link Landing}). */
+    public boolean land(double chance) {
+        if (result != Result.ACTIVE || !landable) return false;
         if (random.nextDouble() < chance) {
             result = Result.CAUGHT;
             return true;
@@ -390,6 +395,8 @@ public final class FishingBattle {
     public double rodStrain() { return tension / rig.rodLoad(); }
     /** Ticks the rod spent overloaded: it takes extra wear. */
     public int overloadTicks() { return overloadTicks; }
+    /** Ticks since the fish became landable, for the net's aim (see {@link Landing}). */
+    public int landableTicks() { return landableTicks; }
     public double distance() { return distance; }
     public double lineOut() { return distance + pumpSlack; }
     public double stamina() { return stamina; }

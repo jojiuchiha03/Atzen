@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:bread",
+    "minecraft:bone_meal",
+    "minecraft:dirt"
+  ],
+  "result": {
+    "id": "atzen:groundbait",
+    "count": 4
+  }
+}

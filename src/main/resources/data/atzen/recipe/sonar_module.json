@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:echo_sounder",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "atzen:sonar_module",
+    "count": 1
+  }
+}

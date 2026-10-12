@@ -56,4 +56,26 @@ public record Rig(double lineStrength, double stretch, double abrasion, double r
                 reelForce, capacity, dragLimit, ability, hookStrength, slackLoss, snagFactor, toothGuard,
                 staminaDrain * drainFactor, runDamping * runFactor, hookBonus);
     }
+
+    /** The values modules, upgrades and enchantments change; everything else stays. */
+    public Rig with(double lineStrength, double stretch, double abrasion, double rodLoad, double reelSpeed, double reelForce,
+                    double capacity, double hookStrength, double snagFactor, double runDamping) {
+        return new Rig(lineStrength, stretch, abrasion, rodPower, rodFlex, rodLoad, rodWeight, reelSpeed, reelForce, capacity,
+                dragLimit, ability, hookStrength, slackLoss, snagFactor, toothGuard, staminaDrain, runDamping, hookBonus);
+    }
+
+    /** Rod upgrades (mother-of-pearl in the workshop): more lift and load. */
+    public Rig upgraded(int level) {
+        if (level <= 0) return this;
+        double factor = 1 + 0.06 * level;
+        return new Rig(lineStrength, stretch, abrasion, rodPower * factor, rodFlex, rodLoad * factor, rodWeight, reelSpeed,
+                reelForce, capacity, dragLimit, ability, hookStrength, slackLoss, snagFactor, toothGuard, staminaDrain, runDamping,
+                hookBonus);
+    }
+
+    /** Calm Mind: a slack line costs less hook hold. */
+    public Rig calmer(double slackFactor) {
+        return new Rig(lineStrength, stretch, abrasion, rodPower, rodFlex, rodLoad, rodWeight, reelSpeed, reelForce, capacity,
+                dragLimit, ability, hookStrength, slackLoss * slackFactor, snagFactor, toothGuard, staminaDrain, runDamping, hookBonus);
+    }
 }

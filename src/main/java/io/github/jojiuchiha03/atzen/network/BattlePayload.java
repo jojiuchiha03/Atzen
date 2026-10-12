@@ -17,7 +17,8 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                             float tension, float drag, int dragStep, float stamina, float distance, float lineOut,
                             float capacity, float hookHold, float condition, float danger, int sideDir, float lift,
                             int flags, int secondsLeft, int quality, FishSpecies species, float lengthCm, float weightKg,
-                            int bossPhase, int fishEntityId, int strike, float rodStrain)
+                            int bossPhase, int fishEntityId, int strike, float rodStrain, int landTicks,
+                            float netWindow)
         implements CustomPacketPayload {
     public static final int SLACK = 1, LANDABLE = 2, TANGLED = 4, PRACTICE = 8, FAKING = 16, TWIST = 32;
     public static final Type<BattlePayload> TYPE = new Type<>(Atzen.id("battle"));
@@ -31,7 +32,7 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                     buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
                     buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readByte(), buf.readFloat(),
                     buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readEnum(FishSpecies.class), buf.readFloat(),
-                    buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat());
+                    buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat(), buf.readVarInt(), buf.readFloat());
         }
 
         public void encode(RegistryFriendlyByteBuf buf, BattlePayload value) {
@@ -61,6 +62,8 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
             buf.writeVarInt(value.fishEntityId());
             buf.writeVarInt(value.strike());
             buf.writeFloat(value.rodStrain());
+            buf.writeVarInt(value.landTicks());
+            buf.writeFloat(value.netWindow());
         }
     };
 
@@ -69,7 +72,7 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
     public boolean has(int flag) { return (flags & flag) != 0; }
 
     public static BattlePayload of(int id, FishingBattle battle, boolean practice, FishSpecimen specimen, int fishEntityId,
-                                   int strike) {
+                                   int strike, float netWindow) {
         double strength = battle.rig().lineStrength();
         int flags = (battle.slack() ? SLACK : 0) | (battle.landable() ? LANDABLE : 0) | (battle.tangled() ? TANGLED : 0)
                 | (practice ? PRACTICE : 0) | (battle.faking() ? FAKING : 0) | (battle.twisting() ? TWIST : 0);
@@ -79,6 +82,6 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                 (float) battle.hookHold(), (float) battle.condition(), (float) battle.danger(), battle.sideDir(),
                 (float) battle.lift(), flags, Math.max(0, (battle.maxTicks() - battle.elapsed() + 19) / 20), battle.quality(),
                 specimen.species(), (float) specimen.lengthCm(), (float) specimen.weightKg(), battle.bossPhase(),
-                fishEntityId, strike, (float) battle.rodStrain());
+                fishEntityId, strike, (float) battle.rodStrain(), battle.landableTicks(), netWindow);
     }
 }

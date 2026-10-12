@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:chest",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "atzen:bait_box",
+    "count": 1
+  }
+}

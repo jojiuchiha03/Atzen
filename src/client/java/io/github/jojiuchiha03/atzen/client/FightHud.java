@@ -3,6 +3,7 @@ package io.github.jojiuchiha03.atzen.client;
 import io.github.jojiuchiha03.atzen.battle.Boss;
 import io.github.jojiuchiha03.atzen.battle.FishAction;
 import io.github.jojiuchiha03.atzen.battle.FishingBattle;
+import io.github.jojiuchiha03.atzen.battle.Landing;
 import io.github.jojiuchiha03.atzen.fish.FishSpecies;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import java.util.Locale;
@@ -23,7 +24,7 @@ final class FightHud {
     private FightHud() { }
 
     enum Advice {
-        LAND(0xFF5BE38A), RELEASE(0xFFFF5B6E), TANGLED(0xFFFF5B6E), WARN_RUN(0xFFFF9A3C), WARN_DIVE(0xFFFF9A3C),
+        LAND(0xFF5BE38A), NET(0xFF5BE38A), RELEASE(0xFFFF5B6E), TANGLED(0xFFFF5B6E), WARN_RUN(0xFFFF9A3C), WARN_DIVE(0xFFFF9A3C),
         WARN_SIDE(0xFFFF9A3C), WARN_SHAKE(0xFFFF9A3C), WARN_JUMP(0xFFFF9A3C), SLACK(0xFFFFD45B), JUMP(0xFFFFD45B),
         STEER_LEFT(0xFFFFD45B), STEER_RIGHT(0xFFFFD45B), SPOOL(0xFFFF5B6E), TAKING(0xFFFFD45B), TWIST(0xFFFFD45B),
         SHAKE(0xFFFFD45B), PUMP(0xFF5BE38A), REEL(0xFF5BE38A);
@@ -40,7 +41,7 @@ final class FightHud {
     static Advice advice(BattlePayload state) {
         float tension = AtzenClient.displayedTension;
         if (state.has(BattlePayload.TANGLED)) return Advice.TANGLED;
-        if (state.has(BattlePayload.LANDABLE)) return Advice.LAND;
+        if (state.has(BattlePayload.LANDABLE)) return state.netWindow() >= 0 ? Advice.NET : Advice.LAND;
         if (tension >= 0.9f) return Advice.RELEASE;
         if (state.pending() != null) return switch (state.pending()) {
             case DIVE -> Advice.WARN_DIVE;
@@ -100,7 +101,7 @@ final class FightHud {
 
         // what to do now; it blinks when it is urgent
         Advice advice = advice(state);
-        boolean blink = (advice.urgent() || advice == Advice.LAND) && (AtzenClient.cameraTicks / 4) % 2 == 1;
+        boolean blink = (advice.urgent() || advice == Advice.LAND || advice == Advice.NET) && (AtzenClient.cameraTicks / 4) % 2 == 1;
         if (!blink) {
             Component text = Component.translatable(advice.key(), AtzenClient.reelKey.getTranslatedKeyMessage(),
                     AtzenClient.liftKey.getTranslatedKeyMessage(), AtzenClient.dragDownKey.getTranslatedKeyMessage(),
@@ -119,8 +120,25 @@ final class FightHud {
             Component strike = Component.translatable("hud.atzen.strike." + quality, state.strike());
             graphics.text(font, strike, (graphics.guiWidth() - font.width(strike)) / 2, y - 26, 0xFFFFFFFF, true);
         }
+        if (state.has(BattlePayload.LANDABLE) && state.netWindow() >= 0) netGauge(graphics, x, y - 40, state);
         Boss boss = state.species().boss();
         if (boss != null) bossBar(graphics, font, state, boss);
+    }
+
+    /**
+     * The landing gauge: the fish twists in front of the net; the green field is the net's opening. Scoop
+     * (right-click) while the marker is inside it. Same formula as the server, so what is seen is what counts.
+     */
+    private static void netGauge(GuiGraphicsExtractor graphics, int x, int y, BattlePayload state) {
+        int half = WIDTH / 2, centre = x + half;
+        int window = Math.round(half * state.netWindow());
+        graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 7, 0xC0101820);
+        graphics.fill(x, y, x + WIDTH, y + 6, 0xFF3A2A2A);
+        graphics.fill(centre - window, y, centre + window, y + 6, 0xFF2F8A5A);
+        double ticks = state.landTicks() + AtzenClient.packetAge;
+        int marker = centre + (int) Math.round(Landing.marker((int) ticks) * half);
+        boolean inside = Math.abs(Landing.marker((int) ticks)) <= state.netWindow();
+        graphics.fill(marker - 2, y - 2, marker + 2, y + 8, inside ? 0xFFFFFFFF : 0xFFFF7A5C);
     }
 
     private static void bossBar(GuiGraphicsExtractor graphics, Font font, BattlePayload state, Boss boss) {

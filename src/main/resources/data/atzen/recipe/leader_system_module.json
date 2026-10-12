@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:fluoro_leader",
+    "atzen:steel_leader",
+    "minecraft:iron_nugget"
+  ],
+  "result": {
+    "id": "atzen:leader_system_module",
+    "count": 1
+  }
+}

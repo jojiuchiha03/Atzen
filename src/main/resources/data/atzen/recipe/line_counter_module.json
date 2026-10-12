@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:clock",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "atzen:line_counter_module",
+    "count": 1
+  }
+}

@@ -2,14 +2,14 @@
 
 Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 50 Fischarten mit eigenen Lebensräumen, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
 
-**Stand: 0.7.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
+**Stand: 0.14.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
 ## Installation
 
 Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und Fabric API **0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `atzen-0.7.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `atzen-0.14.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
 ## Der Angelvorgang
@@ -20,7 +20,7 @@ Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder ne
 4. **Biss:** Atzen-Fische in bis zu 12 Blöcken bemerken die Pose, schwimmen hin und sehen sich den Köder an – die Kamera taucht dafür unter Wasser. Mag der Fisch den Köder nicht, ignoriert er ihn; ist er nur halb interessiert, dreht er manchmal wieder ab.
 5. **Anschlag:** Rechtsklick, wenn die Pose abtaucht. Der richtige Moment setzt den Haken fester: Raubfische erst etwas drehen lassen, Forellen sofort anschlagen. Die Anzeige meldet „perfekt“, „gut“ oder „ungünstig“.
 6. **Drill:** siehe unten.
-7. **Landen:** Ist der Fisch nah (unter 4 m) und erschöpft, steht über der Hotbar „Rechtsklick – Fisch landen!“. Ein großer oder noch nicht ganz müder Fisch kann dabei ausschlagen und noch einmal flüchten.
+7. **Landen:** Ist der Fisch nah (unter 4 m) und erschöpft, wird er landbar. Fische bis 2 kg hebst du mit Rechtsklick per Hand heraus. Größere brauchen einen **Kescher in der anderen Hand**: über der Hotbar erscheint eine Zielleiste, der Fisch pendelt vor dem Netz, das grüne Feld ist die Öffnung – Rechtsklick, solange die Marke im Feld ist, landet fast sicher; daneben schlägt der Fisch oft aus und flüchtet noch einmal. Bosse brauchen den Großfischkescher.
 8. **Trophäe:** Nach dem Fang dreht sich die Kamera um dich, eine Karte zeigt Art, Seltenheit, Länge, Gewicht und deine Kontrolle im Drill.
 
 ## Der Drill
@@ -33,7 +33,7 @@ Der Server simuliert die Schnur: Der Fisch zieht mit einer Kraft, die von Größ
 | **G** halten | Rute heben (Pumpen): zieht den Fisch heran. Danach loslassen und **beim Absenken R** – so kommt die gewonnene Schnur doppelt so schnell herein. Absenken ohne Kurbeln lässt die Schnur durchhängen. |
 | **Pfeil links/rechts** | Gegensteuern, wenn der Fisch seitwärts zu Hindernissen zieht. |
 | **Pfeil hoch/runter** | Bremse fester/lockerer (10 Stufen). |
-| **Rechtsklick** | Fisch landen, wenn er nah und erschöpft ist. |
+| **Rechtsklick** | Fisch landen, wenn er nah und erschöpft ist (mit Kescher: im grünen Feld). |
 | **X** | Drill abbrechen bzw. Kameraszene überspringen. |
 | **C** | Kinokamera an/aus. |
 
@@ -177,6 +177,80 @@ Jeder Boss braucht seinen eigenen Bossköder, sein Gewässer und seine Zeit. Auc
 
 Bosse sind nur mit starker Ausrüstung zu schaffen (Carbonschnur, kräftige Rolle).
 
+## Kescher und Zurücksetzen
+
+| Kescher | Passt für | Haltbarkeit |
+| --- | --- | --- |
+| Kleiner Kescher | bis 60 cm, 3 kg | 96 |
+| Karpfenkescher | bis 120 cm, 25 kg | 256 |
+| Großfischkescher | bis 3,2 m, alle Bosse | 512 |
+
+Je kleiner der Fisch im Verhältnis zum Netz, desto breiter das grüne Feld. Jeder gefangene Fisch ist ein **Individuum** mit eigener Kennung, Maßen und **Zustand** (0–100 %): lange Drills und das Herausheben per Hand stressen ihn. Fisch in der Hand über Wasser benutzen setzt ihn als genau diesen Fisch zurück – das bringt Erfahrung, zählt für Rücksetz-Aufträge und senkt den Fangdruck.
+
+## Setzkescher und Unterwasser-Netz
+
+**Setzkescher** ins Wasser stellen (der Block muss im Wasser stehen): bis 8 Fische, 40 kg, je höchstens 120 cm. Rechtsklick mit Fisch legt ihn hinein, leere Hand nimmt den letzten heraus, Schleichen lässt alle frei. Jede Minute prüft er das Wasser: **Volumen, Sauerstoff (Strömung, Pflanzen), Temperatur (passt das Gewässer zur Art?), Besatzdichte, Wasserqualität** (sinkt mit der Last, erholt sich in Strömung und Regen). Schlechtes Wasser stresst zuerst und wird angezeigt („zu wenig Sauerstoff“ …), erst Vernachlässigung tötet. Ein Fisch kann nie doppelt im Setzkescher liegen.
+
+Das **Unterwasser-Netz** unter Wasser setzen: hineingesetzte Fische leben als echte Fische weiter, im Umkreis des Netzes. Platz gibt es für einen Fisch je 24 Wasserblöcke ringsum. Füttern mit Köder oder Futtermischung; satte, gesunde Paare derselben Art (mindestens einen Tag alt) bekommen alle zehn Minuten höchstens ein Junges. Leere Hand zeigt Zustand und Probleme, Schleichen öffnet das Netz.
+
+## Rutenhalter
+
+| Halter | Ruten | Bissanzeige |
+| --- | --- | --- |
+| Rutenhalter | 1 | Klicken + Spritzer an der Stelle |
+| Doppelständer | 2 | wie oben |
+| Rod Pod | 3 | elektronischer Alarm (laut), große Fische ziehen keine Rute hinein |
+
+Rute auf den Halter klicken: sie wirft 6–12 Blöcke vor den Halter aus (Wurfweite der Rute zählt). Die Wartezeit hängt von Köder, Fangdruck, Futterplatz, Köder-Verzauberung und Posenmodul ab. Beißt einer, hast du 8 Sekunden (mit Bisssensor 12): Halter mit leerer Hand anklicken nimmt die Rute auf und der Drill beginnt ohne Pose – Rechtsklick mit der Rute landet. Verpasste Bisse kosten den Köder, manchmal nimmt der Fisch Schnur und Kunstköder mit, und ein großer Fisch kann eine Rute aus einem einfachen Halter ins Wasser ziehen. Liegen zwei Köder näher als 2 Blöcke beieinander, verheddern sich die Schnüre.
+
+## Fangdruck und Verhalten der Fische
+
+Jedes Chunk merkt sich den **Fangdruck**: jeder entnommene Fisch erhöht ihn, zurückgesetzte Fische senken ihn um die Hälfte, mit der Zeit erholt sich das Wasser (etwa 2 Spieltage von „leergefischt“ bis „unberührt“). Bei hohem Druck beißen seltene Fische weniger, die Fische sind kleiner und es wachsen langsamer neue nach. Das **Echolot** zeigt Tiefe, Fangdruck und die Fische ringsum.
+
+Fische haben Alter, Hunger und Scheu. Raubfische jagen kleinere Fische (die fliehen vor ihnen), Schwärme fressen an Pflanzen und Futterplätzen, ziehen tagsüber im Meer, laichen nachts bei Vollmond, Raubfische halten Reviere, scheue Fische meiden Spieler, jede Art hält ihre bevorzugte Tiefe. Weit weg von Spielern ruht dieses Verhalten.
+
+## Fortschritt, Markt und Werkstatt
+
+Jeder Fang bringt **Angler-Erfahrung** nach Seltenheit, Größe und Kontrolle im Drill; dieselbe Art am selben Tag bringt jedes Mal 20 % weniger. Stufe = √(Erfahrung / 40). Die Angelgebiete:
+
+| Gebiet | Gewässer | seltene Fische ab Stufe |
+| --- | --- | --- |
+| Heimatsee | Seen | 0 |
+| Waldfluss | Flüsse, kalte Gewässer | 3 |
+| Nebelmoor | Sümpfe | 5 |
+| Küste | Meer, warmes Meer | 7 |
+| Tiefenreservat | Nordmeer, Tiefsee | 10 |
+
+Vor der Stufe beißen dort nur gewöhnliche und ungewöhnliche Fische. Täglich gibt es drei, wöchentlich zwei **Aufträge** (Art, Gewicht, Gewässer, Seltenheit, Zurücksetzen) – für alle Spieler gleich, Belohnung Smaragde und Erfahrung. Das **Fischlexikon** zeigt entdeckte Arten mit Anzahl und größtem Fang, Aufträge, Gebiete, die Serverrekorde je Art, die Rangliste der zehn schwersten Fänge und die eigene Statistik. Epische und bessere Fänge bringen manchmal **Perlmutt**.
+
+**Fischmarkt:** Rechtsklick mit Fisch verkauft ihn, Schleichen verkauft alle. Preis nach Seltenheit, Gewicht, Kontrolle und Frische (Zustand); Wechselgeld bleibt als Guthaben.
+
+**Angelwerkstatt:** Rute in die Haupthand, in die andere Hand Smaragd (repariert ein Viertel), Perlmutt (verstärkt, bis 3×, je +6 % Hub und Last) oder ein Modul. Schleichen nimmt die Module ab.
+
+## Module, Verzauberungen und Hilfsmittel
+
+Zwei Module pro Rute:
+
+| Modul | Wirkung |
+| --- | --- |
+| Feinbremse | +12 % Dehnung, schluckt Rucke |
+| Verstärkter Blank | +20 % Rutenlast |
+| Bisssensor | +20 % Gefühl beim Anschlag, längeres Bissfenster am Halter |
+| Leichtes Spulenlager | +10 % Wurfweite |
+| Keramikringe | 30 % weniger Abrieb |
+| Verbesserte Kugellager | +10 % Einzug, +5 % Kraft |
+| Verstärkte Hakenhalterung | +20 % Hakenfestigkeit |
+| Vorfachsystem | 25 % weniger Hindernisschaden |
+| Posenmodul | +10 % Gefühl, schnellere Bisse am Halter |
+| Sonarmodul | zeigt beim Warten alle 5 s die Fische um die Pose |
+| Schnurzähler | +10 % Schnur auf der Spule |
+| Bossmontage | nur gegen Bosse: +10 % Tragkraft, +15 % Last, +30 % Haken, Fluchten −10 % |
+| Futterkorb | wirkt wie ein Futterplatz am Köder |
+
+Neue Verzauberungen: **Ruhige Hand** (II, schlaffe Schnur kostet 20 % weniger Hakenhalt je Stufe), **Präzisionswurf** (III, +6 % Wurfweite und feinerer Anschlag je Stufe), **Drillkontrolle** (III, Fluchten −6 % je Stufe). Vanilla **Köder** verkürzt die Wartezeit am Rutenhalter, **Glück des Meeres** macht seltene Fische wahrscheinlicher.
+
+Hilfsmittel: **Futtermischung** (aufs Wasser werfen: 5 Minuten Futterplatz, füttert auch Fische im Netz), **Echolot**, **Köderbox** (packt alle Köder ein, legt leere Köderplätze automatisch nach), **Angelwerkzeug** (nimmt die ganze Montage auf einmal ab). Aus dem Boot angeln funktioniert wie vom Ufer; der Drill läuft vom Boot aus genauso.
+
 ## Rezepte
 
 Alle Werkbankrezepte sind formlos.
@@ -234,9 +308,21 @@ Alle Werkbankrezepte sind formlos.
 | Königswobbler | Wobbler, Smaragd, Goldbarren, Feder |
 | 2 Strömungsköder | Boilie, Prismarinkristalle, Ton, Knochenmehl |
 | 2 Tiefenlicht | Leuchtköder, Echosplitter, Sculk |
-| Zauberbücher | Buch, Lapislazuli + Faden & Eisen (Schnurmeister) / Redstone & Amethyst (Kurbelkraft) / Prismarinkristalle & Leuchttinte (Wellenruhe) |
+| Zauberbücher | Buch, Lapislazuli + Faden & Eisen (Schnurmeister) / Redstone & Amethyst (Kurbelkraft) / Prismarinkristalle & Leuchttinte (Wellenruhe) / Feder & Amethyst (Ruhige Hand) / Pfeil & Gold (Präzisionswurf) / Eisen & Leder (Drillkontrolle) |
+| Kescher | klein: 2 Stöcke, 3 Faden · Karpfen: kleiner Kescher, Eisen, 3 Faden · Großfisch: Karpfenkescher, Eisenblock, Geflochtene Schnur, Leder |
+| 4 Futtermischung | Weizen, Brot, Knochenmehl, Erde |
+| Echolot | Kupferbarren, Redstone, Amethystscherbe, Glasscheibe |
+| Köderbox | Truhe, Kupferbarren |
+| Angelwerkzeug | Schere, Eisennugget, Stock |
+| Fischlexikon | Buch, Roher Kabeljau, Tintenbeutel |
+| Setzkescher | 4 Faden, 2 Stöcke |
+| Rutenhalter / Doppelständer / Rod Pod | 3 Stöcke + Eichenstufe / 2 Rutenhalter + Stock / 3 Eisen, Redstone, Notenblock |
+| Unterwasser-Netz | 2 Setzkescher, Eisengitter, Faden |
+| Fischmarkt | Fass, Smaragd, Eichenschild, Roher Kabeljau |
+| Angelwerkstatt | Schmiedetisch, Angel, Eisenbarren |
+| Module | Feinbremse: Kupfer, Schleim, Redstone · Blank: 2 Eisen, Kohlefaser · Bisssensor: Redstone, Kupfer, Glocke · Spulenlager: Gold, Feder, Kupfer · Keramikringe: 2 Ziegel, Quarz · Kugellager: Eisen, Goldnugget, Redstone, Kupfer · Hakenhalterung: Eisen, Eisenkette · Vorfachsystem: beide Vorfächer, Nugget · Pose: Feder, roter Farbstoff, Bretter · Sonar: Echolot, Kupfer · Schnurzähler: Uhr, Kupfer · Bossmontage: Perlmutt, Diamant, Carbonschnur · Futterkorb: Futtermischung, Eisengitter |
 
-Verzauberungen: **Schnurmeister** +8 % Tragkraft je Stufe, **Kurbelkraft** +8 % Einzug und Kraft, **Wellenruhe** Fluchten −12 %. Zauberbuch in die Haupthand, eingeholte Angel in die Nebenhand, rechtsklicken.
+Verzauberungen: **Schnurmeister** +8 % Tragkraft je Stufe, **Kurbelkraft** +8 % Einzug und Kraft, **Wellenruhe** Fluchten −12 %, dazu Ruhige Hand, Präzisionswurf und Drillkontrolle (siehe oben). Zauberbuch in die Haupthand, eingeholte Angel in die Nebenhand, rechtsklicken.
 
 Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“.
 
@@ -248,14 +334,20 @@ Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“.
                                 (roach, river_trout, pike, carp, catfish, tuna,
                                  ancient_catfish, reed_king, black_sturgeon, deep_warden)
 /atzen cancel                   Drill abbrechen
+/atzen lexikon                  Fischlexikon öffnen
+/atzen turnier start <min> [art]  Turnier: schwerster Fisch (der Art) gewinnt, Plätze 1–3: 16/8/4 Smaragde (OP)
+/atzen turnier ende             Turnier sofort auswerten (OP)
+/atzen leistung [niedrig|normal|hoch]
+                                Leistungsstufe: wie weit Fische voll aktiv sind (24/48/96 Blöcke)
+                                und wie oft Rutenhalter prüfen (OP)
 ```
 
 ## Entwicklung und Prüfungen
 
-`./gradlew build` mit JDK 25 kompiliert Server- und Clientcode, baut die JAR und führt die JUnit-Prüfungen aus. Sie spielen den Drill ohne Minecraft mit einem Test-Angler durch: jede gewöhnliche Art mit passender Ausrüstung fangbar, große Fische zerreißen schwache Ausrüstung, Dauer-Kurbeln reicht bei großen Fischen nicht, jeder Boss ist mit bester Ausrüstung schaffbar und mit einfacher nicht, alle Aktionen werden angekündigt, eine zu feste Bremse reißt die Schnur. Dazu Köderauswahl, Bossbedingungen, Maße, JSON-Dateien, Texturen, Übersetzungen und die Mixin-Ziele gegen Minecraft 26.2.
+`./gradlew build` mit JDK 25 kompiliert Server- und Clientcode, baut die JAR und führt die JUnit-Prüfungen aus. Sie spielen den Drill ohne Minecraft mit einem Test-Angler durch: jede gewöhnliche Art mit passender Ausrüstung fangbar, große Fische zerreißen schwache Ausrüstung, Dauer-Kurbeln reicht bei großen Fischen nicht, jeder Boss ist mit bester Ausrüstung schaffbar und mit einfacher nicht, alle Aktionen werden angekündigt, eine zu feste Bremse reißt die Schnur. Dazu Setzkescher (keine Duplikate, Grenzen, schlechtes Wasser stresst und tötet erst bei Vernachlässigung), Kescher-Zielleiste, Fangdruck, Aufträge (für alle gleich), Erfahrung und Preise (Wiederholung lohnt nicht), Angelgebiete, Köderauswahl, Bossbedingungen, Maße, JSON-Dateien, Texturen, Übersetzungen und die Mixin-Ziele gegen Minecraft 26.2.
 
 Ressourcen neu erzeugen: `node scripts/generate-resources.mjs` (Modelle, Rezepte, Übersetzungen), `python3 scripts/draw-textures.py` (alle Texturen, 64×64), `python3 scripts/sounds.py OUT` (Klänge).
 
-Spielbalance: `FishingBattle.java` (Drill), `Boss.java`, `FishSpecimen.fighter()` (Fischkraft), `ReelType`/`LineType`/`RodType`/`BaitType` (Ausrüstung).
+Spielbalance: `FishingBattle.java` (Drill), `Landing.java` (Kescher), `Valuation.java` (Erfahrung, Preise), `Pressure.java` (Fangdruck), `WaterConditions.java` (Haltung), `Boss.java`, `FishSpecimen.fighter()` (Fischkraft), `ReelType`/`LineType`/`RodType`/`BaitType` (Ausrüstung).
 
 Lizenz: MIT, siehe `LICENSE`.

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:mother_of_pearl",
+    "minecraft:diamond",
+    "atzen:carbon_line"
+  ],
+  "result": {
+    "id": "atzen:boss_rig_module",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:redstone",
+    "minecraft:amethyst_shard",
+    "minecraft:glass_pane"
+  ],
+  "result": {
+    "id": "atzen:echo_sounder",
+    "count": 1
+  }
+}

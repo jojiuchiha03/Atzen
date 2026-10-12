@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:lapis_lazuli",
+    "minecraft:arrow",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "atzen:precision_cast_tome",
+    "count": 1
+  }
+}

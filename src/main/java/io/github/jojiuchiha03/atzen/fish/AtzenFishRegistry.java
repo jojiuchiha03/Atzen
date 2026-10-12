@@ -90,6 +90,9 @@ public final class AtzenFishRegistry {
                             BlockPos pos, RandomSource random) {
         if (!level.getFluidState(pos).is(FluidTags.WATER)) return false;
         boolean deepEnough = level.getFluidState(pos.below()).is(FluidTags.WATER) || level.getBlockState(pos.above()).is(Blocks.WATER);
+        // A fished-out stretch fills up again only slowly.
+        if (level instanceof net.minecraft.server.level.ServerLevel server && reason == EntitySpawnReason.NATURAL
+                && random.nextDouble() > io.github.jojiuchiha03.atzen.ecology.Ecology.factor(server, pos)) return false;
         return deepEnough && level.canSeeSkyFromBelowWater(pos);
     }
 

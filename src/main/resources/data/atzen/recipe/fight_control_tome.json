@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:lapis_lazuli",
+    "minecraft:iron_ingot",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "atzen:fight_control_tome",
+    "count": 1
+  }
+}

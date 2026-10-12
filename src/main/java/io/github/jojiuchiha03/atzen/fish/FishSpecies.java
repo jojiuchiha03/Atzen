@@ -159,6 +159,9 @@ public enum FishSpecies {
 
         /** Ticks after the bite at which the strike sets the hook best: predators turn the bait first, trout spit fast. */
         public int strikeIdeal() { return strikeIdeal; }
+
+        /** Hunts other fish. */
+        public boolean predatory() { return this == PREDATOR || this == SEA_PREDATOR; }
     }
 
     private final double minLength, maxLength, weightFactor;
@@ -259,6 +262,16 @@ public enum FishSpecies {
     public boolean salt() {
         for (int i = 0; i < Habitat.OCEAN.ordinal(); i++) if (habitatWeights[i] > 0) return false;
         return boss() == null;
+    }
+
+    /** Where in the water column the fish likes to be: -1 at the bottom, 0 in the middle, 1 just under the surface. */
+    public int preferredDepth() {
+        return switch (this) {
+            case HERRING, SARDINE, ANCHOVY, SPRAT, ASP, MACKEREL, RUDD, GOLDEN_KOI, SKIPJACK -> 1;
+            case CARP, CRUCIAN_CARP, TENCH, BARBEL, CATFISH, EEL, BREAM, STURGEON, ATLANTIC_COD, HADDOCK, PLAICE, FLOUNDER,
+                 SOLE, TURBOT, HALIBUT, MONKFISH, GURNARD, WOLFFISH, RED_MULLET, ZANDER -> -1;
+            default -> 0;
+        };
     }
 
     /** Sharp teeth: without a steel leader they can bite through the line. */

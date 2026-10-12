@@ -164,20 +164,27 @@ public final class AtzenRodItem extends FishingRodItem {
     public Optional<TooltipComponent> getTooltipImage(ItemStack rod) {
         ItemStack[] slots = new ItemStack[GearSlot.values().length];
         for (GearSlot slot : GearSlot.values()) slots[slot.ordinal()] = get(rod, slot);
-        return Optional.of(new GearTooltip(slots, BattleEquipment.preview(rod), AtzenItems.rod(rod), BattleEquipment.castFactor(rod)));
+        return Optional.of(new GearTooltip(slots, BattleEquipment.preview(rod), AtzenItems.rod(rod), BattleEquipment.castFactor(rod),
+                RodMods.modules(rod), RodMods.upgrades(rod)));
     }
 
     /** Casting: how far the float flies depends on rod, spool and bait (see {@link BattleEquipment#castFactor}). */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        // During a fight from a rod holder there is no float: the click lands the fish.
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer && io.github.jojiuchiha03.atzen.Atzen.BATTLES.click(serverPlayer)) {
+            return InteractionResult.SUCCESS;
+        }
         boolean casting = player.fishing == null;
         InteractionResult result = super.use(level, player, hand);
         if (casting && !level.isClientSide() && player.fishing != null) {
-            player.fishing.setDeltaMovement(player.fishing.getDeltaMovement().scale(BattleEquipment.castFactor(player.getItemInHand(hand))));
+            player.fishing.setDeltaMovement(player.fishing.getDeltaMovement().scale(
+                    BattleEquipment.castFactor((net.minecraft.server.level.ServerPlayer) player, player.getItemInHand(hand))));
         }
         return result;
     }
 
     /** What the tooltip shows: the slots, the rod's attributes and what the whole set does. */
-    public record GearTooltip(ItemStack[] slots, Rig rig, RodType rod, double cast) implements TooltipComponent { }
+    public record GearTooltip(ItemStack[] slots, Rig rig, RodType rod, double cast, java.util.List<ModuleType> modules,
+                              int upgrades) implements TooltipComponent { }
 }

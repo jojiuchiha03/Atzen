@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:cod",
+    "minecraft:ink_sac"
+  ],
+  "result": {
+    "id": "atzen:fish_lexicon",
+    "count": 1
+  }
+}

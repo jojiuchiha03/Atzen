@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:barrel",
+    "minecraft:emerald",
+    "minecraft:oak_sign",
+    "minecraft:cod"
+  ],
+  "result": {
+    "id": "atzen:fish_market",
+    "count": 1
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:rod_holder",
+    "atzen:rod_holder",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "atzen:double_rod_holder",
+    "count": 1
+  }
+}

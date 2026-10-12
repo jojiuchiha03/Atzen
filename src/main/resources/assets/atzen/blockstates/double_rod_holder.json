@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "bite=false,facing=north,loaded=false": {
+      "model": "atzen:block/double_rod_holder"
+    },
+    "bite=true,facing=north,loaded=false": {
+      "model": "atzen:block/double_rod_holder"
+    },
+    "bite=false,facing=north,loaded=true": {
+      "model": "atzen:block/double_rod_holder_loaded"
+    },
+    "bite=true,facing=north,loaded=true": {
+      "model": "atzen:block/double_rod_holder_bite"
+    },
+    "bite=false,facing=east,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 90
+    },
+    "bite=true,facing=east,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 90
+    },
+    "bite=false,facing=east,loaded=true": {
+      "model": "atzen:block/double_rod_holder_loaded",
+      "y": 90
+    },
+    "bite=true,facing=east,loaded=true": {
+      "model": "atzen:block/double_rod_holder_bite",
+      "y": 90
+    },
+    "bite=false,facing=south,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 180
+    },
+    "bite=true,facing=south,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 180
+    },
+    "bite=false,facing=south,loaded=true": {
+      "model": "atzen:block/double_rod_holder_loaded",
+      "y": 180
+    },
+    "bite=true,facing=south,loaded=true": {
+      "model": "atzen:block/double_rod_holder_bite",
+      "y": 180
+    },
+    "bite=false,facing=west,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 270
+    },
+    "bite=true,facing=west,loaded=false": {
+      "model": "atzen:block/double_rod_holder",
+      "y": 270
+    },
+    "bite=false,facing=west,loaded=true": {
+      "model": "atzen:block/double_rod_holder_loaded",
+      "y": 270
+    },
+    "bite=true,facing=west,loaded=true": {
+      "model": "atzen:block/double_rod_holder_bite",
+      "y": 270
+    }
+  }
+}

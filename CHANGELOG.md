@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.14.0] - 2026-10-12
+
+Die Stufen 0.8 bis 0.14 der Roadmap in einer Version.
+
+### Neu
+- **Kescher** (klein, Karpfen, Großfisch) in der anderen Hand: aktive Landung mit Zielleiste – der Fisch pendelt vor dem Netz, Rechtsklick im grünen Feld landet fast sicher. Per Hand nur noch Fische bis 2 kg; Bosse brauchen den Großfischkescher.
+- **Fisch-Individuen:** jeder Fisch hat Kennung, Alter, Hunger, Scheu und Zustand; sie bleiben in Hand, Setzkescher, Netz und Wasser erhalten. Fisch über Wasser benutzen setzt ihn zurück.
+- **Setzkescher** mit Haltungsbedingungen (Volumen, Sauerstoff, Temperatur, Besatzdichte, Wasserqualität), Warnungen, Tod erst bei Vernachlässigung, keine Duplikate.
+- **Unterwasser-Netz:** Fische leben darin als echte Fische, Platz nach Wasservolumen, Füttern, einfache Zucht.
+- **Rutenhalter, Doppelständer, Rod Pod** mit Bissanzeige (Pod mit Alarm): mehrere Ruten gleichzeitig, Biss aufnehmen und drillen, verpasste Bisse, Schnur genommen, Rute ins Wasser gezogen, verhedderte Schnüre.
+- **Fischverhalten:** Raubfische jagen kleinere Fische, Beutefische fliehen; Schwärme fressen, ziehen, laichen, halten Reviere oder meiden Spieler; bevorzugte Tiefe je Art.
+- **Fangdruck** pro Chunk: senkt Bisse auf seltene Fische, Fischgröße und Nachwuchs, erholt sich mit der Zeit; Zurücksetzen hilft.
+- **Fortschritt:** Angler-Erfahrung und Stufen, fünf Angelgebiete (seltene Fische ab Stufe), tägliche und wöchentliche Aufträge, Serverrekorde, Rangliste, Turniere (`/atzen turnier`), **Fischlexikon**.
+- **Fischmarkt** (Smaragde nach Seltenheit, Gewicht, Kontrolle, Frische; Wiederholung bringt weniger) und **Angelwerkstatt** (Reparatur, Verstärken mit Perlmutt, Module einbauen).
+- **13 Module** (zwei pro Rute), drei neue Verzauberungen (Ruhige Hand, Präzisionswurf, Drillkontrolle); Vanilla Köder und Glück des Meeres wirken.
+- **Hilfsmittel:** Futtermischung (Futterplatz), Echolot, Köderbox (legt Köder automatisch nach), Angelwerkzeug.
+- **Leistungsstufen** (`/atzen leistung`): Reichweite des vollen Fischverhaltens und Takt der Rutenhalter.
+- Neue Prüfungen für Setzkescher, Kescher, Fangdruck, Aufträge, Bewertung und Gebiete.
+
 ## [0.7.0] - 2026-10-12
 
 ### Neu

@@ -13,7 +13,8 @@
 - Sounds erzeugt `python3 scripts/sounds.py OUT` als WAV (reine Synthese); danach mit ffmpeg/libvorbis mono nach `assets/atzen/sounds/*.ogg`, Ereignisse in `AtzenSounds` und `sounds.json`.
 - Texturen (Items, Eimer, Fischhäute, alle 64×64) zeichnet `python3 scripts/draw-textures.py` neu; Farben und Formen dort ändern, nicht in den PNGs.
   `scripts/import-textures.ps1` (alte Bildvorlagen aus `art/`) nicht mehr ausführen, es würde die gezeichneten Texturen überschreiben.
-- Blöcke analog: `BlockBehaviour.Properties...setId(blockKey)`, plus `BlockItem` mit `useBlockDescriptionPrefix()`, `blockstates/`.
+- Blöcke in `block/AtzenBlocks` (`BlockBehaviour.Properties...setId(blockKey)`, `BlockItem` mit Namen `item.atzen.<id>`), dazu `blockstates/`, `models/block/`, Beutetabelle unter `data/atzen/loot_table/blocks/` – alles in `generate-resources.mjs`. Die Darstellung (Cutout) wählt 26.2 selbst nach der Textur-Transparenz.
+- Spielerfortschritt und Serverrekorde liegen als Fabric-Attachments (`Progression.PLAYER`, `Progression.SERVER`), Fangdruck als Chunk-Attachment (`Ecology.PRESSURE`).
 - Mixins nach `io.github.jojiuchiha03.atzen.mixin` und in `atzen.mixins.json` eintragen (`mixins` = beide Seiten, `client` = nur Client).
 - 26.2-Falle: Grasblöcke sind nicht mehr in `#minecraft:dirt`, sondern in `#minecraft:grass_blocks` / `#minecraft:substrate_overworld`.
 - Mod-ID und Namensraum: `atzen`. Paket: `io.github.jojiuchiha03.atzen`.

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:carp_landing_net",
+    "minecraft:iron_block",
+    "atzen:braided_line",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "atzen:big_game_landing_net",
+    "count": 1
+  }
+}

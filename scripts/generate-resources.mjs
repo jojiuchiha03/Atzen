@@ -99,7 +99,7 @@ for (const tag of ['fishing', 'durability', 'vanishing']) {
   json(`data/minecraft/tags/item/enchantable/${tag}.json`, { replace: false, values: rods });
 }
 
-const enchantments = { steady_line: 3, reel_power: 3, calm_waters: 2 };
+const enchantments = { steady_line: 3, reel_power: 3, calm_waters: 2, calm_mind: 2, precision_cast: 3, fight_control: 3 };
 for (const [id, maxLevel] of Object.entries(enchantments)) {
   json(`data/atzen/enchantment/${id}.json`, {
     description: { translate: `enchantment.atzen.${id}` }, supported_items: '#atzen:rods',
@@ -443,3 +443,275 @@ for (const [key, [german, english]] of Object.entries(fishTranslations)) { de[ke
 json('assets/atzen/lang/de_de.json', de);
 json('assets/atzen/lang/en_us.json', en);
 console.log(`Generated ${Object.keys(fish).length} fish species with buckets, spawn eggs, cooking recipes and catch translations.`);
+
+// ---------------------------------------------------------------- 0.8–0.14: nets, tools, modules, blocks, progress
+
+const extraItems = {
+  calm_mind_tome: ['Zauberbuch: Ruhige Hand', 'Tome of Calm Mind', 'Rechtsklick mit Angel in der anderen Hand: Ruhige Hand +1 (schlaffe Schnur kostet 20 % weniger Hakenhalt).', 'Use with a rod in the other hand: Calm Mind +1 (slack costs 20% less hook hold).'],
+  precision_cast_tome: ['Zauberbuch: Präzisionswurf', 'Tome of Precision Cast', 'Rechtsklick mit Angel in der anderen Hand: Präzisionswurf +1 (6 % weiter, feinerer Anschlag).', 'Use with a rod in the other hand: Precision Cast +1 (6% further, finer strike).'],
+  fight_control_tome: ['Zauberbuch: Drillkontrolle', 'Tome of Fight Control', 'Rechtsklick mit Angel in der anderen Hand: Drillkontrolle +1 (Fluchten 6 % schwächer).', 'Use with a rod in the other hand: Fight Control +1 (runs 6% weaker).'],
+  small_landing_net: ['Kleiner Kescher', 'Small Landing Net', 'In die andere Hand: landet Fische bis 60 cm und 3 kg. Zielanzeige im Drill – schöpfen, wenn der Fisch im grünen Feld ist.', 'In the other hand: lands fish up to 60 cm and 3 kg. Aim gauge in the fight – scoop while the fish is in the green field.'],
+  carp_landing_net: ['Karpfenkescher', 'Carp Landing Net', 'In die andere Hand: Fische bis 120 cm und 25 kg, weite Öffnung.', 'In the other hand: fish up to 120 cm and 25 kg, wide opening.'],
+  big_game_landing_net: ['Großfischkescher', 'Big Game Landing Net', 'In die andere Hand: für Riesen bis 3,2 m und alle Bossfische.', 'In the other hand: for giants up to 3.2 m and every boss fish.'],
+  mother_of_pearl: ['Perlmutt', 'Mother-of-Pearl', 'Seltene Beigabe epischer Fänge. In der Werkstatt: Rute verstärken (bis 3×, je +6 % Hub und Belastbarkeit).', 'Rare bonus from epic catches. In the workshop: reinforce a rod (up to 3×, +6% lift and load each).'],
+  groundbait: ['Futtermischung', 'Groundbait', 'Aufs Wasser werfen: 5 Minuten Futterplatz, Friedfische kommen und beißen eher. Füttert Fische im Netz.', 'Throw on water: a feeding spot for 5 minutes, coarse fish gather and bite sooner. Feeds penned fish.'],
+  echo_sounder: ['Echolot', 'Echo Sounder', 'Rechtsklick: Tiefe, Fangdruck und welche Fische in 24 Blöcken stehen.', 'Use: depth, fishing pressure and which fish are within 24 blocks.'],
+  bait_box: ['Köderbox', 'Bait Box', 'Rechtsklick packt alle Köder ein (9 Stapel), Schleichen leert sie. Füllt den Köderplatz der Rute automatisch nach.', 'Use packs all bait (9 stacks), sneak empties it. Refills the rod\'s bait slot automatically.'],
+  angler_tool: ['Angelwerkzeug', 'Angler\'s Tool', 'Mit Rute in der anderen Hand: nimmt die ganze Montage auf einmal ab.', 'With a rod in the other hand: takes the whole rig off at once.'],
+  fish_lexicon: ['Fischlexikon', 'Fish Lexicon', 'Arten, Aufträge, Angelgebiete, Rekorde, Rangliste und Statistik.', 'Species, orders, fishing grounds, records, ranking and statistics.'],
+};
+const modules = {
+  fine_drag: ['Feinbremsmodul', 'Fine Drag Module', 'Schluckt Rucke wie dehnbare Schnur (+12 % Dehnung).', 'Soaks up jolts like stretchy line (+12% stretch).', '#4fd8d0'],
+  reinforced_blank: ['Verstärkter Blank', 'Reinforced Blank', 'Rute hält 20 % mehr Last.', 'The rod bears 20% more load.', '#8a5a2a'],
+  bite_sensor: ['Bisssensor', 'Bite Sensor', 'Feinerer Anschlag (+20 % Gefühl), am Rutenhalter längeres Bissfenster und festerer Haken.', 'Finer strike (+20% feel); at a rod holder a longer bite window and a firmer hook.', '#e84a4a'],
+  light_bearing: ['Leichtes Spulenlager', 'Light Spool Bearing', '10 % weitere Würfe.', '10% longer casts.', '#e8d070'],
+  ceramic_guides: ['Keramikringe', 'Ceramic Guides', 'Schnur scheuert 30 % weniger an Hindernissen.', 'The line frays 30% less on snags.', '#f0f0f0'],
+  improved_bearings: ['Verbesserte Kugellager', 'Improved Bearings', '10 % schnellerer Einzug, 5 % mehr Kraft.', '10% faster retrieve, 5% more force.', '#b8bec6'],
+  reinforced_hook_mount: ['Verstärkte Hakenhalterung', 'Reinforced Hook Mount', 'Haken hält 20 % mehr.', 'The hook holds 20% more.', '#6a6e78'],
+  leader_system: ['Vorfachsystem', 'Leader System', 'Hindernisse richten 25 % weniger Schaden an.', 'Snags do 25% less damage.', '#5fa04a'],
+  float: ['Posenmodul', 'Float Module', 'Bisse früher sehen (+10 % Gefühl), am Rutenhalter etwas schnellere Bisse.', 'See bites earlier (+10% feel), slightly faster bites at a rod holder.', '#ff8a2a'],
+  sonar: ['Sonarmodul', 'Sonar Module', 'Beim Warten zeigt die Rute alle 5 s, wie viele Fische um die Pose stehen.', 'While waiting, the rod shows every 5 s how many fish are around the float.', '#3a7ad8'],
+  line_counter: ['Schnurzähler', 'Line Counter', 'Sauber gespult: 10 % mehr Schnur auf der Spule.', 'Neatly spooled: 10% more line on the spool.', '#c8c8a0'],
+  boss_rig: ['Bossmontage', 'Boss Rig', 'Nur gegen Bosse: +10 % Tragkraft, +15 % Rutenlast, +30 % Hakenhalt, Fluchten 10 % schwächer.', 'Only against bosses: +10% breaking load, +15% rod load, +30% hook hold, runs 10% weaker.', '#c9a03a'],
+  feeder: ['Futterkorb', 'Feeder', 'Wirkt wie ein Futterplatz am Köder: Friedfische beißen eher, am Rutenhalter schneller.', 'Works like a feeding spot at the bait: coarse fish bite sooner, faster at a rod holder.', '#7a5a3a'],
+};
+for (const [id, [german, english, germanTip, englishTip]] of Object.entries(modules)) extraItems[`${id}_module`] = [german, english, germanTip, englishTip];
+for (const id of Object.keys(extraItems)) {
+  json(`assets/atzen/models/item/${id}.json`, { parent: 'minecraft:item/generated', textures: { layer0: `atzen:item/${id}` } });
+  json(`assets/atzen/items/${id}.json`, { model: { type: 'minecraft:model', model: `atzen:item/${id}` } });
+}
+
+const blocks = {
+  keepnet: ['Setzkescher', 'Keepnet', 'Ins Wasser stellen: hält bis 8 Fische (40 kg) am Leben. Fisch rein: Rechtsklick mit Fisch; raus: leere Hand; alle freilassen: Schleichen.', 'Set it in water: keeps up to 8 fish (40 kg) alive. In: use a fish on it; out: empty hand; release all: sneak.'],
+  rod_holder: ['Rutenhalter', 'Rod Holder', 'Rute daraufklicken: wirft vor dem Halter aus. Bei Biss (Klicken + Spritzer) den Halter anklicken und drillen.', 'Click a rod on it: casts in front of the holder. On a bite (click + splash) click the holder and fight.'],
+  double_rod_holder: ['Doppelständer', 'Double Rod Stand', 'Zwei Ruten nebeneinander. Liegen zwei Köder zu nah, verheddern sich die Schnüre.', 'Two rods side by side. Baits lying too close make the lines tangle.'],
+  rod_pod: ['Rod Pod', 'Rod Pod', 'Drei Ruten mit elektronischem Bissanzeiger (lauter Alarm); große Fische ziehen hier keine Rute ins Wasser.', 'Three rods with an electronic bite alarm (loud); big fish cannot pull a rod in here.'],
+  fish_pen: ['Unterwasser-Netz', 'Fish Pen', 'Unter Wasser setzen: Fische leben darin, je 24 Wasserblöcke einer. Füttern mit Köder/Futter; satte, gesunde Paare vermehren sich.', 'Place under water: fish live in it, one per 24 water blocks. Feed with bait/groundbait; well-fed healthy pairs breed.'],
+  fish_market: ['Fischmarkt', 'Fish Market', 'Fisch verkaufen: Rechtsklick mit Fisch, Schleichen verkauft alle. Seltenheit, Gewicht, Kontrolle und Frische zählen.', 'Sell fish: use a fish on it, sneak sells all. Rarity, weight, control and freshness count.'],
+  workshop: ['Angelwerkstatt', 'Angler\'s Workshop', 'Rute in der Haupthand, in der anderen: Smaragd (reparieren), Perlmutt (verstärken) oder Modul (einbauen). Schleichen: Module ab.', 'Rod in the main hand, in the other: emerald (repair), mother-of-pearl (reinforce) or a module (fit). Sneak: modules off.'],
+};
+const holders = { rod_holder: 'holder_wood', double_rod_holder: 'holder_wood', rod_pod: 'holder_metal' };
+for (const id of Object.keys(blocks)) {
+  json(`data/atzen/loot_table/blocks/${id}.json`, {
+    type: 'minecraft:block', pools: [{ rolls: 1, entries: [{ type: 'minecraft:item', name: `atzen:${id}` }],
+      conditions: [{ condition: 'minecraft:survives_explosion' }] }],
+  });
+  json(`assets/atzen/items/${id}.json`, { model: { type: 'minecraft:model', model: `atzen:block/${id}` } });
+}
+const box = (from, to, texture, faces = ['north', 'south', 'east', 'west', 'up', 'down']) => ({
+  from, to, faces: Object.fromEntries(faces.map(face => [face, { texture }])),
+});
+json('assets/atzen/models/block/keepnet.json', {
+  parent: 'minecraft:block/block', textures: { particle: 'atzen:block/net', net: 'atzen:block/net', ring: 'atzen:block/holder_wood' },
+  elements: [box([2, 0, 2], [14, 12, 14], '#net'), box([1, 12, 1], [15, 14, 15], '#ring', ['north', 'south', 'east', 'west', 'up'])],
+});
+json('assets/atzen/blockstates/keepnet.json', { variants: { '': { model: 'atzen:block/keepnet' } } });
+json('assets/atzen/models/block/fish_pen.json', {
+  parent: 'minecraft:block/block', textures: { particle: 'atzen:block/net', net: 'atzen:block/net', frame: 'atzen:block/holder_wood' },
+  elements: [box([0, 0, 0], [16, 4, 16], '#net'), box([0, 0, 0], [2, 5, 2], '#frame'), box([14, 0, 0], [16, 5, 2], '#frame'),
+    box([0, 0, 14], [2, 5, 16], '#frame'), box([14, 0, 14], [16, 5, 16], '#frame')],
+});
+json('assets/atzen/blockstates/fish_pen.json', { variants: { '': { model: 'atzen:block/fish_pen' } } });
+for (const id of ['fish_market', 'workshop']) {
+  json(`assets/atzen/models/block/${id}.json`, {
+    parent: 'minecraft:block/cube_bottom_top',
+    textures: { side: `atzen:block/${id}_side`, top: `atzen:block/${id}_top`, bottom: 'minecraft:block/spruce_planks' },
+  });
+  json(`assets/atzen/blockstates/${id}.json`, { variants: { '': { model: `atzen:block/${id}` } } });
+}
+// Rod holders: posts with a rest for each rod; a rod lying in when loaded, the indicator red on a bite.
+const rodsOf = { rod_holder: 1, double_rod_holder: 2, rod_pod: 3 };
+for (const [id, material] of Object.entries(holders)) {
+  const count = rodsOf[id];
+  for (const variant of ['', '_loaded', '_bite']) {
+    const elements = [];
+    for (let i = 0; i < count; i++) {
+      const x = count === 1 ? 7 : count === 2 ? 3 + i * 8 : 1.5 + i * 5.5;
+      elements.push(box([x, 0, 7], [x + 2, 10, 9], '#post'));
+      elements.push(box([x - 1, 10, 6], [x + 3, 11, 10], '#post'));
+      if (variant) {
+        elements.push({ from: [x + 0.5, 10.5, -6], to: [x + 1.5, 11.5, 16], rotation: { angle: 22.5, axis: 'x', origin: [x + 1, 11, 8] },
+          faces: Object.fromEntries(['north', 'south', 'east', 'west', 'up', 'down'].map(face => [face, { texture: '#rod' }])) });
+        elements.push(box([x + 0.5, 4, 5.5], [x + 1.5, 6, 6.5], variant === '_bite' ? '#alarm_on' : '#alarm_off'));
+      }
+    }
+    if (count === 3) elements.push(box([0, 0, 6.5], [16, 1.5, 9.5], '#post'));
+    json(`assets/atzen/models/block/${id}${variant}.json`, {
+      parent: 'minecraft:block/block',
+      textures: { particle: `atzen:block/${material}`, post: `atzen:block/${material}`, rod: 'atzen:block/rod_blank',
+        alarm_on: 'atzen:block/alarm_on', alarm_off: 'atzen:block/alarm_off' },
+      elements,
+    });
+  }
+  const variants = {};
+  const yRot = { north: 0, east: 90, south: 180, west: 270 };
+  for (const [facing, y] of Object.entries(yRot)) for (const loaded of [false, true]) for (const bite of [false, true]) {
+    const model = !loaded ? id : bite ? `${id}_bite` : `${id}_loaded`;
+    variants[`bite=${bite},facing=${facing},loaded=${loaded}`] = { model: `atzen:block/${model}`, ...(y ? { y } : {}) };
+  }
+  json(`assets/atzen/blockstates/${id}.json`, { variants });
+}
+
+const extraRecipes = {
+  calm_mind_tome: ['minecraft:book', 'minecraft:lapis_lazuli', 'minecraft:feather', 'minecraft:amethyst_shard'],
+  precision_cast_tome: ['minecraft:book', 'minecraft:lapis_lazuli', 'minecraft:arrow', 'minecraft:gold_ingot'],
+  fight_control_tome: ['minecraft:book', 'minecraft:lapis_lazuli', 'minecraft:iron_ingot', 'minecraft:leather'],
+  small_landing_net: ['minecraft:stick', 'minecraft:stick', 'minecraft:string', 'minecraft:string', 'minecraft:string'],
+  carp_landing_net: ['atzen:small_landing_net', 'minecraft:iron_ingot', 'minecraft:string', 'minecraft:string', 'minecraft:string'],
+  big_game_landing_net: ['atzen:carp_landing_net', 'minecraft:iron_block', 'atzen:braided_line', 'minecraft:leather'],
+  groundbait: { count: 4, ingredients: ['minecraft:wheat', 'minecraft:bread', 'minecraft:bone_meal', 'minecraft:dirt'] },
+  echo_sounder: ['minecraft:copper_ingot', 'minecraft:redstone', 'minecraft:amethyst_shard', 'minecraft:glass_pane'],
+  bait_box: ['minecraft:chest', 'minecraft:copper_ingot'],
+  angler_tool: ['minecraft:shears', 'minecraft:iron_nugget', 'minecraft:stick'],
+  fish_lexicon: ['minecraft:book', 'minecraft:cod', 'minecraft:ink_sac'],
+  fine_drag_module: ['minecraft:copper_ingot', 'minecraft:slime_ball', 'minecraft:redstone'],
+  reinforced_blank_module: ['minecraft:iron_ingot', 'minecraft:iron_ingot', 'atzen:carbon_fiber'],
+  bite_sensor_module: ['minecraft:redstone', 'minecraft:copper_ingot', 'minecraft:bell'],
+  light_bearing_module: ['minecraft:gold_ingot', 'minecraft:feather', 'minecraft:copper_ingot'],
+  ceramic_guides_module: ['minecraft:brick', 'minecraft:brick', 'minecraft:quartz'],
+  improved_bearings_module: ['minecraft:iron_ingot', 'minecraft:gold_nugget', 'minecraft:redstone', 'minecraft:copper_ingot'],
+  reinforced_hook_mount_module: ['minecraft:iron_ingot', 'minecraft:iron_chain'],
+  leader_system_module: ['atzen:fluoro_leader', 'atzen:steel_leader', 'minecraft:iron_nugget'],
+  float_module: ['minecraft:feather', 'minecraft:red_dye', 'minecraft:oak_planks'],
+  sonar_module: ['atzen:echo_sounder', 'minecraft:copper_ingot'],
+  line_counter_module: ['minecraft:clock', 'minecraft:copper_ingot'],
+  boss_rig_module: ['atzen:mother_of_pearl', 'minecraft:diamond', 'atzen:carbon_line'],
+  feeder_module: ['atzen:groundbait', 'minecraft:iron_bars'],
+  keepnet: ['minecraft:string', 'minecraft:string', 'minecraft:string', 'minecraft:string', 'minecraft:stick', 'minecraft:stick'],
+  rod_holder: ['minecraft:stick', 'minecraft:stick', 'minecraft:stick', 'minecraft:oak_slab'],
+  double_rod_holder: ['atzen:rod_holder', 'atzen:rod_holder', 'minecraft:stick'],
+  rod_pod: ['minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:redstone', 'minecraft:note_block'],
+  fish_pen: ['atzen:keepnet', 'atzen:keepnet', 'minecraft:iron_bars', 'minecraft:string'],
+  fish_market: ['minecraft:barrel', 'minecraft:emerald', 'minecraft:oak_sign', 'minecraft:cod'],
+  workshop: ['minecraft:smithing_table', 'minecraft:fishing_rod', 'minecraft:iron_ingot'],
+};
+for (const [id, recipe] of Object.entries(extraRecipes)) {
+  const ingredients = Array.isArray(recipe) ? recipe : recipe.ingredients;
+  const count = Array.isArray(recipe) ? 1 : recipe.count;
+  json(`data/atzen/recipe/${id}.json`, { type: 'minecraft:crafting_shapeless', category: 'misc', ingredients, result: { id: `atzen:${id}`, count } });
+  json(`data/atzen/advancement/recipes/${id}.json`, {
+    parent: 'minecraft:recipes/root',
+    criteria: {
+      has_ingredient: { trigger: 'minecraft:inventory_changed', conditions: { items: [{ items: ingredients[0] }] } },
+      has_the_recipe: { trigger: 'minecraft:recipe_unlocked', conditions: { recipe: `atzen:${id}` } },
+    },
+    requirements: [['has_ingredient', 'has_the_recipe']], rewards: { recipes: [`atzen:${id}`] },
+  });
+}
+
+const progressTranslations = {
+  'enchantment.atzen.calm_mind': ['Ruhige Hand', 'Calm Mind'],
+  'enchantment.atzen.precision_cast': ['Präzisionswurf', 'Precision Cast'],
+  'enchantment.atzen.fight_control': ['Drillkontrolle', 'Fight Control'],
+  'catch.atzen.condition': ['Zustand: %s %%', 'Condition: %s%%'],
+  'tooltip.atzen.gear.modules': ['Module: %s · Verstärkt %s/3', 'Modules: %s · Reinforced %s/3'],
+  'hud.atzen.advice.net': ['Kescher: Rechtsklick, wenn der Fisch im grünen Feld ist!', 'Net: right-click while the fish is in the green field!'],
+  'message.atzen.need_net': ['Zu schwer für die Hand – nimm einen Kescher in die andere Hand!', 'Too heavy for your hand – hold a landing net in the other hand!'],
+  'message.atzen.net_too_small': ['Der Kescher ist zu klein für diesen Fisch!', 'The net is too small for this fish!'],
+  'message.atzen.groundbait': ['Futterplatz angelegt – Friedfische ziehen heran.', 'Feeding spot made – coarse fish are coming.'],
+  'message.atzen.sonar': ['Echolot: %s m tief · Fangdruck %s %%', 'Echo sounder: %s m deep · fishing pressure %s%%'],
+  'message.atzen.sonar_empty': ['Keine Fische in Reichweite.', 'No fish in range.'],
+  'message.atzen.sonar_float': ['Sonar: %s Fische um die Pose', 'Sonar: %s fish around the float'],
+  'message.atzen.bait_box_filled': ['%s Köder eingepackt (%s/%s Stapel).', 'Packed %s baits (%s/%s stacks).'],
+  'message.atzen.bait_box_emptied': ['Köderbox ausgeleert.', 'Bait box emptied.'],
+  'message.atzen.bait_refilled': ['Köder aus der Köderbox nachgelegt.', 'Bait refilled from the bait box.'],
+  'message.atzen.tool_instruction': ['Halte eine eingeholte Atzen-Rute in der anderen Hand.', 'Hold a reeled-in Atzen rod in the other hand.'],
+  'message.atzen.tool_stripped': ['%s Teile abgenommen.', 'Took %s parts off.'],
+  'message.atzen.performance': ['Leistungsstufe: %s', 'Performance tier: %s'],
+  'message.atzen.unknown_species': ['Unbekannte Fischart: %s', 'Unknown species: %s'],
+  'performance.atzen.low': ['niedrig (Fische voll aktiv bis 24 Blöcke, Rutenhalter alle 2 s)', 'low (fish fully active within 24 blocks, rod holders every 2 s)'],
+  'performance.atzen.normal': ['normal (48 Blöcke, Rutenhalter jede Sekunde)', 'normal (48 blocks, rod holders every second)'],
+  'performance.atzen.high': ['hoch (96 Blöcke, Rutenhalter alle 0,5 s)', 'high (96 blocks, rod holders every 0.5 s)'],
+  'holding.atzen.problem.volume': ['zu wenig Wasser', 'not enough water'],
+  'holding.atzen.problem.oxygen': ['zu wenig Sauerstoff', 'not enough oxygen'],
+  'holding.atzen.problem.temperature': ['falsche Wassertemperatur für diese Art', 'wrong water temperature for this species'],
+  'holding.atzen.problem.density': ['zu viele Fische', 'too many fish'],
+  'holding.atzen.problem.quality': ['schlechte Wasserqualität', 'poor water quality'],
+  'holding.atzen.water_good': ['Wasser gut', 'water good'],
+  'holding.atzen.add.ok': ['Im Setzkescher: %s/%s Fische, %s/%s kg', 'In the keepnet: %s/%s fish, %s/%s kg'],
+  'holding.atzen.add.full': ['Setzkescher voll (%s/%s)', 'Keepnet full (%s/%s)'],
+  'holding.atzen.add.too_heavy': ['Zu schwer: %3$s/%4$s kg', 'Too heavy: %3$s/%4$s kg'],
+  'holding.atzen.add.too_big': ['Zu groß für den Setzkescher', 'Too big for the keepnet'],
+  'holding.atzen.add.duplicate': ['Dieser Fisch ist schon drin.', 'This fish is already in there.'],
+  'holding.atzen.add.dead': ['Der Fisch lebt nicht mehr.', 'The fish is no longer alive.'],
+  'holding.atzen.status': ['Setzkescher: %s/%s Fische, %s/%s kg – %s', 'Keepnet: %s/%s fish, %s/%s kg – %s'],
+  'holding.atzen.taken': ['%s herausgenommen (%s/%s)', 'Took out %s (%s/%s)'],
+  'holding.atzen.released_all': ['%s Fische freigelassen.', 'Released %s fish.'],
+  'holding.atzen.warning': ['Setzkescher: %s! Zustand der Fische %s %%', 'Keepnet: %s! Fish condition %s%%'],
+  'holding.atzen.died': ['Ein Fisch im Setzkescher ist gestorben: %s', 'A fish in the keepnet died: %s'],
+  'holding.atzen.pen_warning': ['Unterwasser-Netz: %s!', 'Fish pen: %s!'],
+  'holding.atzen.pen_full': ['Netz voll: %s/%s – mehr Wasser drumherum schafft Platz.', 'Pen full: %s/%s – more water around makes room.'],
+  'holding.atzen.pen_added': ['%s im Netz (%s/%s)', '%s in the pen (%s/%s)'],
+  'holding.atzen.pen_status': ['Netz: %s/%s Fische, Zustand %s %% – %s', 'Pen: %s/%s fish, condition %s%% – %s'],
+  'holding.atzen.fed': ['%s Fische gefüttert.', 'Fed %s fish.'],
+  'holder.atzen.full': ['Alle Plätze belegt.', 'All rests are taken.'],
+  'holder.atzen.no_water': ['Kein Wasser vor dem Halter.', 'No water in front of the holder.'],
+  'holder.atzen.placed': ['Rute %s/%s ausgeworfen.', 'Rod %s/%s cast out.'],
+  'holder.atzen.hands_full': ['Kein Platz im Inventar für das, was du in der Hand hast.', 'No room in your inventory for what you are holding.'],
+  'holder.atzen.missed': ['Zu spät – oder du drillst schon.', 'Too late – or you are already fighting.'],
+  'holder.atzen.empty': ['Keine Rute im Halter.', 'No rod in the holder.'],
+  'holder.atzen.tangled': ['Die Schnüre haben sich verheddert! Köder verloren.', 'The lines tangled! Bait lost.'],
+  'holder.atzen.rod_pulled': ['Ein großer Fisch hat deine Rute ins Wasser gezogen!', 'A big fish pulled your rod into the water!'],
+  'holder.atzen.line_taken': ['Ein Fisch hat Schnur genommen und ist mit dem Köder weg.', 'A fish took line and left with the bait.'],
+  'holder.atzen.escaped': ['Biss verpasst – der Köder ist weg.', 'Bite missed – the bait is gone.'],
+  'market.atzen.sold': ['%s Fisch(e) verkauft: %s Smaragde (Guthaben %s)', 'Sold %s fish: %s emeralds (credit %s)'],
+  'market.atzen.help': ['Fischmarkt: Rechtsklick mit einem Fisch verkauft ihn, Schleichen verkauft alle. Seltenheit, Gewicht, Kontrolle und Frische zählen; dieselbe Art am selben Tag bringt weniger.', 'Fish market: use a fish to sell it, sneak to sell all. Rarity, weight, control and freshness count; the same species on the same day pays less.'],
+  'workshop.atzen.help': ['Werkstatt: Rute in die Haupthand, in die andere Hand Smaragd (reparieren), Perlmutt (verstärken) oder ein Modul (einbauen). Schleichen nimmt Module ab.', 'Workshop: rod in the main hand, in the other an emerald (repair), mother-of-pearl (reinforce) or a module (fit). Sneak removes modules.'],
+  'workshop.atzen.not_damaged': ['Die Rute ist heil.', 'The rod is not damaged.'],
+  'workshop.atzen.repaired': ['Rute repariert.', 'Rod repaired.'],
+  'workshop.atzen.max_upgrades': ['Schon maximal verstärkt (%s/%s).', 'Already fully reinforced (%s/%s).'],
+  'workshop.atzen.upgraded': ['Rute verstärkt (%s/%s).', 'Rod reinforced (%s/%s).'],
+  'workshop.atzen.no_slot': ['Beide Modulplätze belegt oder Modul schon drin.', 'Both module slots taken or module already fitted.'],
+  'workshop.atzen.module_fitted': ['Modul eingebaut.', 'Module fitted.'],
+  'workshop.atzen.modules_removed': ['Module abgenommen.', 'Modules removed.'],
+  'workshop.atzen.no_modules': ['Keine Module eingebaut.', 'No modules fitted.'],
+  'progress.atzen.xp': ['+%s Angler-Erfahrung', '+%s angler experience'],
+  'progress.atzen.released': ['Zurückgesetzt: +%s Erfahrung', 'Released: +%s experience'],
+  'progress.atzen.level_up': ['Anglerstufe %s erreicht!', 'Angler level %s reached!'],
+  'progress.atzen.area_unlocked': ['Neues Angelgebiet: %s – dort beißen jetzt auch seltene Fische.', 'New fishing ground: %s – rare fish bite there now.'],
+  'progress.atzen.quest_done': ['Auftrag erfüllt: %s (+%s Smaragde, +%s Erfahrung)', 'Order done: %s (+%s emeralds, +%s experience)'],
+  'progress.atzen.record': ['Serverrekord: %s!', 'Server record: %s!'],
+  'progress.atzen.any_fish': ['jeder Fisch', 'any fish'],
+  'progress.atzen.tournament_start': ['Angelturnier! %s Minuten, gewertet: %s – der schwerste Fisch gewinnt.', 'Fishing tournament! %s minutes, counted: %s – the heaviest fish wins.'],
+  'progress.atzen.tournament_end': ['Das Angelturnier ist vorbei!', 'The fishing tournament is over!'],
+  'progress.atzen.tournament_place': ['%s. %s – %s kg', '%s. %s – %s kg'],
+  'quest.atzen.species': ['Fange %1$s× %2$s', 'Catch %1$s× %2$s'],
+  'quest.atzen.weight': ['Fange einen Fisch ab %3$s kg', 'Catch a fish of %3$s kg or more'],
+  'quest.atzen.habitat': ['Fange %1$s Fische: %2$s', 'Catch %1$s fish: %2$s'],
+  'quest.atzen.rarity': ['Fange einen Fisch der Seltenheit %2$s oder besser', 'Catch a fish of rarity %2$s or better'],
+  'quest.atzen.release': ['Setze %1$s Fische zurück', 'Release %1$s fish'],
+  'area.atzen.home_lake': ['Heimatsee (Seen)', 'Home Lake (lakes)'],
+  'area.atzen.forest_river': ['Waldfluss (Flüsse, kalte Gewässer)', 'Forest River (rivers, cold waters)'],
+  'area.atzen.mist_moor': ['Nebelmoor (Sümpfe)', 'Mist Moor (swamps)'],
+  'area.atzen.coast': ['Küste (Meer, warmes Meer)', 'Coast (sea, warm sea)'],
+  'area.atzen.deep_reserve': ['Tiefenreservat (Nordmeer, Tiefsee)', 'Deep Reserve (northern sea, deep sea)'],
+  'lexicon.atzen.title': ['Fischlexikon', 'Fish Lexicon'],
+  'lexicon.atzen.tab.species': ['Arten', 'Species'],
+  'lexicon.atzen.tab.quests': ['Aufträge', 'Orders'],
+  'lexicon.atzen.tab.records': ['Rekorde', 'Records'],
+  'lexicon.atzen.tab.stats': ['Statistik', 'Statistics'],
+  'lexicon.atzen.known': ['Entdeckt: %s von %s Arten', 'Discovered: %s of %s species'],
+  'lexicon.atzen.species_line': [' – %s× gefangen, größter %s kg / %s cm', ' – caught %s×, biggest %s kg / %s cm'],
+  'lexicon.atzen.daily': ['[Tag] ', '[Day] '],
+  'lexicon.atzen.weekly': ['[Woche] ', '[Week] '],
+  'lexicon.atzen.quest_progress': [' – %s/%s · %s Smaragde', ' – %s/%s · %s emeralds'],
+  'lexicon.atzen.areas': ['Angelgebiete (seltene Fische ab Stufe):', 'Fishing grounds (rare fish from level):'],
+  'lexicon.atzen.area_line': ['%s – ab Stufe %s', '%s – from level %s'],
+  'lexicon.atzen.tournament_running': ['Turnier läuft noch %s Minuten!', 'Tournament running for %s more minutes!'],
+  'lexicon.atzen.ranking': ['Rangliste – die schwersten Fänge', 'Ranking – the heaviest catches'],
+  'lexicon.atzen.records': ['Serverrekorde je Art', 'Server records per species'],
+  'lexicon.atzen.level': ['Anglerstufe %s – %s Erfahrung (nächste Stufe bei %s)', 'Angler level %s – %s experience (next level at %s)'],
+  'lexicon.atzen.stat.catches': ['Gefangene Fische: %s', 'Fish caught: %s'],
+  'lexicon.atzen.stat.released': ['Zurückgesetzt: %s', 'Released: %s'],
+  'lexicon.atzen.stat.bosses': ['Bossfische: %s', 'Boss fish: %s'],
+  'lexicon.atzen.stat.earned': ['Am Fischmarkt verdient: %s Smaragde', 'Earned at the fish market: %s emeralds'],
+};
+for (const [id, [german, english, germanTip, englishTip]] of Object.entries({ ...extraItems, ...blocks })) {
+  de[`item.atzen.${id}`] = german; en[`item.atzen.${id}`] = english;
+  de[`tooltip.atzen.${id}`] = germanTip; en[`tooltip.atzen.${id}`] = englishTip;
+}
+for (const [id, [german, english]] of Object.entries(blocks)) { de[`block.atzen.${id}`] = german; en[`block.atzen.${id}`] = english; }
+for (const [key, [german, english]] of Object.entries(progressTranslations)) { de[key] = german; en[key] = english; }
+json('assets/atzen/lang/de_de.json', de);
+json('assets/atzen/lang/en_us.json', en);
+console.log(`Generated ${Object.keys(extraItems).length} items and ${Object.keys(blocks).length} blocks of 0.8–0.14.`);

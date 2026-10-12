@@ -1,0 +1,286 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "atzen:block/holder_wood",
+    "post": "atzen:block/holder_wood",
+    "rod": "atzen:block/rod_blank",
+    "alarm_on": "atzen:block/alarm_on",
+    "alarm_off": "atzen:block/alarm_off"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        7
+      ],
+      "to": [
+        5,
+        10,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#post"
+        },
+        "south": {
+          "texture": "#post"
+        },
+        "east": {
+          "texture": "#post"
+        },
+        "west": {
+          "texture": "#post"
+        },
+        "up": {
+          "texture": "#post"
+        },
+        "down": {
+          "texture": "#post"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        10,
+        6
+      ],
+      "to": [
+        6,
+        11,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#post"
+        },
+        "south": {
+          "texture": "#post"
+        },
+        "east": {
+          "texture": "#post"
+        },
+        "west": {
+          "texture": "#post"
+        },
+        "up": {
+          "texture": "#post"
+        },
+        "down": {
+          "texture": "#post"
+        }
+      }
+    },
+    {
+      "from": [
+        3.5,
+        10.5,
+        -6
+      ],
+      "to": [
+        4.5,
+        11.5,
+        16
+      ],
+      "rotation": {
+        "angle": 22.5,
+        "axis": "x",
+        "origin": [
+          4,
+          11,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        },
+        "up": {
+          "texture": "#rod"
+        },
+        "down": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        3.5,
+        4,
+        5.5
+      ],
+      "to": [
+        4.5,
+        6,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#alarm_on"
+        },
+        "south": {
+          "texture": "#alarm_on"
+        },
+        "east": {
+          "texture": "#alarm_on"
+        },
+        "west": {
+          "texture": "#alarm_on"
+        },
+        "up": {
+          "texture": "#alarm_on"
+        },
+        "down": {
+          "texture": "#alarm_on"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        0,
+        7
+      ],
+      "to": [
+        13,
+        10,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#post"
+        },
+        "south": {
+          "texture": "#post"
+        },
+        "east": {
+          "texture": "#post"
+        },
+        "west": {
+          "texture": "#post"
+        },
+        "up": {
+          "texture": "#post"
+        },
+        "down": {
+          "texture": "#post"
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        10,
+        6
+      ],
+      "to": [
+        14,
+        11,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#post"
+        },
+        "south": {
+          "texture": "#post"
+        },
+        "east": {
+          "texture": "#post"
+        },
+        "west": {
+          "texture": "#post"
+        },
+        "up": {
+          "texture": "#post"
+        },
+        "down": {
+          "texture": "#post"
+        }
+      }
+    },
+    {
+      "from": [
+        11.5,
+        10.5,
+        -6
+      ],
+      "to": [
+        12.5,
+        11.5,
+        16
+      ],
+      "rotation": {
+        "angle": 22.5,
+        "axis": "x",
+        "origin": [
+          12,
+          11,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        },
+        "up": {
+          "texture": "#rod"
+        },
+        "down": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        11.5,
+        4,
+        5.5
+      ],
+      "to": [
+        12.5,
+        6,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#alarm_on"
+        },
+        "south": {
+          "texture": "#alarm_on"
+        },
+        "east": {
+          "texture": "#alarm_on"
+        },
+        "west": {
+          "texture": "#alarm_on"
+        },
+        "up": {
+          "texture": "#alarm_on"
+        },
+        "down": {
+          "texture": "#alarm_on"
+        }
+      }
+    }
+  ]
+}
