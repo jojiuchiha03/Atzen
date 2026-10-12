@@ -174,6 +174,8 @@ final class FishBehaviour {
 
         @Override
         public void tick() {
+            // The selector re-checks canContinueToUse only every other tick, so the prey can already be gone here.
+            if (prey == null || !prey.isAlive()) return;
             if (ticks % 10 == 0) fish.getNavigation().moveTo(prey, 1.6);
             if (fish.distanceToSqr(prey) < 1.5) {
                 if (fish.getRandom().nextFloat() < 0.3f) {

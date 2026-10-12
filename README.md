@@ -2,14 +2,14 @@
 
 Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 50 Fischarten mit eigenen Lebensräumen, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
 
-**Stand: 0.14.1.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
+**Stand: 0.14.2.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
 ## Installation
 
 Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und Fabric API **0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `atzen-0.14.1.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `atzen-0.14.2.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
 ## Der Angelvorgang

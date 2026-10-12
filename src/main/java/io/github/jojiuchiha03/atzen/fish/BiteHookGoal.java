@@ -79,6 +79,7 @@ final class BiteHookGoal extends Goal {
 
     @Override
     public void tick() {
+        if (target == null || !target.isAlive()) return;
         ticks++;
         fish.getLookControl().setLookAt(target.getX(), target.getY(), target.getZ());
         double distance = fish.distanceToSqr(target.getX(), target.getY() - 0.4, target.getZ());

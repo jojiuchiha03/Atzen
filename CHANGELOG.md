@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.2] - 2026-10-12
+
+### Behoben
+- Serverabsturz „Ticking entity“: Ein jagender Raubfisch griff auf seine Beute zu, nachdem sie schon gefressen oder verschwunden war. Jagd und Anbiss prüfen ihr Ziel jetzt in jedem Tick.
+
 ## [0.14.1] - 2026-10-12
 
 ### Behoben
