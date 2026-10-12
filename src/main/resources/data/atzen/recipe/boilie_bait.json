@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:egg",
+    "minecraft:wheat",
+    "minecraft:sugar",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "atzen:boilie_bait",
+    "count": 6
+  }
+}

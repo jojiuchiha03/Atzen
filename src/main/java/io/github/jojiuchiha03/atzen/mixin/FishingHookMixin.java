@@ -11,6 +11,7 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.Final;
 import io.github.jojiuchiha03.atzen.fish.BiteTarget;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,6 +28,9 @@ public abstract class FishingHookMixin implements BiteTarget {
     @Shadow private int timeUntilHooked;
     @Shadow private int timeUntilLured;
     @Shadow @Final private static EntityDataAccessor<Boolean> DATA_BITING;
+    @Shadow private boolean biting;
+    @Unique private int atzen$lastNibble;
+    @Unique private int atzen$biteStart = -1000;
 
     @Override
     public void atzen$bite(int ticks) {
@@ -44,7 +48,19 @@ public abstract class FishingHookMixin implements BiteTarget {
     }
 
     @Override
-    public boolean atzen$isBiting() { return nibble > 0; }
+    public boolean atzen$isBiting() { return nibble > 0 || biting; }
+
+    @Override
+    public int atzen$ticksSinceBite() {
+        return ((FishingHook) (Object) this).tickCount - atzen$biteStart;
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void atzen$trackBite(CallbackInfo ci) {
+        // Vanilla and Atzen bites alike: remember when the float went under, for the strike timing.
+        if (nibble > 0 && atzen$lastNibble <= 0) atzen$biteStart = ((FishingHook) (Object) this).tickCount;
+        atzen$lastNibble = nibble;
+    }
 
     @ModifyExpressionValue(method = "retrieve", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;"))

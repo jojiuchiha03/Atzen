@@ -15,16 +15,29 @@ Legende: ✅ fertig · 🔶 teilweise · ⬜ offen
 | 4–6 Ausrüstung | 🔶 Rolle/Schnur/Köder-Slots; Rutentypen, Spulen, Vorfächer und Haken fehlen |
 | 16 Fisch-Mobs | 🔶 eigene Entities mit Länge/Gewicht, schwimmen zum Köder; Hunger/Scheu/Alter fehlen |
 
+## Stand nach 0.6.0
+
+| Punkt | Stand |
+| --- | --- |
+| 2 Angelvorgang | 🔶 Auswerfen, Biss mit Inspektion, Anschlag-Timing, Drill, Landung per Hand; Wurfweite/Montage offen |
+| 3 Kamera | ✅ Zustände IDLE, CASTING, WAITING, BITE, HOOKED, FIGHTING, LANDING (+ TROPHY), abschaltbar/überspringbar; Rutenbiegung offen |
+| 5 Rollen | 🔶 13 Rollen (Stationär, Baitcaster mit Perücke, Multi, Fliege + Spezialrollen); Spulen offen |
+| 6 Schnüre | 🔶 Mono/Geflecht/Carbon mit Tragkraft, Dehnung, Abrieb; Vorfächer offen |
+| 8 Köder | 🔶 alle 18 aus der Liste + Leucht-/Kraft-/Bossköder, Artvorlieben, Verschleiß; Futtermischungen, Alterung offen |
+| 9 Fische | ✅ 50 Arten inkl. Karausche und Stör, 6 Seltenheitsstufen, artspezifisches Drillverhalten |
+| 10 Drill | ✅ Spannung, Ausdauer, Hakenhalt, Schnurkapazität, Schnurzustand, Bremse, Pumpen, Gegensteuern, Spezialaktionen; Kescher-Landung kommt in 0.8.0 |
+| 18 Bosse | ✅ alle vier mit Bedingungen, Phasen, Eigenheiten, Trophäen; Lexikon-Eintrag kommt mit 0.12.0 |
+
 ## Stufen
 
 | Version | Inhalt | Anforderungen |
 | --- | --- | --- |
-| **0.6.0** | Kamera-Controller mit Zuständen (Wurf, Warten am Köder, Biss, Anschlag, Drill, Sprung, Landung), Bremse einstellbar, Schnurkapazität, Hakenhalt, Pumpen, längere Drills, Schnurbruch nach Zugkraft/Tragkraft; Rollentypen mit Spezialfähigkeiten; 18 Köder mit Artvorlieben; Seltenheit in 6 Stufen; erster Bossfisch | 3, 5.1–5.4, 6.5, 8, 9.4, 10, 18.1 |
+| ✅ **0.6.0** | Kamera-Controller mit Zuständen (Wurf, Warten am Köder, Biss, Anschlag, Drill, Sprung, Landung), Bremse einstellbar, Schnurkapazität, Hakenhalt, Pumpen, längere Drills, Schnurbruch nach Zugkraft/Tragkraft; Rollentypen mit Spezialfähigkeiten; 25 Köder mit Artvorlieben; Seltenheit in 6 Stufen; alle vier Bossfische | 3, 5.1–5.4, 6.5, 8, 9.4, 10, 18 |
 | 0.7.0 | Rutentypen (Bambus, Spinn, Karpfen, Fliege, Big-Game) mit Attributen, Spulen, Vorfächer (Fluo, Stahl), Haken | 4, 5.5, 6, 7 |
 | 0.8.0 | Kescher (klein/Karpfen/Großfisch) mit aktiver Landung, Trophäenansicht, Setzkescher | 3.6, 10.6, 14, 15.1 |
 | 0.9.0 | Rutenhalter, Doppelständer, Rod Pod, Bissanzeiger, mehrere Ruten gleichzeitig | 13 |
 | 0.10.0 | Unterwasser-Netz, Haltungsbedingungen, einfache Zucht | 15.2–15.4 |
 | 0.11.0 | Fisch-Individuen (Alter, Hunger, Scheu), Schwarmtypen, Raubfischjagd, Fangdruck/Regeneration | 16, 17 |
 | 0.12.0 | Werkstatt, Händler, Geld/Erfahrung, Lexikon, Aufträge, Trophäen, Ranglisten, Angelgebiete | 19, 20 |
-| 0.13.0 | Restliche Bosse (Schilfkönig, Schwarzer Stör, Tiefenwächter), Verzauberungen, Module, Hilfsmittel (Echolot, Futterkorb …) | 11, 12, 18 |
+| 0.13.0 | Verzauberungen nach Liste, Angelmodule, Hilfsmittel (Echolot, Futterkorb, Köderbox …), Bootangeln | 11, 12 |
 | 0.14.0 | Balancing, Multiplayer- und Dauertests, Performance-Stufen | 22, 24 |

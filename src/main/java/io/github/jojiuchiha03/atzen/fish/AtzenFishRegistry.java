@@ -63,9 +63,10 @@ public final class AtzenFishRegistry {
             FISH.put(species, item(species.id(), Item::new, new Item.Properties().stacksTo(1)
                     .food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.1f).build())
                     .rarity(switch (species.rarity()) {
-                        case LEGENDARY -> Rarity.EPIC;
+                        case COMMON -> Rarity.COMMON;
+                        case UNCOMMON -> Rarity.UNCOMMON;
                         case RARE -> Rarity.RARE;
-                        default -> Rarity.COMMON;
+                        default -> Rarity.EPIC;
                     })));
             BUCKETS.put(species, item(species.id() + "_bucket", properties -> new MobBucketItem(type, Fluids.WATER,
                     SoundEvents.BUCKET_EMPTY_FISH, properties), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));

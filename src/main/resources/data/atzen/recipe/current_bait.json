@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:boilie_bait",
+    "minecraft:prismarine_crystals",
+    "minecraft:clay_ball",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "atzen:current_bait",
+    "count": 2
+  }
+}

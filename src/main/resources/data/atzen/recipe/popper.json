@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "minecraft:white_dye",
+    "minecraft:iron_nugget",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "atzen:popper",
+    "count": 1
+  }
+}

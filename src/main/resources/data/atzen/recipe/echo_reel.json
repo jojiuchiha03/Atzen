@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:iron_reel",
+    "minecraft:echo_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "atzen:echo_reel",
+    "count": 1
+  }
+}

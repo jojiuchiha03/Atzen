@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:yellow_dye"
+  ],
+  "result": {
+    "id": "atzen:corn_bait",
+    "count": 8
+  }
+}

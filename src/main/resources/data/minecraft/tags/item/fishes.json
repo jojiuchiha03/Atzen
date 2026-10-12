@@ -18,6 +18,8 @@
     "atzen:rudd",
     "atzen:bream",
     "atzen:tench",
+    "atzen:crucian_carp",
+    "atzen:sturgeon",
     "atzen:chub",
     "atzen:atlantic_cod",
     "atzen:saithe",
@@ -48,6 +50,10 @@
     "atzen:monkfish",
     "atzen:gurnard",
     "atzen:wolffish",
-    "atzen:golden_koi"
+    "atzen:golden_koi",
+    "atzen:ancient_catfish",
+    "atzen:reed_king",
+    "atzen:black_sturgeon",
+    "atzen:deep_warden"
   ]
 }

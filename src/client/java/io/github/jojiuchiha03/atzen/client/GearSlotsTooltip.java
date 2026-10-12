@@ -33,21 +33,26 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
         return Component.translatable(slot.translationKey(), content);
     }
 
-    private static String percent(double factor) {
-        long change = Math.round((factor - 1) * 100);
-        return String.format(Locale.ROOT, "%s%d %%", change > 0 ? "+" : change < 0 ? "−" : "±", Math.abs(change));
+    private static String number(double value) {
+        return String.format(Locale.GERMAN, value >= 10 ? "%.0f" : "%.1f", value);
     }
 
+    /** Breaking load, line capacity, retrieve speed (m/s) and winch force of the whole set. */
     private Component summary() {
-        double[] e = data.effect();
-        return Component.translatable("tooltip.atzen.gear.stats", percent(e[0]), percent(e[1]), percent(e[2]));
+        var rig = data.rig();
+        return Component.translatable("tooltip.atzen.gear.stats", number(rig.lineStrength()), number(rig.capacity()),
+                number(rig.reelSpeed() * 20), number(rig.reelForce()));
     }
 
-    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + 12; }
+    private Component ability() {
+        return Component.translatable("tooltip.atzen.gear.ability", Component.translatable(data.rig().ability().translationKey()));
+    }
+
+    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + 22; }
 
     @Override
     public int getWidth(Font font) {
-        int width = font.width(summary());
+        int width = Math.max(font.width(summary()), font.width(ability()));
         for (GearSlot slot : GearSlot.values()) width = Math.max(width, SLOT + 6 + font.width(label(slot)));
         return width;
     }
@@ -77,5 +82,6 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
             graphics.text(font, label(slot), x + SLOT + 5, y + slot.ordinal() * ROW + 6, empty ? 0xFF9A9A9A : 0xFFFFFFFF, true);
         }
         graphics.text(font, summary(), x, y + GearSlot.values().length * ROW + 2, 0xFF7FD8C8, true);
+        graphics.text(font, ability(), x, y + GearSlot.values().length * ROW + 12, 0xFFE8C860, true);
     }
 }

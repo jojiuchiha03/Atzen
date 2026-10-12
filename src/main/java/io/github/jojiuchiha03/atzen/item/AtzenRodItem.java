@@ -1,6 +1,7 @@
 package io.github.jojiuchiha03.atzen.item;
 
 import io.github.jojiuchiha03.atzen.AtzenSounds;
+import io.github.jojiuchiha03.atzen.battle.Rig;
 import java.util.Optional;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -52,15 +53,30 @@ public final class AtzenRodItem extends FishingRodItem {
         return get(rod, GearSlot.BAIT);
     }
 
-    /** Uses one bait from the slot; true if there was one. */
+    /** Uses one bait from the slot, or wears the lure in it by one fight; true if there was one. */
     public static boolean consumeBait(ItemStack rod, Player player) {
         ItemStack bait = bait(rod);
         if (bait.isEmpty()) return false;
         if (!player.hasInfiniteMaterials()) {
-            bait.shrink(1);
-            set(rod, GearSlot.BAIT, bait);
+            set(rod, GearSlot.BAIT, use(bait));
         }
         return true;
+    }
+
+    /** A natural bait is eaten, a lure takes one fight's wear and breaks at the end of its life. */
+    public static ItemStack use(ItemStack bait) {
+        ItemStack copy = bait.copy();
+        if (copy.isDamageableItem()) {
+            copy.setDamageValue(copy.getDamageValue() + 1);
+            return copy.getDamageValue() >= copy.getMaxDamage() ? ItemStack.EMPTY : copy;
+        }
+        copy.shrink(1);
+        return copy;
+    }
+
+    /** A broken line takes the lure with it. */
+    public static void loseLure(ItemStack rod) {
+        if (bait(rod).isDamageableItem()) set(rod, GearSlot.BAIT, ItemStack.EMPTY);
     }
 
     /** Bait stacks up; a reel or a line is swapped for the one on the cursor. */
@@ -150,5 +166,5 @@ public final class AtzenRodItem extends FishingRodItem {
     }
 
     /** What the tooltip shows: the three slots and what the whole set does. */
-    public record GearTooltip(ItemStack reel, ItemStack line, ItemStack bait, double[] effect) implements TooltipComponent { }
+    public record GearTooltip(ItemStack reel, ItemStack line, ItemStack bait, Rig rig) implements TooltipComponent { }
 }

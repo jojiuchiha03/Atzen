@@ -12,9 +12,9 @@ public enum GearSlot {
     /** Which slot an item goes into, or null if it is no rod gear. */
     public static GearSlot of(ItemStack stack) {
         if (stack.isEmpty()) return null;
-        if (AtzenItems.REELS.contains(stack.getItem())) return REEL;
-        if (AtzenItems.LINES.contains(stack.getItem())) return LINE;
-        if (BattleEquipment.isBait(stack)) return BAIT;
+        if (AtzenItems.reel(stack) != null) return REEL;
+        if (AtzenItems.line(stack) != null) return LINE;
+        if (AtzenItems.bait(stack) != null) return BAIT;
         return null;
     }
 }

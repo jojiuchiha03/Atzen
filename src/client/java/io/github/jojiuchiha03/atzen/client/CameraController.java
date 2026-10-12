@@ -1,0 +1,260 @@
+package io.github.jojiuchiha03.atzen.client;
+
+import io.github.jojiuchiha03.atzen.battle.FishAction;
+import io.github.jojiuchiha03.atzen.battle.FishingBattle;
+import io.github.jojiuchiha03.atzen.fish.AtzenFishEntity;
+import io.github.jojiuchiha03.atzen.fish.BiteTarget;
+import io.github.jojiuchiha03.atzen.network.BattlePayload;
+import java.util.Comparator;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * The fishing camera: one state machine for the whole cast. Every state has its own shot; the camera glides
+ * between them and blends in and out of the player's own view.
+ * <ul>
+ *   <li>CASTING: over the shoulder, following the flying float.</li>
+ *   <li>WAITING: low beside the angler, on the float — only while the angler stands still; moving or looking
+ *       around gives the view back at once.</li>
+ *   <li>BITE: under water beside the float, watching the fish come in and take the bait.</li>
+ *   <li>HOOKED / FIGHTING: over the shoulder while the fish holds; on the fish when it runs or dives; wide when it
+ *       heads for cover; tight behind the angler when it jumps. Shakes when the line is close to breaking.</li>
+ *   <li>LANDING: low at the water, on the fish being drawn in.</li>
+ *   <li>TROPHY: a slow turn around the angler with the catch.</li>
+ * </ul>
+ * The camera key turns the cinematic camera off and on; it never makes a decision for the player.
+ */
+public final class CameraController {
+    public enum State { IDLE, CASTING, WAITING, BITE, HOOKED, FIGHTING, LANDING, TROPHY }
+
+    static final int TROPHY_TICKS = 80;
+    private static State state = State.IDLE;
+    private static int stateTicks;
+    private static boolean enabled = true;
+    private static float blend;
+    private static float previousBlend;
+    private static int restless;
+    private static Vec3 lastPosition;
+    private static float lastYaw, lastPitch;
+    private static int trophyTicks;
+    private static Vec3 smoothPosition, smoothFocus;
+    private static long lastFrame;
+    private static CameraType previousType;
+    private static AtzenFishEntity watched;
+
+    private CameraController() { }
+
+    static State state() { return state; }
+    static boolean enabled() { return enabled; }
+
+    static void toggle(Minecraft client) {
+        enabled = !enabled;
+        if (client.player != null) {
+            client.player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+                    enabled ? "message.atzen.camera_on" : "message.atzen.camera_off"));
+        }
+    }
+
+    static void trophy() { trophyTicks = TROPHY_TICKS; }
+
+    static void skip() {
+        trophyTicks = 0;
+        if (state == State.WAITING || state == State.BITE || state == State.CASTING || state == State.TROPHY) restless = 60;
+    }
+
+    /** Once per client tick: pick the state and run the camera-type switch. */
+    static void tick(Minecraft client) {
+        var player = client.player;
+        if (player == null || client.level == null) {
+            restore(client);
+            state = State.IDLE;
+            return;
+        }
+        // The angler moving or looking around takes the camera back while nothing is hooked.
+        if (lastPosition != null && (player.position().distanceToSqr(lastPosition) > 0.0025
+                || Math.abs(Mth.wrapDegrees(player.getYRot() - lastYaw)) > 2.5 || Math.abs(player.getXRot() - lastPitch) > 2.5)) {
+            restless = Math.max(restless, 30);
+        }
+        lastPosition = player.position();
+        lastYaw = player.getYRot();
+        lastPitch = player.getXRot();
+        if (restless > 0) restless--;
+        if (trophyTicks > 0) trophyTicks--;
+
+        State next = choose(client);
+        if (next != state) {
+            state = next;
+            stateTicks = 0;
+        } else {
+            stateTicks++;
+        }
+        previousBlend = blend;
+        blend = state == State.IDLE ? Math.max(0, blend - 1 / 14f) : Math.min(1, blend + 1 / 12f);
+        if (blend > 0 && previousType == null) {
+            // Third person while the cinematic camera runs, so the angler and the rod are drawn and no hand floats.
+            previousType = client.options.getCameraType();
+            client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+        } else if (blend == 0 && previousBlend == 0) {
+            restore(client);
+        }
+    }
+
+    private static State choose(Minecraft client) {
+        if (!enabled) return State.IDLE;
+        BattlePayload fight = AtzenClient.state;
+        if (fight != null) {
+            if (fight.result() == FishingBattle.Result.CAUGHT) return trophyTicks > 0 ? State.TROPHY : State.IDLE;
+            if (fight.result() != FishingBattle.Result.ACTIVE) return State.IDLE;
+            if (AtzenClient.cameraTicks < 16) return State.HOOKED;
+            if (fight.has(BattlePayload.LANDABLE) || fight.distance() < 5) return State.LANDING;
+            return State.FIGHTING;
+        }
+        if (trophyTicks > 0) return State.TROPHY;
+        FishingHook hook = client.player.fishing;
+        if (hook == null || hook.isRemoved() || restless > 0) return State.IDLE;
+        if (!hook.isInWater()) return hook.tickCount < 50 ? State.CASTING : State.IDLE;
+        watched = approaching(client, hook);
+        if (((BiteTarget) hook).atzen$isBiting() || watched != null) return State.BITE;
+        return State.WAITING;
+    }
+
+    /** A fish close to the float and swimming at it. */
+    private static AtzenFishEntity approaching(Minecraft client, FishingHook hook) {
+        return client.level.getEntitiesOfClass(AtzenFishEntity.class, hook.getBoundingBox().inflate(4)).stream()
+                .filter(fish -> fish.getDeltaMovement().dot(hook.position().subtract(fish.position())) > 0 || fish.distanceToSqr(hook) < 2)
+                .min(Comparator.comparingDouble(fish -> fish.distanceToSqr(hook))).orElse(null);
+    }
+
+    private static void restore(Minecraft client) {
+        if (previousType != null && client != null) {
+            client.options.setCameraType(previousType);
+            previousType = null;
+        }
+        smoothPosition = null;
+        smoothFocus = null;
+    }
+
+    static void reset() {
+        smoothPosition = null;
+        smoothFocus = null;
+    }
+
+    /** Returns {x, y, z, yRot, xRot} for the camera, or null to keep vanilla's view. */
+    public static double[] view(Entity entity, float partial, Vec3 vanilla, float vanillaYaw, float vanillaPitch) {
+        Minecraft client = Minecraft.getInstance();
+        var player = client.player;
+        if (player == null || entity != player || client.level == null || (blend == 0 && previousBlend == 0)) return null;
+        long now = System.nanoTime();
+        double seconds = lastFrame == 0 ? 0.016 : Math.min(0.1, (now - lastFrame) / 1e9);
+        lastFrame = now;
+        float time = player.tickCount + partial;
+        Vec3 eye = player.getEyePosition(partial);
+        // Blend from the player's own eyes when they play in first person (vanilla is third person meanwhile).
+        Vec3 base = previousType != null && previousType.isFirstPerson() ? eye : vanilla;
+        float baseYaw = player.getViewYRot(partial), basePitch = player.getViewXRot(partial);
+        if (previousType == null || !previousType.isFirstPerson()) { baseYaw = vanillaYaw; basePitch = vanillaPitch; }
+
+        Vec3[] shot = shot(client, player, eye, partial, time);
+        if (shot != null) {
+            Vec3 position = clip(client, shot[2] == null ? eye : shot[2], shot[0], player);
+            double follow = 1 - Math.exp(-seconds * (state == State.HOOKED ? 9 : 4));
+            smoothPosition = smoothPosition == null ? position : smoothPosition.lerp(position, follow);
+            smoothFocus = smoothFocus == null ? shot[1] : smoothFocus.lerp(shot[1], 1 - Math.exp(-seconds * 7));
+        }
+        if (smoothPosition == null || smoothFocus == null) return null;
+
+        Vec3 look = smoothFocus.subtract(smoothPosition);
+        float yaw = (float) Math.toDegrees(Math.atan2(-look.x, look.z));
+        float pitch = (float) -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance()));
+        BattlePayload fight = AtzenClient.state;
+        if (fight != null && fight.result() == FishingBattle.Result.ACTIVE) {
+            float shake = Math.max(0, AtzenClient.displayedTension - 0.75f) / 0.25f * 1.2f
+                    + (fight.action() == FishAction.RUN && fight.pending() == null ? 0.35f : 0);
+            yaw += shake * (float) Math.sin(time * 2.7);
+            pitch += shake * (float) Math.cos(time * 3.3) * 0.6f;
+        }
+        float b = Mth.lerp(partial, previousBlend, blend);
+        b = b * b * (3 - 2 * b);
+        Vec3 position = base.lerp(smoothPosition, b);
+        return new double[] {position.x, position.y, position.z,
+                baseYaw + Mth.wrapDegrees(yaw - baseYaw) * b, Mth.lerp(b, basePitch, pitch)};
+    }
+
+    /** {camera position, focus, clip origin (null = eye)} for the current state. */
+    private static Vec3[] shot(Minecraft client, net.minecraft.client.player.LocalPlayer player, Vec3 eye, float partial, float time) {
+        FishingHook hook = player.fishing;
+        Vec3 hookPos = hook != null ? hook.getPosition(partial) : eye.add(player.getLookAngle().scale(8));
+        Vec3 fish = fishPosition(client, partial, hookPos);
+        Vec3 toFish = fish.subtract(eye).multiply(1, 0, 1);
+        if (toFish.lengthSqr() < 1e-4) toFish = player.getLookAngle().multiply(1, 0, 1);
+        toFish = toFish.normalize();
+        Vec3 right = new Vec3(-toFish.z, 0, toFish.x);
+        BattlePayload fight = AtzenClient.state;
+        return switch (state) {
+            case IDLE -> null;
+            case CASTING -> new Vec3[] {eye.subtract(player.getLookAngle().multiply(1, 0, 1).normalize().scale(2.6))
+                    .add(right.scale(0.8)).add(0, 0.45, 0), hookPos, null};
+            case WAITING -> {
+                double drift = Math.sin(time * 0.01) * 0.4;
+                yield new Vec3[] {eye.add(right.scale(1.7 + drift)).subtract(toFish.scale(0.9)).add(0, 0.05, 0),
+                        eye.lerp(hookPos, 0.85), null};
+            }
+            case BITE -> {
+                Vec3 target = watched != null && !watched.isRemoved() ? watched.getPosition(partial).lerp(hookPos, 0.4) : hookPos.add(0, -0.4, 0);
+                Vec3 under = hookPos.add(right.scale(2.2)).subtract(toFish.scale(0.6)).add(0, -0.9, 0);
+                boolean water = client.level.getFluidState(net.minecraft.core.BlockPos.containing(under)).is(FluidTags.WATER);
+                yield water ? new Vec3[] {under, target, hookPos.add(0, -0.3, 0)}
+                        : new Vec3[] {hookPos.subtract(toFish.scale(2.6)).add(right.scale(0.8)).add(0, 0.9, 0), target, null};
+            }
+            case HOOKED -> new Vec3[] {eye.subtract(toFish.scale(2.2)).add(right.scale(0.9)).add(0, 0.5, 0), eye.lerp(fish, 0.6), null};
+            case FIGHTING -> fighting(eye, fish, toFish, right, fight, time);
+            case LANDING -> new Vec3[] {eye.add(toFish.scale(0.8)).add(right.scale(1.7)).add(0, -0.7, 0), fish, null};
+            case TROPHY -> {
+                double angle = stateTicks * 0.045 + Math.atan2(toFish.z, toFish.x);
+                yield new Vec3[] {eye.add(Math.cos(angle) * 2.8, -0.2, Math.sin(angle) * 2.8), eye.add(0, -0.35, 0), null};
+            }
+        };
+    }
+
+    private static Vec3[] fighting(Vec3 eye, Vec3 fish, Vec3 toFish, Vec3 right, BattlePayload fight, float time) {
+        FishAction action = fight == null ? FishAction.CALM : fight.pending() != null ? FishAction.CALM : fight.action();
+        return switch (action) {
+            // on the fish: beside it, low, the angler in the background
+            case RUN, DIVE -> new Vec3[] {fish.subtract(toFish.scale(2.6)).add(right.scale(2.2)).add(0, 1.1, 0), fish, null};
+            // wide and high: the fish heading for cover
+            case SIDE -> new Vec3[] {eye.subtract(toFish.scale(4.5)).add(0, 3.2, 0), eye.lerp(fish, 0.7), null};
+            // tight behind the angler, the leap in front
+            case JUMP -> new Vec3[] {eye.subtract(toFish.scale(1.8)).add(right.scale(0.7)).add(0, 0.45, 0), fish.add(0, 0.6, 0), null};
+            // over the shoulder, swaying slowly from one shoulder to the other
+            default -> {
+                double sway = Math.sin(time * 0.025) * 0.9;
+                double back = 3.0 - Math.min(1, fight == null ? 0 : (1 - fight.stamina()) * 0.6);
+                yield new Vec3[] {eye.subtract(toFish.scale(back)).add(right.scale(1.4 * sway + 0.6))
+                        .add(0, 0.9 + 0.2 * Math.sin(time * 0.04), 0), eye.lerp(fish, 0.55).add(0, -0.3, 0), null};
+            }
+        };
+    }
+
+    private static Vec3 fishPosition(Minecraft client, float partial, Vec3 fallback) {
+        BattlePayload fight = AtzenClient.state;
+        if (fight != null && fight.fishEntityId() >= 0) {
+            Entity fish = client.level.getEntity(fight.fishEntityId());
+            if (fish != null) return fish.getPosition(partial);
+        }
+        return fallback;
+    }
+
+    /** Never through a wall: stop short of the first block between the origin and the wanted position. */
+    private static Vec3 clip(Minecraft client, Vec3 origin, Vec3 wanted, Entity player) {
+        var hit = client.level.clip(new ClipContext(origin, wanted, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player));
+        if (hit.getType() == HitResult.Type.MISS) return wanted;
+        return hit.getLocation().add(origin.subtract(hit.getLocation()).normalize().scale(0.3));
+    }
+}

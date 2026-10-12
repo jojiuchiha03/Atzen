@@ -1,7 +1,9 @@
 package io.github.jojiuchiha03.atzen.item;
 
 import io.github.jojiuchiha03.atzen.Atzen;
-import io.github.jojiuchiha03.atzen.battle.BattleTuning;
+import io.github.jojiuchiha03.atzen.battle.ReelAbility;
+import io.github.jojiuchiha03.atzen.battle.Rig;
+import io.github.jojiuchiha03.atzen.fish.FishSpecies;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,51 +11,57 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /**
- * What the gear does to a fight. Three numbers, multiplied together from rod, reel, line, bait and enchantments:
- * strain (how fast the line tension rises when reeling, lower is better), catch speed (how fast the fish tires,
- * higher is better) and surge strain (extra strain while the fish runs, lower is better). Carbon is the best rod
- * and the best line.
+ * Turns rod, reel, line, bait and enchantments into the {@link Rig} the fight runs on. Carbon is the best rod
+ * and the best line; the reels trade speed, force and capacity and each brings an ability.
  */
 public final class BattleEquipment {
     private BattleEquipment() { }
 
-    /** Rod, reel, line and bait without enchantments: {strain, catch speed, surge strain}. */
-    public static double[] preview(ItemStack rod) {
-        ItemStack bait = AtzenRodItem.bait(rod);
-        return gear(rod, bait);
+    /** The rig without enchantments, for the tooltip. */
+    public static Rig preview(ItemStack rod) {
+        return rig(rod, AtzenRodItem.bait(rod), 0, 0, 0);
     }
 
-    private static double[] gear(ItemStack rod, ItemStack bait) {
-        double strain = 1, speed = 1, surge = 1;
-        if (rod.is(AtzenItems.RIVER_ROD)) { strain = 0.9; speed = 1.05; }
-        if (rod.is(AtzenItems.IRON_ROD)) { strain = 0.78; }
-        if (rod.is(AtzenItems.TIDE_ROD)) { strain = 0.9; speed = 1.25; }
-        if (rod.is(AtzenItems.CARBON_ROD)) { strain = 0.66; speed = 1.2; surge = 0.9; }
-        ItemStack reel = rod.getItem() instanceof AtzenRodItem ? AtzenRodItem.get(rod, GearSlot.REEL) : ItemStack.EMPTY;
-        if (reel.is(AtzenItems.COPPER_REEL)) speed *= 1.08;
-        if (reel.is(AtzenItems.IRON_REEL)) { speed *= 1.15; surge *= 0.95; }
-        if (reel.is(AtzenItems.DIAMOND_REEL)) { speed *= 1.28; surge *= 0.88; }
-        ItemStack line = rod.getItem() instanceof AtzenRodItem ? AtzenRodItem.get(rod, GearSlot.LINE) : ItemStack.EMPTY;
-        if (line.is(AtzenItems.NYLON_LINE)) strain *= 0.9;
-        if (line.is(AtzenItems.BRAIDED_LINE)) { strain *= 0.8; speed *= 1.05; }
-        if (line.is(AtzenItems.CARBON_LINE)) { strain *= 0.66; surge *= 0.85; }
-        if (bait.is(AtzenItems.WORM_BAIT)) speed *= 1.15;
-        if (bait.is(AtzenItems.GLOW_BAIT)) surge *= 0.8;
-        if (bait.is(AtzenItems.HEARTY_BAIT)) { speed *= 1.25; strain *= 1.12; }
-        return new double[] {strain, speed, surge};
+    public static Rig rig(ServerPlayer player, ItemStack rod, ItemStack bait) {
+        return rig(rod, bait, enchantmentLevel(player, rod, "steady_line"), enchantmentLevel(player, rod, "reel_power"),
+                enchantmentLevel(player, rod, "calm_waters"));
     }
 
-    public static BattleTuning tuning(ServerPlayer player, ItemStack rod, ItemStack bait) {
-        double[] gear = gear(rod, bait);
-        double strain = gear[0], speed = gear[1], surge = gear[2];
-        strain *= 1 - 0.08 * enchantmentLevel(player, rod, "steady_line");
-        speed *= 1 + 0.08 * enchantmentLevel(player, rod, "reel_power");
-        surge *= 1 - 0.15 * enchantmentLevel(player, rod, "calm_waters");
-        return new BattleTuning(strain, speed, surge);
+    private static Rig rig(ItemStack rod, ItemStack bait, int steadyLine, int reelPower, int calmWaters) {
+        RodType rodType = AtzenItems.rod(rod);
+        boolean atzen = rod.getItem() instanceof AtzenRodItem;
+        ReelType reel = atzen ? AtzenItems.reel(AtzenRodItem.get(rod, GearSlot.REEL)) : null;
+        LineType line = atzen ? AtzenItems.line(AtzenRodItem.get(rod, GearSlot.LINE)) : null;
+        if (line == null) line = LineType.STRING;
+        BaitType baitType = AtzenItems.bait(bait);
+        double power = 1 + 0.08 * reelPower;
+        Rig rig = new Rig(line.strength() * (1 + 0.08 * steadyLine), line.stretch(), line.abrasion(), rodType.power(),
+                rodType.flex(),
+                (reel == null ? Rig.VANILLA.reelSpeed() : reel.speed()) * rodType.speed() * power,
+                (reel == null ? Rig.VANILLA.reelForce() : reel.force()) * power,
+                reel == null ? Rig.VANILLA.capacity() : reel.capacity(), Rig.VANILLA.dragLimit(),
+                reel == null ? ReelAbility.NONE : reel.ability(), 1, 1 - 0.12 * calmWaters, 0);
+        if (baitType != null) rig = rig.scaled(baitType.strain(), baitType.drain(), baitType.run());
+        return rig;
     }
 
     public static boolean isBait(ItemStack stack) {
-        return stack.is(AtzenItems.WORM_BAIT) || stack.is(AtzenItems.GLOW_BAIT) || stack.is(AtzenItems.HEARTY_BAIT);
+        return AtzenItems.bait(stack) != null;
+    }
+
+    /**
+     * How keen a fish is on this bait (a bare hook {@link BaitType#BARE_HOOK}); a worn lure runs worse, a dry
+     * fly needs a fly reel to be presented well, a glow bait shines at night.
+     */
+    public static double appeal(ItemStack bait, ItemStack rod, FishSpecies species, boolean night) {
+        BaitType type = AtzenItems.bait(bait);
+        if (type == null) return BaitType.BARE_HOOK;
+        double appeal = type.appeal(species);
+        if (type.lure() && bait.getMaxDamage() > 0) appeal *= 0.6 + 0.4 * (1 - bait.getDamageValue() / (double) bait.getMaxDamage());
+        if ((type == BaitType.DRY_FLY || type == BaitType.NYMPH || type == BaitType.STREAMER)
+                && AtzenItems.reel(AtzenRodItem.get(rod, GearSlot.REEL)) != ReelType.FLY) appeal *= 0.6;
+        if (type == BaitType.GLOW && night) appeal *= 1.6;
+        return appeal;
     }
 
     private static int enchantmentLevel(ServerPlayer player, ItemStack rod, String name) {

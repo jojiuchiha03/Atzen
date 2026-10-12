@@ -8,11 +8,14 @@ import java.util.EnumSet;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A fish notices a float in the water nearby, swims to it and bites. The angler then has the vanilla bite window
- * to strike; the fight is against exactly this fish. Without a strike the fish loses interest and swims off.
+ * A fish notices a float in the water nearby, swims to it, looks at the bait and — if it likes it — bites. The
+ * angler then has the vanilla bite window to strike; the fight is against exactly this fish. A fish that does not
+ * care for the bait ignores it; one that is only half keen inspects it and turns away now and then. Without a
+ * strike the fish loses interest and swims off.
  */
 final class BiteHookGoal extends Goal {
     private static final double RANGE = 12;
@@ -21,6 +24,8 @@ final class BiteHookGoal extends Goal {
     private int ticks;
     private int afterBite;
     private int cooldown;
+    private int inspect;
+    private double appeal;
 
     BiteHookGoal(AtzenFishEntity fish) {
         this.fish = fish;
@@ -29,13 +34,14 @@ final class BiteHookGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (fish.isBattleDummy() || --cooldown > 0 || fish.getRandom().nextInt(reducedTickDelay(20)) != 0) return false;
+        if (fish.isBattleDummy() || fish.specimen().species().boss() != null || --cooldown > 0
+                || fish.getRandom().nextInt(reducedTickDelay(20)) != 0) return false;
         target = fish.level().getEntitiesOfClass(FishingHook.class, fish.getBoundingBox().inflate(RANGE), this::interesting)
                 .stream().min(Comparator.comparingDouble(fish::distanceToSqr)).orElse(null);
         if (target == null) return false;
-        // Bait in the rod's slot (or the other hand) makes a bite a sure thing, a bare hook only sometimes.
-        boolean baited = hasBait(target.getPlayerOwner());
-        if (!baited && fish.getRandom().nextFloat() > 0.45f) {
+        // The bait decides: a liked bait draws the fish in, a disliked one is ignored, a bare hook only sometimes.
+        appeal = appeal(target.getPlayerOwner());
+        if (appeal < 0.5 && fish.getRandom().nextFloat() > appeal) {
             cooldown = 100;
             return false;
         }
@@ -47,17 +53,19 @@ final class BiteHookGoal extends Goal {
                 && !Atzen.BATTLES.isBattling(hook) && !Atzen.BATTLES.hasBiter(hook);
     }
 
-    private static boolean hasBait(Player player) {
-        for (ItemStack stack : new ItemStack[] {player.getMainHandItem(), player.getOffhandItem()}) {
-            if (!AtzenRodItem.bait(stack).isEmpty() || BattleEquipment.isBait(stack)) return true;
-        }
-        return false;
+    private double appeal(Player player) {
+        ItemStack rod = player.getMainHandItem().getItem() instanceof FishingRodItem ? player.getMainHandItem() : player.getOffhandItem();
+        ItemStack other = rod == player.getMainHandItem() ? player.getOffhandItem() : player.getMainHandItem();
+        ItemStack bait = !AtzenRodItem.bait(rod).isEmpty() ? AtzenRodItem.bait(rod) : BattleEquipment.isBait(other) ? other : ItemStack.EMPTY;
+        long time = Math.floorMod(fish.level().getOverworldClockTime(), 24000L);
+        return BattleEquipment.appeal(bait, rod, fish.specimen().species(), time >= 13000 && time < 23000);
     }
 
     @Override
     public void start() {
         ticks = 0;
         afterBite = -1;
+        inspect = -1;
         fish.getNavigation().moveTo(target.getX(), target.getY() - 0.4, target.getZ(), 1.4);
     }
 
@@ -80,6 +88,16 @@ final class BiteHookGoal extends Goal {
                 return;
             }
             fish.getNavigation().stop();
+            // A half-keen fish looks at the bait for a moment and may turn away (it can come back later).
+            if (inspect < 0) inspect = 20 + fish.getRandom().nextInt(30);
+            if (inspect-- > 0) {
+                fish.setDeltaMovement((target.getX() - fish.getX()) * 0.05, 0, (target.getZ() - fish.getZ()) * 0.05);
+                return;
+            }
+            if (fish.getRandom().nextDouble() > Math.min(0.95, appeal)) {
+                afterBite = 0;
+                return;
+            }
             ((BiteTarget) target).atzen$bite(40);
             afterBite = 45;
         } else {

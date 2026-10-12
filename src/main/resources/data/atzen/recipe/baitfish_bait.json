@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cod"
+  ],
+  "result": {
+    "id": "atzen:baitfish_bait",
+    "count": 2
+  }
+}

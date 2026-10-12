@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:glow_bait",
+    "minecraft:echo_shard",
+    "minecraft:sculk"
+  ],
+  "result": {
+    "id": "atzen:deep_light_bait",
+    "count": 2
+  }
+}

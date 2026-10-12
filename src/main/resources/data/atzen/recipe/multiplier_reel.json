@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:iron_reel",
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "minecraft:copper_block"
+  ],
+  "result": {
+    "id": "atzen:multiplier_reel",
+    "count": 1
+  }
+}

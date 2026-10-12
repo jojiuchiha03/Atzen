@@ -176,6 +176,8 @@ FISH = {
     "rudd": F(30, 13, "#6a6a3a", "#d0b858", "#f2e6a8", "#d8402a", "scales"),
     "bream": F(34, 19, "#5a5236", "#a8986a", "#e0d4a8", "#6a5a48", "scales"),
     "tench": F(34, 13, "#3e4a26", "#6a7a3a", "#c8b860", "#4a5228", "none", "round"),
+    "crucian_carp": F(32, 18, "#5a4a1e", "#b8962e", "#ecd47a", "#9a6a2a", "scales", "round"),
+    "sturgeon": F(52, 9, "#4a5260", "#8a929e", "#dcdcd8", "#5a6270", "plates", snout=1.8, barbels=True),
     "chub": F(38, 12, "#4e5a5e", "#a8b0a8", "#e8e8e0", "#b06a4a", "scales"),
     # cod family
     "atlantic_cod": F(44, 13, "#6a6040", "#b8a878", "#ece4cc", "#8a7a50", "speckle", "square", barbels=True),
@@ -214,6 +216,11 @@ FISH = {
     "wolffish": F(46, 11, "#4a525a", "#7a828a", "#c4c8cc", "#5a6068", "bars", "round", eel=True),
     # the special one
     "golden_koi": F(36, 15, "#f2f0ea", "#fbf8f2", "#ffffff", "#f5c24a", "koi", "veil"),
+    # the bosses
+    "ancient_catfish": F(48, 14, "#2a2620", "#4e4636", "#a89c84", "#3a3428", "scars", "round", barbels=True, flathead=True),
+    "reed_king": F(50, 10, "#26381a", "#5a6e2a", "#d8d4a0", "#8a6a2a", "spots", snout=1.7),
+    "black_sturgeon": F(54, 9, "#121418", "#2c3038", "#8a8e94", "#1e2228", "plates", snout=1.9, barbels=True),
+    "deep_warden": F(42, 18, "#08262e", "#0e3a44", "#1e5a62", "#0a2a32", "glow", "round", spiny=True, monk=False),
 }
 
 
@@ -327,6 +334,20 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
             elif pat == "belly_stripes" and 0.15 < u < 0.95 and v > 0.05:
                 if int((v + 1) * 9) % 2 == 0:
                     colour = back[1]
+            elif pat == "plates" and 0.12 < u < 0.97:
+                # the sturgeon's rows of bony scutes
+                for row in (-0.55, 0.05, 0.6):
+                    if abs(v - row) < 0.13 and (u * 22) % 1 < 0.55:
+                        colour = shade(belly, light * 0.7 + 0.25)
+            elif pat == "scars" and 0.1 < u < 0.97:
+                if abs(math.sin(u * 31 + v * 4)) < 0.06 and v < 0.3:
+                    colour = shade(belly, light * 0.6 + 0.2)
+                elif (int(x * 5 + y * 11) % 13) == 0:
+                    colour = back[0]
+            elif pat == "glow" and 0.1 < u < 0.97:
+                for su, sv, sr in spots:
+                    if ((u - su) / (sr * 0.6)) ** 2 + ((v - sv) / (sr * 1.6)) ** 2 < 1:
+                        colour = (90, 240, 230, 255)
             elif pat == "koi":
                 for su, sv, sr in koi:
                     if ((u - su) / sr) ** 2 + ((v - sv) / (sr * 2.4)) ** 2 < 1:
@@ -600,12 +621,22 @@ def rod(name):
 
 # ---------------------------------------------------------------- reels, lines, carbon fibre
 
-REELS = {"copper_reel": "#c9783a", "iron_reel": "#b8bec6", "diamond_reel": "#4fd8d0"}
+REELS = {"copper_reel": "#c9783a", "iron_reel": "#b8bec6", "diamond_reel": "#4fd8d0", "baitcaster_reel": "#c83a3a",
+         "multiplier_reel": "#d0a83a", "fly_reel": "#6a8a5a", "echo_reel": "#1e5a6a", "tide_reel": "#3ab8a8",
+         "netherite_reel": "#4a4446", "ancient_reel": "#5a4a2a", "reed_reel": "#5a8a2a", "current_reel": "#2a3a5a",
+         "deep_reel": "#0e3a44"}
 LINES = {"nylon_line": "#e8eef2", "braided_line": "#5fa04a", "carbon_line": "#3a3d44"}
 
 
 def reel(name):
-    """A spinning reel seen from the side: the spool with line on it, the foot and the crank."""
+    """A reel seen from the side. Spinning reels: spool, foot, crank. Baitcaster: low and wide. Multiplier: a big
+    drum between two plates. Fly reel: a flat disc with holes. Boss reels get their trophy's glint."""
+    if name == "baitcaster_reel":
+        return baitcaster(name)
+    if name in ("multiplier_reel", "current_reel", "ancient_reel"):
+        return multiplier(name)
+    if name == "fly_reel":
+        return fly_reel(name)
     px = canvas()
     metal = ramp(REELS[name])
     dark = ramp("#3a3c42")
@@ -621,6 +652,67 @@ def reel(name):
     if name == "diamond_reel":
         for sx, sy in ((14, 18), (50, 22), (18, 54)):
             put(px, sx, sy, (210, 255, 250, 255))
+    outline(px)
+    glints(px, name)
+    return px
+
+
+def glints(px, name):
+    """Sparkles for the special reels: echo blue, sea green, boss gold."""
+    colour = {"echo_reel": (90, 230, 255, 255), "tide_reel": (160, 255, 230, 255), "reed_reel": (230, 220, 90, 255),
+              "deep_reel": (90, 240, 230, 255), "ancient_reel": (240, 200, 90, 255), "current_reel": (150, 200, 255, 255),
+              "netherite_reel": (200, 140, 255, 255)}.get(name)
+    if not colour:
+        return
+    for sx, sy in ((10, 14), (54, 12), (8, 46), (56, 40)):
+        if px[sy][sx][3] == 0:
+            put(px, sx, sy, colour)
+            for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                if 0 <= sx + ddx < N and 0 <= sy + ddy < N and px[sy + ddy][sx + ddx][3] == 0:
+                    put(px, sx + ddx, sy + ddy, tuple(int(c * 0.6) for c in colour[:3]) + (255,))
+
+
+def baitcaster(name):
+    px = canvas()
+    metal, dark = ramp(REELS[name]), ramp("#2a2c32")
+    polygon(px, [(8, 30), (56, 30), (58, 44), (6, 44)], lambda x, y: shade(metal, 0.85 - (y - 30) / 22))
+    disc(px, 20, 37, 9, dark)
+    disc(px, 20, 37, 5, ramp("#e8e2d0"))
+    disc(px, 44, 37, 9, metal)
+    polygon(px, [(24, 22), (40, 22), (42, 30), (22, 30)], lambda x, y: dark[2])
+    line(px, 44, 37, 56, 52, dark[2], 3)
+    disc(px, 56, 53, 3.8, dark)
+    outline(px)
+    return px
+
+
+def multiplier(name):
+    px = canvas()
+    metal, dark = ramp(REELS[name]), ramp("#2a2c32")
+    for x0 in (10, 46):
+        polygon(px, [(x0, 14), (x0 + 8, 14), (x0 + 8, 54), (x0, 54)], lambda x, y: shade(metal, 0.9 - (y - 14) / 50))
+    for y in range(20, 49):
+        for x in range(18, 46):
+            px[y][x] = shade(ramp("#e8e2d0"), 0.4 + 0.5 * math.cos((y - 34) / 16))
+            if (x + y) % 5 == 0:
+                px[y][x] = ramp("#e8e2d0")[1]
+    polygon(px, [(26, 6), (38, 6), (36, 14), (28, 14)], lambda x, y: dark[2])
+    line(px, 54, 34, 60, 50, dark[2], 3)
+    disc(px, 60, 51, 3.2, dark)
+    outline(px)
+    glints(px, name)
+    return px
+
+
+def fly_reel(name):
+    px = canvas()
+    metal = ramp(REELS[name])
+    disc(px, 32, 32, 24, metal, ring=0.8)
+    for k in range(6):
+        a = k * math.pi / 3
+        disc(px, 32 + 13 * math.cos(a), 32 + 13 * math.sin(a), 4, ramp("#2a2c32"))
+    disc(px, 32, 32, 5, ramp("#c8c0a0"))
+    line(px, 44, 44, 50, 50, ramp("#2a2c32")[2], 3)
     outline(px)
     return px
 
@@ -720,6 +812,195 @@ def hearty():
     return px
 
 
+def blob_bait(colour, count, seed, size=(4.5, 7.0), area=(14, 50)):
+    """Small round baits on a heap: maggots, corn, boilies, bread."""
+    px = canvas()
+    rnd = random.Random(seed)
+    for _ in range(count):
+        r = rnd.uniform(*size)
+        disc(px, rnd.uniform(area[0], area[1]), rnd.uniform(area[0] + 6, area[1] + 4), r, ramp(colour))
+    outline(px)
+    return px
+
+
+def maggot():
+    px = canvas()
+    rnd = random.Random(11)
+    for cx, cy, a in ((22, 24, 0.4), (40, 22, 2.6), (24, 44, 2.9), (42, 42, 0.8), (32, 33, 1.6)):
+        for i in range(9):
+            disc(px, cx + math.cos(a) * (i - 4) * 2.0, cy + math.sin(a) * (i - 4) * 2.0, 4.6 - abs(i - 4) * 0.35, ramp("#efe6c8"))
+        put(px, cx + math.cos(a) * 9, cy + math.sin(a) * 9, (40, 30, 30, 255))
+    outline(px)
+    return px
+
+
+def bread():
+    px = canvas()
+    crust, crumb = ramp("#b8762e"), ramp("#f0e2b8")
+    polygon(px, [(12, 22), (48, 14), (54, 40), (20, 52)], lambda x, y: shade(crumb, 0.7 - (y - 14) / 90))
+    for x in range(12, 56):
+        for y in range(10, 56):
+            if px[y][x][3] and not inside([(15, 24), (46, 17), (51, 38), (21, 49)], x + 0.5, y + 0.5):
+                px[y][x] = crust[2]
+    rnd = random.Random(5)
+    for _ in range(14):
+        put(px, rnd.randint(20, 46), rnd.randint(22, 44), crumb[1])
+    outline(px)
+    return px
+
+
+def fish_bait(back, belly, strip=False):
+    """A small baitfish, or a strip cut from one."""
+    px = canvas()
+    if strip:
+        polygon(px, [(10, 26), (52, 18), (56, 30), (14, 44)], lambda x, y: shade(ramp(belly if (x + y) % 9 else back), 0.6))
+        line(px, 10, 26, 52, 18, ramp("#c03a3a")[3], 2)
+    else:
+        polygon(px, [(8, 32), (20, 24), (46, 26), (56, 18), (54, 32), (56, 46), (46, 38), (20, 40)],
+                lambda x, y: shade(ramp(back if y < 32 else belly), 0.75 - abs(y - 32) / 30))
+        put(px, 15, 30, (20, 20, 24, 255))
+    outline(px)
+    return px
+
+
+def larva():
+    px = canvas()
+    body = ramp("#c8a868")
+    for i in range(9):
+        disc(px, 14 + i * 4.4, 34 + math.sin(i / 1.8) * 6, 5.2 - (i == 8) * 1.5, body)
+    for i in range(9):
+        put(px, 14 + i * 4.4, 30 + math.sin(i / 1.8) * 6, body[1])
+    disc(px, 12, 34, 4, ramp("#4a3020"))
+    outline(px)
+    return px
+
+
+def shrimp():
+    px = canvas()
+    shell = ramp("#e8806a")
+    for i in range(8):
+        a = i / 7 * math.pi * 0.95
+        disc(px, 32 + 16 * math.cos(a + 0.2), 30 + 16 * math.sin(a + 0.2) * 0.9, 6.5 - i * 0.45, shell)
+    for k in range(4):
+        line(px, 46, 30, 58, 12 + k * 3, shell[1], 1)
+    outline(px)
+    return px
+
+
+def lure(kind, colour, accent):
+    """Artificial lures: blade, spoon, crankbait, soft bait, popper, jig, flies; with a hook."""
+    px = canvas()
+    c, a, metal = ramp(colour), ramp(accent), ramp("#c0c4cc")
+    if kind == "spinner":
+        line(px, 6, 32, 50, 32, metal[2], 2)
+        polygon(px, [(10, 32), (26, 12), (40, 18), (30, 38)], lambda x, y: shade(c, 0.95 - (x - 10) / 40))
+        disc(px, 40, 32, 6, a)
+        disc(px, 47, 33, 4.5, a)
+    elif kind == "spoon":
+        for y in range(N):
+            for x in range(N):
+                dx, dy = (x + 0.5 - 30) / 20, (y + 0.5 - 30) / 9
+                if dx * dx + dy * dy <= 1:
+                    px[y][x] = shade(c, lit(dx, dy) + 0.1) if (x // 6) % 2 else shade(a, lit(dx, dy) + 0.1)
+    elif kind == "wobbler":
+        polygon(px, [(8, 32), (18, 22), (44, 22), (52, 30), (44, 40), (18, 40)], lambda x, y: shade(c if y < 31 else a, 0.8 - abs(y - 31) / 25))
+        polygon(px, [(4, 34), (10, 30), (12, 38)], metal[3])
+        put(px, 14, 28, (20, 20, 20, 255))
+    elif kind == "soft_lure":
+        polygon(px, [(10, 32), (20, 24), (40, 28), (48, 22), (52, 32), (48, 42), (40, 36), (20, 40)], lambda x, y: shade(c, 0.85 - abs(y - 32) / 25))
+        disc(px, 14, 32, 6, a)
+    elif kind == "popper":
+        polygon(px, [(10, 24), (40, 26), (50, 32), (40, 38), (10, 40)], lambda x, y: shade(c if x > 18 else a, 0.85 - abs(y - 32) / 25))
+        disc(px, 12, 32, 6, ramp("#2a2c32"))
+    elif kind == "jig":
+        disc(px, 18, 32, 9, a)
+        for k in range(9):
+            line(px, 22, 32, 54, 20 + k * 3, c[2 + k % 2], 1.3)
+    else:  # flies: streamer, dry fly, nymph
+        line(px, 8, 32, 46, 32, metal[2], 2.5)
+        if kind == "streamer":
+            for y in range(24, 41):
+                for x in range(18, 58):
+                    if abs(y - 32) < (x - 14) * 0.22 + 1 and (x + y) % 3:
+                        px[y][x] = shade(c if abs(y - 32) > 2 else a, 0.75 - abs(y - 32) / 30)
+            disc(px, 14, 32, 5, a)
+        elif kind == "dry_fly":
+            for k in range(10):
+                ang = k * math.pi / 5
+                line(px, 22, 32, 22 + 11 * math.cos(ang), 32 + 11 * math.sin(ang), a[3], 2)
+            polygon(px, [(24, 28), (46, 14), (50, 20), (28, 32)], lambda x, y: shade(c, 0.8))
+            polygon(px, [(24, 34), (44, 40), (40, 44), (22, 36)], lambda x, y: shade(c, 0.6))
+        else:
+            disc(px, 14, 32, 7, ramp("#d8b040"))
+            for i in range(6):
+                disc(px, 22 + i * 5, 32, 7 - i * 0.6, c)
+            for i in range(6):
+                put(px, 22 + i * 5, 26 + i * 0.6, a[3])
+    # the hook
+    line(px, 50, 36, 54, 46, metal[1], 1.5)
+    line(px, 54, 46, 48, 50, metal[1], 1.5)
+    line(px, 48, 50, 46, 46, metal[1], 1.5)
+    outline(px)
+    return px
+
+
+def boss_bait(name):
+    px = canvas()
+    if name == "ancient_bait":
+        disc(px, 32, 34, 18, ramp("#6a3a2a"))
+        rnd = random.Random(9)
+        for _ in range(8):
+            disc(px, rnd.uniform(20, 44), rnd.uniform(22, 46), 3, ramp("#2a8fb0"))
+    elif name == "current_bait":
+        disc(px, 32, 34, 15, ramp("#4a90a0"))
+        for k in range(3):
+            line(px, 16, 26 + k * 7, 48, 22 + k * 7, ramp("#c8f0ff")[3], 1)
+    else:
+        disc(px, 32, 32, 16, ramp("#0e3a44"))
+        disc(px, 32, 32, 8, ramp("#5af0e6"))
+    outline(px)
+    for sx, sy in ((10, 12), (54, 14), (52, 54)):
+        put(px, sx, sy, (255, 220, 120, 255))
+    return px
+
+
+def trophy_item(name):
+    px = canvas()
+    if name == "ancient_barbel":
+        for i in range(30):
+            disc(px, 10 + i * 1.5, 50 - math.sin(i / 9) * 30, 3.4 - i * 0.07, ramp("#4e4636"))
+    elif name == "reed_crown":
+        polygon(px, [(10, 46), (14, 22), (22, 36), (32, 14), (42, 36), (50, 22), (54, 46)], lambda x, y: shade(ramp("#5a8a2a"), 0.9 - (y - 14) / 40))
+        for cx in (14, 32, 50):
+            disc(px, cx, 20 if cx != 32 else 13, 3, ramp("#e8c040"))
+    elif name == "sturgeon_plate":
+        polygon(px, [(32, 8), (52, 26), (44, 54), (20, 54), (12, 26)], lambda x, y: shade(ramp("#2c3038"), 0.9 - (y - 8) / 50))
+        line(px, 32, 12, 32, 50, ramp("#8a8e94")[3], 2)
+    else:
+        disc(px, 32, 34, 18, ramp("#0e3a44"))
+        disc(px, 32, 34, 9, ramp("#5af0e6"))
+        polygon(px, [(26, 18), (32, 6), (38, 18)], ramp("#0e3a44")[2])
+    outline(px)
+    return px
+
+
+BAITS = {
+    "maggot_bait": maggot, "corn_bait": lambda: blob_bait("#f0c83a", 12, 4, (4, 5.5)), "bread_bait": bread,
+    "boilie_bait": lambda: blob_bait("#c87a3a", 4, 7, (8, 10), (20, 40)),
+    "baitfish_bait": lambda: fish_bait("#5a7a8a", "#e8eef2"), "fish_strip_bait": lambda: fish_bait("#5a6a7a", "#f0d8d0", True),
+    "larva_bait": larva, "shrimp_bait": shrimp,
+    "spinner": lambda: lure("spinner", "#d8d8d8", "#e04030"), "spoon": lambda: lure("spoon", "#e8c040", "#d84030"),
+    "wobbler": lambda: lure("wobbler", "#3a8a3a", "#f0e8a0"), "soft_lure": lambda: lure("soft_lure", "#8ad040", "#d8c040"),
+    "popper": lambda: lure("popper", "#f0f0e8", "#e04040"), "jig": lambda: lure("jig", "#e8a030", "#c0c4cc"),
+    "streamer": lambda: lure("streamer", "#4a8a3a", "#e8e0a0"), "dry_fly": lambda: lure("dry_fly", "#a87a4a", "#e8e0d0"),
+    "nymph": lambda: lure("nymph", "#6a5a3a", "#d8b040"),
+    "reed_king_lure": lambda: lure("wobbler", "#2a5a1a", "#e8c040"),
+    "ancient_bait": lambda: boss_bait("ancient_bait"), "current_bait": lambda: boss_bait("current_bait"),
+    "deep_light_bait": lambda: boss_bait("deep_light_bait"),
+}
+TROPHIES = ["ancient_barbel", "reed_crown", "sturgeon_plate", "warden_heart"]
+
+
 # ---------------------------------------------------------------- tomes
 
 TOMES = {
@@ -811,6 +1092,12 @@ def skin(name):
             c = belly[3]
         elif pat == "scales" and (int(u * 24) + int(v * 8)) % 2 == 0:
             c = base[2]
+        elif pat == "plates" and v < 0.8 and (int(u * 30) % 3 == 0) and int(v * 6) % 2 == 0:
+            c = belly[2]
+        elif pat == "glow" and rnd.random() < 0.06:
+            c = (90, 240, 230, 255)
+        elif pat == "scars" and rnd.random() < 0.05:
+            c = belly[1]
         elif pat == "koi":
             if math.sin(u * 9.0 + 1.3) * math.cos(v * 5.0) > 0.35:
                 c = ramp("#e8571c" if u < 0.5 else "#f0a020")[3]
@@ -883,6 +1170,10 @@ def main():
     save(os.path.join(item, "worm_bait.png"), worm())
     save(os.path.join(item, "glow_bait.png"), glow())
     save(os.path.join(item, "hearty_bait.png"), hearty())
+    for name, draw in BAITS.items():
+        save(os.path.join(item, name + ".png"), draw())
+    for name in TROPHIES:
+        save(os.path.join(item, name + ".png"), trophy_item(name))
     print("textures written to", os.path.normpath(ROOT))
 
 

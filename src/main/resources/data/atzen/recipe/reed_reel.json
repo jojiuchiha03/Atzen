@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:baitcaster_reel",
+    "atzen:reed_crown",
+    "minecraft:emerald"
+  ],
+  "result": {
+    "id": "atzen:reed_reel",
+    "count": 1
+  }
+}

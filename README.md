@@ -1,159 +1,216 @@
 # Atzen – Fishing Battles
 
-Fabric-Mod für **Minecraft Java 26.2**: Fische im Wasser beobachten, den Biss anschlagen und den Fang in einem Duell mit Schnurspannung, Fluchten und Ausdauer landen.
+Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 50 Fischarten mit eigenen Lebensräumen, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
 
-**Stand: 0.5.0.** Enthält 48 Süß- und Salzwasserfische mit eigenen animierten 3D-Körperformen und Lebensräumen, vier Angeln, wechselbare Rollen, Schnüre und Köder sowie drei Verzauberungen. Deutsch und Englisch sind enthalten. Build-, Daten- und Logiktests sind eingerichtet. Ein Test in einer laufenden Minecraft-Welt steht noch aus; die EULA wurde für eine Testinstanz nicht bestätigt.
+**Stand: 0.6.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
 ## Installation
 
-Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und eine zu 26.2 passende Fabric API. Gebaut wird gegen **Fabric API 0.161.0+26.2**.
+Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und Fabric API **0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `build/libs/atzen-0.2.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `atzen-0.6.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
-Die Datei mit `-sources.jar` im Namen ist Quellcode und gehört nicht in den `mods`-Ordner.
+## Der Angelvorgang
 
-## Angeln und Duelle
+1. **Ausrüsten:** Rolle, Schnur und Köder im Inventar auf die Rute ziehen (siehe unten).
+2. **Auswerfen:** Die Kamera geht kurz über die Schulter und folgt der Pose.
+3. **Warten:** Bleibst du ruhig stehen, zeigt die Kamera die Pose vom Ufer aus. Bewegst du dich oder schaust dich um, hast du sofort wieder die normale Sicht.
+4. **Biss:** Atzen-Fische in bis zu 12 Blöcken bemerken die Pose, schwimmen hin und sehen sich den Köder an – die Kamera taucht dafür unter Wasser. Mag der Fisch den Köder nicht, ignoriert er ihn; ist er nur halb interessiert, dreht er manchmal wieder ab.
+5. **Anschlag:** Rechtsklick, wenn die Pose abtaucht. Der richtige Moment setzt den Haken fester: Raubfische erst etwas drehen lassen, Forellen sofort anschlagen. Die Anzeige meldet „perfekt“, „gut“ oder „ungünstig“.
+6. **Drill:** siehe unten.
+7. **Landen:** Ist der Fisch nah (unter 4 m) und erschöpft, steht über der Hotbar „Rechtsklick – Fisch landen!“. Ein großer oder noch nicht ganz müder Fisch kann dabei ausschlagen und noch einmal flüchten.
+8. **Trophäe:** Nach dem Fang dreht sich die Kamera um dich, eine Karte zeigt Art, Seltenheit, Länge, Gewicht und deine Kontrolle im Drill.
 
-Mit einer normalen Angel oder einer Atzen-Rute auswerfen. Beim Biss rechtsklicken, um das Duell zu starten. Atzen-Fische in der Nähe (bis 12 Blöcke) bemerken eine ausgeworfene Pose, schwimmen hin und beißen an: Die Pose taucht ab wie bei einem normalen Biss. Wer jetzt rechtsklickt, kämpft gegen genau diesen Fisch, mit seiner Länge und seinem Gewicht. Mit Köder beißen sie sicher, ohne Köder nur manchmal; zieht man nicht an, schwimmt der Fisch weiter. Auch ein direkt mit dem Haken getroffener Atzen-Fisch kann gefangen werden; dann entsprechen Maße und Beute genau diesem Tier.
+## Der Drill
 
-| Eingabe | Wirkung |
+Der Server simuliert die Schnur: Der Fisch zieht mit einer Kraft, die von Größe, Ausdauer und seiner aktuellen Aktion abhängt. Die Spannung auf der Schnur kann diese Kraft nie dauerhaft über die **Bremse** hinaus heben – dort rutscht die Rolle und der Fisch nimmt Schnur. Die Schnur **reißt**, wenn die Spannung ihre Tragkraft übersteigt: durch eine Bremse, die fester als die Schnur eingestellt ist, durch Rucke bei steifer Ausrüstung oder durch eine an Hindernissen aufgescheuerte Schnur. Geht die Schnur auf der Spule aus, ist der Fisch weg.
+
+| Taste (einstellbar) | Wirkung |
 | --- | --- |
-| **R halten** | Einholen: Fisch-Ausdauer sinkt, Schnurspannung steigt |
-| **R loslassen** | Nachgeben und Spannung abbauen |
-| **X** | Aktuelles Duell abbrechen |
+| **R** halten | Einholen – nur gegen einen Fisch, der schwächer zieht als die Rolle. Gegen eine rutschende Bremse zu kurbeln verdrallt die Schnur. |
+| **G** halten | Rute heben (Pumpen): zieht den Fisch heran. Danach loslassen und **beim Absenken R** – so kommt die gewonnene Schnur doppelt so schnell herein. Absenken ohne Kurbeln lässt die Schnur durchhängen. |
+| **Pfeil links/rechts** | Gegensteuern, wenn der Fisch seitwärts zu Hindernissen zieht. |
+| **Pfeil hoch/runter** | Bremse fester/lockerer (10 Stufen). |
+| **Rechtsklick** | Fisch landen, wenn er nah und erschöpft ist. |
+| **X** | Drill abbrechen bzw. Kameraszene überspringen. |
+| **C** | Kinokamera an/aus. |
 
-Über der Hotbar zeigt eine schmale **Spannungsleiste**, was zu tun ist: grüner Bereich = R halten und einholen, rot = nachgeben; darunter die Ausdauer des Fisches. Ein kurzer Hinweis (Einholen / Nachgeben / Loslassen / Festhalten / Straffen) blinkt, wenn es eilt. Während des Duells kreist die Kamera langsam um dich und die Pose, der Fisch zappelt sichtbar an der Schnur, springt bei Fluchten aus dem Wasser und wird beim Einholen näher gezogen. Die Spannung hörst du: Je lauter und schneller die Schnur knarzt, desto näher ist sie am Reißen; bei hoher Spannung und während Fluchten wackelt die Kamera. Danach geht es weich zurück in deine eigene Ansicht.
+Der Fisch wechselt zwischen **Dagegenhalten**, **Flucht**, **Abtauchen**, **Seitwärts zu Hindernissen**, **Kopfstößen**, **Sprüngen** und **Erschöpfung**. Jede Aktion außer Dagegenhalten und Erschöpfung kündigt er vorher an: er schlägt an der Oberfläche, die Anzeige warnt, ein Brodeln ist zu hören.
 
-Die Tasten lassen sich unter Steuerung → Atzen: Angeln ändern. Zwischen 30 und 65 % Spannung holst du besonders effizient ein. Bei 100 % reißt die Schnur. Bleibt sie drei Sekunden unter 8 %, entkommt der Fisch. Vor jeder Flucht gibt es eine Warnphase; während der Flucht solltest du nachgeben. Jedes Duell hat maximal 60 Sekunden Zeit.
+- **Flucht/Abtauchen:** nicht kurbeln, die Bremse arbeiten lassen; eine haltende Bremse ermüdet den Fisch schneller, ist aber riskanter.
+- **Seitwärts:** in die Gegenrichtung steuern, sonst scheuert die Schnur an Hindernissen (geflochtene Schnur besonders).
+- **Kopfstöße:** Spannung mittel halten – zu straff oder zu locker reißt den Haken aus.
+- **Sprung:** Rute unten lassen und leicht kurbeln. Gehobene Rute oder harte Spannung schütteln den Haken ab.
+- **Schlaffe Schnur** kostet Hakenhalt. Fällt der Hakenhalt auf 0, ist der Fisch weg.
 
-Größere Exemplare derselben Art ziehen stärker und brauchen länger. Bessere Ausrüstung erleichtert den Fang. Der Server berechnet das Ergebnis; häufigeres Senden von Tasteneingaben beschleunigt das Duell nicht. Tod, Verbindungsabbruch, Rutenwechsel oder zu großer Abstand beenden den Versuch.
+**Anzeige über der Hotbar:** Die Leiste zeigt die Spannung als Anteil der Tragkraft (rot ab 85 %), der türkise Strich die Bremse, darunter die Kraft des Fisches und den Hakenhalt. Eine Zeile sagt, was gerade zu tun ist; darunter Schnur draußen/Spulenkapazität, Bremsstufe und Hakenhalt. Bei Seitwärtsfluchten zeigt ein oranger Strich, wie nah das Hindernis ist. Bosse zeigen oben Namen, Phase und Kraft.
 
-Bei normalen Bissen bleiben die Vanilla-Regeln für Schätze, Müll, Glück und offenes Wasser erhalten. Nur Fischbeute wird zu einem detaillierten Atzen-Fang. Ein gewonnenes Duell kann deshalb auch einen Vanilla-Schatz oder Müll liefern. Direkt gehakte Tiere liefern das tatsächlich gehakte Exemplar.
+Typische Drilldauer mit passender Ausrüstung: Rotauge ~15 s, Barsch ~20 s, Hecht 45–60 s, Karpfen 60–90 s, Wels 2–3 min, Bosse 4–7 min. Wer nur R gedrückt hält, fängt kleine Fische, verliert große aber meist.
 
-## Fische und 3D-Modelle
+Der Server berechnet alles; häufigeres Senden von Eingaben beschleunigt nichts. Tod, Verbindungsabbruch, Rutenwechsel oder zu großer Abstand beenden den Versuch. Bei Vanilla-Bissen bleiben Schätze, Müll und Glück erhalten.
 
-48 Arten schwimmen als Tiere im Wasser, jede mit eigener Körperform und Textur; Schwanz und Flossen sind animiert. Plattfische liegen flach mit beiden Augen oben, der Schwertfisch trägt sein Schwert, Welse, Barben und Dorsche haben Barteln. Die sichtbare Größe richtet sich nach der individuellen Länge.
+## Kamera
+
+Eine Zustandsmaschine für den ganzen Wurf: **Wurf** (Schulter, folgt der Pose), **Warten** (vom Ufer auf die Pose, nur solange du still stehst), **Biss** (unter Wasser neben der Pose), **Anschlag**, **Drill** (über die Schulter, wenn der Fisch hält; beim Fisch, wenn er flüchtet oder abtaucht; weit und hoch bei Seitwärtsfluchten; dicht hinter dir bei Sprüngen; wackelt kurz vorm Reißen), **Landung** (tief am Wasser) und **Trophäe**. Die Kamera trifft keine Entscheidungen; **C** schaltet sie ab, **X** überspringt Szenen.
+
+## Ausrüstung
+
+Jede Atzen-Rute hat drei Slots: **Rolle, Schnur, Köder**. Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt erst den Köder, dann die Schnur, dann die Rolle heraus. Der Tooltip zeigt die Slots, Tragkraft, Schnurmenge, Einzug, Kraft und die Fähigkeit der Rolle. Ohne Schnur angelt die Rute mit einfachem Faden (3,5 kg).
+
+| Rute | Hubkraft | Flex | Besonderheit |
+| --- | --- | --- | --- |
+| Angel (Vanilla) | 3 kg | mittel | – |
+| Flussrute | 4 kg | sehr weich | verzeiht Rucke, +5 % Einzug |
+| Eisenrute | 7 kg | steif | pumpt hart, gibt Rucke weiter |
+| Gezeitenrute | 6 kg | mittel | +15 % Einzug |
+| **Carbonrute** | **9 kg** | weich | die beste: kräftig und geschmeidig, +10 % Einzug |
+
+| Schnur | Tragkraft | Dehnung | Abrieb |
+| --- | --- | --- | --- |
+| Faden (ohne Schnur) | 3,5 kg | mittel | schwach |
+| Monofile Schnur | 7 kg | hoch – schluckt Rucke | normal |
+| Geflochtene Schnur | 14 kg | kaum – direkt | scheuert schnell |
+| **Carbonschnur** | **20 kg** | etwas | sehr fest – die beste |
+
+| Rolle | Einzug | Kraft | Schnur | Fähigkeit |
+| --- | --- | --- | --- | --- |
+| Kupfer-Stationärrolle | 2,2 m/s | 5 kg | 120 m | Verzeihend: schlaffe Schnur kostet weniger Hakenhalt |
+| Eisen-Stationärrolle | 2,6 m/s | 7 kg | 160 m | Verzeihend |
+| Diamant-Stationärrolle | 3,0 m/s | 9 kg | 200 m | Feinbremse: Rucke kommen viel schwächer an |
+| Baitcaster | 4,0 m/s | 8 kg | 110 m | sehr schnell; Flucht gegen lockere Bremse (≤ 3) gibt eine Perücke |
+| Multirolle | 2,0 m/s | 15 kg | 350 m | Kraftübersetzung für Großfische |
+| Fliegenrolle | 1,6 m/s | 4 kg | 90 m | Pumpen +60 %, Fische unter 3 kg schwächer; für Fliegen nötig |
+| Echorolle | 2,6 m/s | 8 kg | 180 m | kündigt jede Aktion eine Sekunde früher an |
+| Gezeitenrolle | 2,8 m/s | 9 kg | 220 m | Meeresfische erholen sich nicht |
+| Netheritrolle | 2,4 m/s | 14 kg | 300 m | Bremse hält nie mehr als 90 % der Tragkraft |
+| Rolle des Alten | 2,4 m/s | 13 kg | 320 m | Bossbeute: Fluchten nehmen 35 % weniger Schnur |
+| Schilfkrone | 3,4 m/s | 9 kg | 180 m | Bossbeute: Sprünge reißen nie aus, solange die Rute unten ist |
+| Strömungsrolle | 2,6 m/s | 12 kg | 280 m | Bossbeute: holt in Ruhephasen selbst Schnur ein |
+| Tiefenherz | 3,2 m/s | 12 kg | 300 m | Bossbeute: Fisch ermüdet 25 % schneller, warnt früher |
+
+### Köder
+
+Jede Art hat eine Ernährungsweise (Friedfisch, Raubfisch, Salmonide, Meeresräuber, Meeresgrund, Schwarmfisch); der Köder entscheidet, wer sich nähert und wer anbeißt. Ein unpassender Köder wird ignoriert. Große Köder (Boilie, Köderfisch, Wobbler) bringen größere Fische. **Naturköder** werden pro Drill verbraucht, **Kunstköder** nutzen sich ab (ein abgenutzter läuft schlechter) und gehen bei Schnurbruch verloren.
+
+| Köder | Für |
+| --- | --- |
+| Regenwurm, Made | fast alle Friedfische, Forellen, Aal, Grundfische |
+| Mais, Brotflocke, Boilie | Friedfische (Karpfen/Karausche, Döbel/Rotfeder); Boilie selektiv auf große |
+| Köderfisch, Fischfetzen | Raubfische und Meeresräuber; Wels und Hecht besonders |
+| Insektenlarve | Forellen, Äschen, Friedfische |
+| Garnele | Meeresgrund- und Raubfische |
+| Leuchtköder | alle, nachts besonders; Fluchten 20 % schwächer |
+| Kraftköder | fast alle; Fisch ermüdet schneller, aber mehr Spannung |
+| Spinner, Blinker, Wobbler | Raubfische (Barsch und Rapfen lieben Spinner) |
+| Gummifisch | Raubfische, Zander besonders; verschleißt schnell |
+| Popper | Meeresräuber an der Oberfläche; gehakte Fische springen mehr |
+| Jig | Meeresgrund, Kabeljau und Seelachs |
+| Streamer, Trockenfliege, Nymphe | Forellen und Äschen – mit Fliegenrolle |
+
+Die Tageszeit zählt: Raubfische beißen in der Dämmerung, Wels, Aal und Zander nachts, Friedfische tagsüber, Forellen in der Dämmerung. Regen belebt Süßwasser.
+
+## Fische
+
+50 Arten schwimmen als Tiere im Wasser, jede mit eigener Körperform, Textur und Drillverhalten (Springer, Grundflüchter, Hindernissucher, Kopfschüttler). Die sichtbare Größe richtet sich nach der Länge. Seltenheit in sechs Stufen: Gewöhnlich, Ungewöhnlich, Selten, Episch, Legendär, Mythisch.
 
 | Lebensraum | Arten |
 | --- | --- |
-| Flüsse | Bachforelle, Regenbogenforelle, Äsche, Lachs, Meerforelle, Hecht, Zander, Flussbarsch, Aal, Rapfen, Barbe, Rotauge, Döbel |
-| Seen | Hecht, Zander, Flussbarsch, Karpfen, Brasse, Rotfeder, Schleie |
-| Sümpfe | Wels, Karpfen, Schleie, Aal, Goldkoi |
-| Kalte Gewässer | Bachforelle, Äsche, Lachs, Meerforelle |
+| Flüsse | Bachforelle, Regenbogenforelle, Äsche, Lachs, Meerforelle, Hecht, Zander, Flussbarsch, Aal, Rapfen, Barbe, Rotauge, Döbel, Stör |
+| Seen | Hecht, Zander, Flussbarsch, Karpfen, Karausche, Brasse, Rotfeder, Schleie |
+| Sümpfe | Wels, Karpfen, Karausche, Schleie, Aal, Goldkoi |
+| Kalte Gewässer | Bachforelle, Äsche, Lachs, Meerforelle, Stör |
 | Ozean | Kabeljau, Seelachs, Schellfisch, Seehecht, Wittling, Hering, Sprotte, Wolfsbarsch, Makrele, Scholle, Flunder, Seezunge, Steinbutt, Knurrhahn |
-| Warmer Ozean | Sardine, Sardelle, Dorade, Roter Schnapper, Rotbarbe, Zackenbarsch, Barracuda, Thunfisch, Bonito, Schwertfisch |
+| Warmer Ozean | Sardine, Sardelle, Dorade, Roter Schnapper, Rotbarbe, Zackenbarsch, Barrakuda, Thunfisch, Bonito, Schwertfisch |
 | Kalter Ozean | Alaska-Seelachs, Heilbutt, Rotbarsch, Seewolf, Lachs |
 | Tiefer Ozean | Seeteufel, Heilbutt, Thunfisch, Schwertfisch, Rotbarsch |
 
-Seltene Arten (Zander, Aal, Wels, Zackenbarsch, Heilbutt, Seeteufel u. a.) sind lila markiert, legendäre (Schwertfisch, Goldkoi) golden. Die genaue Gewichtung je Lebensraum steht in `FishSpecies.java`.
+Größere Exemplare ziehen stärker und halten länger durch (ein 1-kg-Barsch zieht etwa 1,5 kg, ein 12-kg-Karpfen etwa 7 kg, ein 50-kg-Wels etwa 15 kg). Fänge speichern Art, Länge, Gewicht, Größenklasse, Fangort, Welt-Tag, Angler und die Kontrolle im Drill; individuelle Fänge sind nicht stapelbar. Lebende Fische lassen sich im Eimer tragen.
 
-Fische spawnen in jedem Wasser mit freiem Himmel darüber, auch oberhalb des Meeresspiegels (Seen, Bergflüsse), aber nicht in Höhlen. Welche Arten auftauchen und anbeißen, hängt vom Lebensraum des Bioms ab.
+## Bossfische
 
-Gewichte folgen einer artspezifischen Länge³-Kurve mit ±12 % Variation. Kleinere Exemplare sind häufiger; die obersten 15 % des Längenbereichs gelten als Trophäenfische. Die Werte sind Spielbalance, keine biologische Vermessungsdatenbank. Bei normalen Angelbissen wird die Art nach dem Lebensraum am Haken gewichtet ausgewählt.
+Jeder Boss braucht seinen eigenen Bossköder, sein Gewässer und seine Zeit. Auch dann ist nur etwa jeder dritte Biss der Boss, und jeder Angler trifft jeden Boss einmal pro Tag. Bosse haben drei Phasen mit eigenem Verhalten und eine Eigenheit; ihr Fang bringt eine Trophäe, aus der die Bossrolle gebaut wird.
 
-Fänge speichern Art, Länge, Gewicht, Größenklasse, Fangbiom, Koordinaten, Welt-Tag, Angler und die Kontrolle während des Duells. Die Angaben stehen im Tooltip; die Rohdaten liegen in `minecraft:custom_data` unter `atzen_fish`. Individuelle Fänge sind nicht stapelbar.
+| Boss | Wo und wann | Köder | Eigenheit | Beute |
+| --- | --- | --- | --- | --- |
+| **Der Alte vom Grund** (Wels) | nachts, See oder Sumpf, ≥ 5 Blöcke tief | Uralter Grundköder | flüchtet ins Totholz, täuscht kurz vor der Landung Erschöpfung vor und explodiert | Uralte Welsbarte → Rolle des Alten |
+| **Der Schilfkönig** (Hecht) | Sumpf bei Regen oder in der Dämmerung | Königswobbler | Jagd ins Schilf, dann ein Tanz aus Sprung auf Sprung | Schilfkrone → Schilfkronen-Rolle |
+| **Der Schwarze Stör** | tagsüber, Fluss, ≥ 4 Blöcke tief | Strömungsköder | die Strömung zieht immer mit; lange Ruhe, dann Ausbrüche | Schwarze Knochenplatte → Strömungsrolle |
+| **Der Tiefenwächter** (mythisch) | verborgenes Wasser unter y 0, ohne Himmel | Tiefenlicht | lernt: wer ständig pumpt, bekommt Kopfstöße, wer nur kurbelt, Fluchten | Herz der Tiefe → Tiefenherz |
 
-Lebende Fische lassen sich mit einem Wassereimer aufnehmen und wieder freilassen. Länge, Gewicht und Gesundheit bleiben erhalten. Raubfische, Plattfische und seltene Arten sind Einzelgänger; Heringsartige ziehen in großen Schwärmen. Getötete Fische liefern ebenfalls einen vermessenen Wildfang. Alle Fisch-Items sind essbar und können zu gebratenem Kabeljau gekocht werden; dabei gehen die Fangdaten verloren.
-
-## Angeln, Köder und Verzauberungen
-
-| Angel | Haltbarkeit | Eigenschaft | Reparaturmaterial |
-| --- | --- | --- | --- |
-| Flussrute | 128 | etwas weniger Spannung, etwas schneller | Kupferbarren |
-| Eisenrute | 384 | deutlich weniger Spannung | Eisenbarren |
-| Gezeitenrute | 512 | weniger Spannung, schnell | Prismarinscherben |
-| **Carbonrute** | 1024 | **am besten:** 34 % weniger Spannung, 20 % schneller, ruhigere Fluchten | Carbonfaser |
-
-Jede Atzen-Rute hat drei **Ausrüstungs-Slots: Rolle, Schnur, Köder.** Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht und landet auf dem Mauszeiger. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt erst den Köder, dann die Schnur, dann die Rolle heraus. Alternativ die Rute auf dem Mauszeiger halten und per Rechtsklick auf ein Teil klicken. Der Tooltip zeigt die drei Slots und die Gesamtwirkung. Ohne geladenen Köder zählt weiterhin ein Köder in der anderen Hand. Pro begonnenem Duell wird ein Köder verbraucht. Im Kreativmodus wird nichts verbraucht.
-
-| Rolle | Wirkung |
-| --- | --- |
-| Kupferrolle | 8 % schneller einholen |
-| Eisenrolle | 15 % schneller, Fluchten 5 % schwächer |
-| Diamantrolle | 28 % schneller, Fluchten 12 % schwächer |
-
-| Schnur | Wirkung |
-| --- | --- |
-| Nylonschnur | 10 % weniger Spannung |
-| Geflochtene Schnur | 20 % weniger Spannung, 5 % schneller |
-| **Carbonschnur** | **am besten:** 34 % weniger Spannung, Fluchten 15 % schwächer |
-
-| Köder | Wirkung |
-| --- | --- |
-| Wurmköder | 15 % schneller einholen |
-| Leuchtköder | 20 % weniger Spannungsanstieg während Fluchten |
-| Kraftköder | 25 % schneller einholen, aber 12 % mehr Spannung |
-
-| Verzauberung | Höchststufe | Wirkung je Stufe |
-| --- | --- | --- |
-| Schnurmeister | III | 8 % weniger Spannungsanstieg |
-| Kurbelkraft | III | 8 % schneller einholen |
-| Wellenruhe | II | 15 % weniger Spannungsanstieg während Fluchten |
-
-Die Verzauberungen unterstützen normale und Atzen-Angeln. Sie sind für den Verzauberungstisch registriert. Alternativ das passende Atzen-Zauberbuch in die **Haupthand**, die eingeholte Angel in die **Nebenhand** nehmen und rechtsklicken: Ein Buch erhöht die Verzauberung um eine Stufe. Auf der Höchststufe wird kein Buch verbraucht. Boni verschiedener Ausrüstungsteile werden miteinander multipliziert.
+Bosse sind nur mit starker Ausrüstung zu schaffen (Carbonschnur, kräftige Rolle).
 
 ## Rezepte
 
-Alle folgenden Werkbankrezepte sind formlos. Die Rutenrezepte erzeugen eine neue Rute; sie übernehmen keine Verzauberungen, Namen oder anderen Daten der eingesetzten Rute. Baue deshalb zuerst die gewünschte Rute und verzaubere sie danach.
+Alle Werkbankrezepte sind formlos.
 
 | Ergebnis | Zutaten |
 | --- | --- |
-| Flussrute | 1 Angel, 2 Kupferbarren, 1 Faden |
-| Eisenrute | 1 Flussrute, 3 Eisenbarren, 1 Leder |
-| Gezeitenrute | 1 Eisenrute, 3 Prismarinscherben, 1 Herz des Meeres, 1 Diamant |
-| Carbonfaser | Kohleblock im Hochofen |
-| Carbonrute | Eisenrute, 3 Carbonfaser, 1 Diamant |
-| Kupferrolle | 2 Kupferbarren, 1 Eisennugget, 1 Stock |
-| Eisenrolle | 2 Eisenbarren, 1 Eisennugget, 1 Redstone |
-| Diamantrolle | Eisenrolle, Diamant, Gold, Redstone |
-| Nylonschnur | 3 Faden, 1 Schleimball |
-| Geflochtene Schnur | Nylonschnur, 3 Faden |
-| Carbonschnur | Geflochtene Schnur, 2 Carbonfaser |
-| 6 Wurmköder | 1 Verrottetes Fleisch, 1 Weizensamen |
-| 4 Leuchtköder | 1 Wurmköder, 1 Leuchttintenbeutel |
-| 4 Kraftköder | 1 Roher Lachs, 1 Seetang, 1 Weizen |
-| Schnurmeister-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Faden, 1 Eisenbarren |
-| Kurbelkraft-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Redstone, 1 Amethystscherbe |
-| Wellenruhe-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Prismarinkristalle, 1 Leuchttintenbeutel |
+| Flussrute | Angel, 2 Kupferbarren, Faden |
+| Eisenrute | Flussrute, 3 Eisenbarren, Leder |
+| Gezeitenrute | Eisenrute, 3 Prismarinscherben, Herz des Meeres, Diamant |
+| Carbonrute | Eisenrute, 3 Kohlefaser, Diamant |
+| Kohlefaser | Kohleblock im Hochofen |
+| Kupfer-Stationärrolle | 2 Kupferbarren, Eisennugget, Stock |
+| Eisen-Stationärrolle | 2 Eisenbarren, Eisennugget, Redstone |
+| Diamant-Stationärrolle | Eisenrolle, Diamant, Goldbarren, Redstone |
+| Baitcaster | 2 Eisenbarren, Goldbarren, Redstone, Quarz |
+| Multirolle | Eisenrolle, 2 Eisenbarren, Kupferblock |
+| Fliegenrolle | Eisenbarren, Leder, Faden, Stock |
+| Echorolle | Eisenrolle, Echosplitter, Amethystscherbe, Redstone |
+| Gezeitenrolle | Diamantrolle, Herz des Meeres, 2 Prismarinscherben |
+| Netheritrolle | Diamantrolle, Netheritbarren |
+| Rolle des Alten / Schilfkrone / Strömungsrolle / Tiefenherz | Multirolle / Baitcaster / Multirolle / Echorolle + Bosstrophäe + Gold / Smaragd / Prismarinkristalle / Diamant |
+| Monofile Schnur | 3 Faden, Schleimball |
+| Geflochtene Schnur | Monofile Schnur, 3 Faden |
+| Carbonschnur | Geflochtene Schnur, 2 Kohlefaser |
+| 6 Regenwurm | Verrottetes Fleisch, Weizensamen |
+| 8 Made | 2 Verrottetes Fleisch |
+| 8 Mais | Weizen, Gelber Farbstoff |
+| 8 Brotflocke | Brot |
+| 6 Boilie | Ei, Weizen, Zucker, Knochenmehl |
+| 2 Köderfisch | Roher Kabeljau |
+| 4 Fischfetzen | Roher Lachs |
+| 6 Insektenlarve | Spinnenauge, Weizensamen |
+| 4 Garnele | Seetang, Roher Kabeljau, Knochenmehl |
+| 4 Leuchtköder | Regenwurm, Leuchttintenbeutel |
+| 4 Kraftköder | Roher Lachs, Seetang, Weizen |
+| Spinner | 2 Eisennuggets, Kupferbarren, Faden |
+| Blinker | Eisenbarren, Goldnugget |
+| Wobbler | Eichenbretter, Roter Farbstoff, 2 Eisennuggets |
+| Gummifisch | Schleimball, Hellgrüner Farbstoff, Eisennugget |
+| Popper | Eichenbretter, Weißer Farbstoff, Eisennugget, Feder |
+| Jig | Eisenbarren, Faden, Schleimball |
+| Streamer | Feder, Faden, Eisennugget, Grüner Farbstoff |
+| Trockenfliege | Feder, Faden, Eisennugget |
+| Nymphe | Feder, Faden, Eisennugget, Goldnugget |
+| 2 Uralter Grundköder | Rohes Rindfleisch, Spinnenauge, Schlamm, Leuchttintenbeutel |
+| Königswobbler | Wobbler, Smaragd, Goldbarren, Feder |
+| 2 Strömungsköder | Boilie, Prismarinkristalle, Ton, Knochenmehl |
+| 2 Tiefenlicht | Leuchtköder, Echosplitter, Sculk |
+| Zauberbücher | Buch, Lapislazuli + Faden & Eisen (Schnurmeister) / Redstone & Amethyst (Kurbelkraft) / Prismarinkristalle & Leuchttinte (Wellenruhe) |
 
-Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“: Angeln, Rollen, Schnüre, Köder, Carbonfaser, Bücher, Fische, Eimer und Spawn-Eier. Die Spawn-Eier erscheinen zusätzlich im Vanilla-Tab Spawn-Eier.
+Verzauberungen: **Schnurmeister** +8 % Tragkraft je Stufe, **Kurbelkraft** +8 % Einzug und Kraft, **Wellenruhe** Fluchten −12 %. Zauberbuch in die Haupthand, eingeholte Angel in die Nebenhand, rechtsklicken.
+
+Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“.
 
 ## Befehle
 
 ```text
-/atzen
-/atzen practice
-/atzen practice darter
-/atzen practice fighter
-/atzen practice bruiser
-/atzen cancel
+/atzen                          Hilfe
+/atzen practice [Art|Boss]      Training ohne Beute mit der Rute in der Hand
+                                (roach, river_trout, pike, carp, catfish, tuna,
+                                 ancient_catfish, reed_king, black_sturgeon, deep_warden)
+/atzen cancel                   Drill abbrechen
 ```
-
-Das Training simuliert nur ein Duell: keine Beute, kein Köderverbrauch und kein Rutenverschleiß. Es lässt sich nur starten, wenn gerade kein Haken ausgeworfen ist.
 
 ## Entwicklung und Prüfungen
 
-Java 25 installieren und `JAVA_HOME` setzen. Unter Windows:
+`./gradlew build` mit JDK 25 kompiliert Server- und Clientcode, baut die JAR und führt die JUnit-Prüfungen aus. Sie spielen den Drill ohne Minecraft mit einem Test-Angler durch: jede gewöhnliche Art mit passender Ausrüstung fangbar, große Fische zerreißen schwache Ausrüstung, Dauer-Kurbeln reicht bei großen Fischen nicht, jeder Boss ist mit bester Ausrüstung schaffbar und mit einfacher nicht, alle Aktionen werden angekündigt, eine zu feste Bremse reißt die Schnur. Dazu Köderauswahl, Bossbedingungen, Maße, JSON-Dateien, Texturen, Übersetzungen und die Mixin-Ziele gegen Minecraft 26.2.
 
-```powershell
-.\scripts\build.ps1 build
-```
+Ressourcen neu erzeugen: `node scripts/generate-resources.mjs` (Modelle, Rezepte, Übersetzungen), `python3 scripts/draw-textures.py` (alle Texturen, 64×64), `python3 scripts/sounds.py OUT` (Klänge).
 
-Das Skript verwendet einen vorhandenen lokalen JDK unter `.tools/jdk`, sonst `JAVA_HOME`. Es legt Gradle-Cache und temporäre Dateien im Projekt ab. Alternativ mit Java 25: `./gradlew build` beziehungsweise `gradlew.bat build`.
-
-`build` kompiliert Server- und Clientcode, baut die JAR und führt 14 JUnit-Prüfungen aus. Diese prüfen erfolgreiche und fehlgeschlagene Duelle, Warnphasen, Abbruch, große Trophäenfische, Größen-/Gewichtsgrenzen, Artenverteilung, JSON-Dateien, eigene Modell-/Texturreferenzen und Übersetzungen. Ein Bytecode-Test prüft außerdem die verwendeten Angel-Mixin-Ziele gegen Minecraft 26.2. Es wird keine Welt gestartet. Der HTML-Testbericht liegt unter `build/reports/tests/test/index.html`.
-
-Ressourcen neu erzeugen:
-
-```powershell
-node scripts/generate-resources.mjs
-.\scripts\import-textures.ps1
-```
-
-Die 21 eigenen PNG-Texturen wurden mit dem integrierten ImageGen-Werkzeug erzeugt. Originale liegen unter `art/source`; genaue Prompts und Zielpfade stehen in `art/prompts.json`. Der Import verkleinert auf 64×64 Pixel und erhält bei Item-Sprites Seitenverhältnis und Transparenz. Die sechs blickdichten Fischatlanten enthalten Haut-, Flossen- und Augenbereiche. Vanilla-Ressourcen werden über Minecraft-Verweise genutzt und nicht als Originaldateien mitgeliefert.
-
-Die 3D-Modelle sind direkt in `AtzenFishModel.java` definiert und benötigen keine zusätzliche Animationsbibliothek. Spielbalance: `FishingBattle.java`, `FishSpecies.java` und `BattleEquipment.java`. Git ist eingerichtet; das Remote verweist auf `https://github.com/jojiuchiha03/Atzen`. Zugangsdaten gehören nicht in das Repository.
+Spielbalance: `FishingBattle.java` (Drill), `Boss.java`, `FishSpecimen.fighter()` (Fischkraft), `ReelType`/`LineType`/`RodType`/`BaitType` (Ausrüstung).
 
 Lizenz: MIT, siehe `LICENSE`.

@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.0] - 2026-10-12
+
+### Neu
+- Anforderungsliste und Roadmap unter `docs/`.
+- Neuer Drill als Schnursimulation: Fischkraft nach Größe und Ausdauer, einstellbare Bremse (10 Stufen), Schnurbruch nach Spannung gegen Tragkraft, Spulenkapazität, Hakenhalt, Pumpen (Rute heben, beim Absenken kurbeln), Gegensteuern bei Seitwärtsfluchten, Abrieb an Hindernissen, Schnurdrall beim Kurbeln gegen die Bremse.
+- Fischaktionen mit Vorwarnung: Flucht, Abtauchen, Seitwärts, Kopfstöße, Sprünge, Erschöpfung; artspezifisches Verhalten.
+- Anschlag-Timing setzt den Haken; aktive Landung per Rechtsklick, wenn der Fisch nah und müde ist.
+- Längere Drills: Hecht ~1 min, Wels 2–3 min, Bosse 4–7 min.
+- Kamera-Zustandsmaschine: Wurf, Warten am Köder, Biss unter Wasser, Anschlag, Drill mit Einstellungen je Fischaktion, Sprung, Landung, Trophäenansicht. C schaltet sie ab, X überspringt.
+- Neue Anzeige über der Hotbar: Spannung, Bremsmarke, Fischkraft, Hakenhalt, Hindernisnähe, Handlungshinweis, Schnur/Bremse/Haken in Zahlen, Bossleiste.
+- 13 Rollen mit Spezialfähigkeiten (Stationär, Baitcaster, Multi, Fliege, Echo, Gezeiten, Netherit und vier Bossrollen).
+- 25 Köder: Regenwurm, Made, Mais, Brot, Boilie, Köderfisch, Fischfetzen, Insektenlarve, Garnele, Spinner, Blinker, Wobbler, Gummifisch, Popper, Jig, Streamer, Trockenfliege, Nymphe u. a.; Fische ignorieren unpassende Köder, Kunstköder nutzen sich ab.
+- Vier Bossfische mit Bedingungen, drei Phasen und Eigenheiten: Der Alte vom Grund, Der Schilfkönig, Der Schwarze Stör, Der Tiefenwächter; Bosstrophäen.
+- Karausche und Stör; sechs Seltenheitsstufen; Tageszeit und Regen beeinflussen die Beißlust.
+- Training mit beliebiger Art oder Boss: `/atzen practice <art>`.
+
+### Geändert
+- Rute, Schnur und Rolle wirken jetzt über physikalische Werte (Hubkraft, Flex, Tragkraft, Dehnung, Abrieb, Einzug, Kraft, Kapazität).
+
 ## [0.5.0] - 2026-10-12
 
 ### Neu

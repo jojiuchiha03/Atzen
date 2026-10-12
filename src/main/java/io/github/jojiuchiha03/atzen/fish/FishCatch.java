@@ -45,14 +45,21 @@ public final class FishCatch {
         return data;
     }
 
+    public static ChatFormatting colour(FishSpecies.Rarity rarity) {
+        return switch (rarity) {
+            case COMMON -> ChatFormatting.WHITE;
+            case UNCOMMON -> ChatFormatting.GREEN;
+            case RARE -> ChatFormatting.AQUA;
+            case EPIC -> ChatFormatting.LIGHT_PURPLE;
+            case LEGENDARY -> ChatFormatting.GOLD;
+            case MYTHIC -> ChatFormatting.RED;
+        };
+    }
+
     public static List<Component> measurementLore(FishSpecimen fish) {
         return List.of(
                 Component.translatable(fish.species().rarityKey()).append(" · ")
-                        .append(Component.translatable(fish.sizeKey())).withStyle(switch (fish.species().rarity()) {
-                            case LEGENDARY -> ChatFormatting.GOLD;
-                            case RARE -> ChatFormatting.LIGHT_PURPLE;
-                            default -> ChatFormatting.AQUA;
-                        }),
+                        .append(Component.translatable(fish.sizeKey())).withStyle(colour(fish.species().rarity())),
                 Component.translatable("catch.atzen.measurements", String.format(Locale.ROOT, "%.1f", fish.lengthCm()),
                         String.format(Locale.ROOT, "%.2f", fish.weightKg())).withStyle(ChatFormatting.GRAY));
     }

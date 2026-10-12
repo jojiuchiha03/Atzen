@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "atzen:wobbler",
+    "minecraft:emerald",
+    "minecraft:gold_ingot",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "atzen:reed_king_lure",
+    "count": 1
+  }
+}

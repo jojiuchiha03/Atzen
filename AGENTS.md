@@ -18,3 +18,5 @@
 - 26.2-Falle: Grasblöcke sind nicht mehr in `#minecraft:dirt`, sondern in `#minecraft:grass_blocks` / `#minecraft:substrate_overworld`.
 - Mod-ID und Namensraum: `atzen`. Paket: `io.github.jojiuchiha03.atzen`.
 - Jede Änderung muss `./gradlew build` bestehen (CI prüft das bei jedem Push). Die JUnit-Tests starten keine Minecraft-Welt.
+- Der Drill ist reine Java-Logik in `battle/` (`FishingBattle`, `Fighter`, `Boss`, `Rig`) ohne Minecraft-Klassen. Balanceänderungen immer mit `FishingBattleTest` prüfen: der Test-Angler muss gewöhnliche Fische mit passender Ausrüstung fangen, Bosse mit bester, nicht mit einfacher.
+- Ausrüstungswerte stehen in den Enums `RodType`, `ReelType`, `LineType`, `BaitType`; Items dazu registriert `AtzenItems` automatisch.

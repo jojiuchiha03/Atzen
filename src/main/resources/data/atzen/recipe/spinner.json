@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "minecraft:copper_ingot",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "atzen:spinner",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:leather",
+    "minecraft:string",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "atzen:fly_reel",
+    "count": 1
+  }
+}

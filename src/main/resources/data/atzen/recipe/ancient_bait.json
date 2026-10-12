@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:beef",
+    "minecraft:spider_eye",
+    "minecraft:mud",
+    "minecraft:glow_ink_sac"
+  ],
+  "result": {
+    "id": "atzen:ancient_bait",
+    "count": 2
+  }
+}
