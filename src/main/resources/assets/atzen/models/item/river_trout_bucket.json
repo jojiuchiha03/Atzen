@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/bucket",
-    "layer1": "atzen:item/river_trout"
+    "layer0": "atzen:item/river_trout_bucket"
   }
 }

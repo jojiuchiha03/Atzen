@@ -16,13 +16,15 @@ Die Datei mit `-sources.jar` im Namen ist Quellcode und gehört nicht in den `mo
 
 ## Angeln und Duelle
 
-Mit einer normalen Angel oder einer Atzen-Rute auswerfen. Beim Biss rechtsklicken, um das Duell zu starten. Auch ein direkt mit dem Haken getroffener Atzen-Fisch kann gefangen werden; dann entsprechen Maße und Beute genau diesem Tier.
+Mit einer normalen Angel oder einer Atzen-Rute auswerfen. Beim Biss rechtsklicken, um das Duell zu starten. Atzen-Fische in der Nähe (bis 12 Blöcke) bemerken eine ausgeworfene Pose, schwimmen hin und beißen an: Die Pose taucht ab wie bei einem normalen Biss. Wer jetzt rechtsklickt, kämpft gegen genau diesen Fisch, mit seiner Länge und seinem Gewicht. Mit Köder beißen sie sicher, ohne Köder nur manchmal; zieht man nicht an, schwimmt der Fisch weiter. Auch ein direkt mit dem Haken getroffener Atzen-Fisch kann gefangen werden; dann entsprechen Maße und Beute genau diesem Tier.
 
 | Eingabe | Wirkung |
 | --- | --- |
 | **R halten** | Einholen: Fisch-Ausdauer sinkt, Schnurspannung steigt |
 | **R loslassen** | Nachgeben und Spannung abbauen |
 | **X** | Aktuelles Duell abbrechen |
+
+Es gibt kein HUD. Während des Duells kreist die Kamera langsam um dich und die Pose, der Fisch zappelt sichtbar an der Schnur, springt bei Fluchten aus dem Wasser und wird beim Einholen näher gezogen. Die Spannung hörst du: Je lauter und schneller die Schnur knarzt, desto näher ist sie am Reißen; bei hoher Spannung und während Fluchten wackelt die Kamera. Danach geht es weich zurück in deine eigene Ansicht.
 
 Die Tasten lassen sich unter Steuerung → Atzen: Angeln ändern. Zwischen 30 und 65 % Spannung holst du besonders effizient ein. Bei 100 % reißt die Schnur. Bleibt sie drei Sekunden unter 8 %, entkommt der Fisch. Vor jeder Flucht gibt es eine Warnphase; während der Flucht solltest du nachgeben. Jedes Duell hat maximal 60 Sekunden Zeit.
 
@@ -36,12 +38,14 @@ Alle sechs Arten schwimmen als Tiere im Wasser. Jede Art besitzt eine eigene Kö
 
 | Art | Länge | Mögliches Gewicht, ca. | Natürliches Vorkommen | Duellstil |
 | --- | --- | --- | --- | --- |
-| Flussforelle | 18–80 cm | 0,07–8,03 kg | Flüsse | Flitzer |
-| Barsch | 12–55 cm | 0,03–3,35 kg | Flüsse und Sümpfe | Kämpfer |
-| Hecht | 35–150 cm | 0,30–30,24 kg | Flüsse und Sümpfe | Kämpfer |
-| Karpfen | 25–110 cm | 0,36–38,76 kg | Sümpfe und Mangrovensümpfe | Brocken |
-| Wels | 40–220 cm | 0,51–107,33 kg | Sümpfe und Mangrovensümpfe | Brocken |
+| Flussforelle | 18–80 cm | 0,07–8,03 kg | Flüsse, seltener Seen | Flitzer |
+| Barsch | 12–55 cm | 0,03–3,35 kg | Flüsse und Sümpfe, seltener Seen | Kämpfer |
+| Hecht | 35–150 cm | 0,30–30,24 kg | Flüsse und Sümpfe, seltener Seen | Kämpfer |
+| Karpfen | 25–110 cm | 0,36–38,76 kg | Sümpfe und Mangrovensümpfe, seltener Seen | Brocken |
+| Wels | 40–220 cm | 0,51–107,33 kg | Sümpfe und Mangrovensümpfe, seltener Seen | Brocken |
 | Goldkoi | 15–75 cm | 0,06–8,98 kg | Selten in Flüssen und Sümpfen | Flitzer |
+
+Fische spawnen in jedem Wasser mit freiem Himmel darüber, auch oberhalb des Meeresspiegels (Seen, Bergflüsse), aber nicht in Höhlen. Seen und Teiche außerhalb von Fluss- und Sumpfbiomen sind dünner besetzt; der Goldkoi bleibt Flüssen und Sümpfen vorbehalten.
 
 Gewichte folgen einer artspezifischen Länge³-Kurve mit ±12 % Variation. Kleinere Exemplare sind häufiger; die obersten 15 % des Längenbereichs gelten als Trophäenfische. Die Werte sind Spielbalance, keine biologische Vermessungsdatenbank. Bei normalen Angelbissen werden Arten gewichtet ausgewählt: In Sümpfen sind Welse und Karpfen häufiger, der Goldkoi macht ungefähr 1 % der Fischart-Auswahl aus.
 
@@ -57,7 +61,7 @@ Lebende Fische lassen sich mit einem Wassereimer aufnehmen und wieder freilassen
 | Eisenrute | 384 | 22 % weniger Spannung | Eisenbarren |
 | Gezeitenrute | 512 | 10 % weniger Spannung, 25 % schneller einholen | Prismarinscherben |
 
-Den Köder in die jeweils andere Hand nehmen. Pro begonnenem Duell wird ein Köder verbraucht, auch wenn der Fisch später entkommt. Im Kreativmodus wird nichts verbraucht.
+Jede Atzen-Rute hat einen **Köder-Slot**: Köder im Inventar auf die Rute ziehen (ein anderer Köder wird getauscht), Rechtsklick auf die Rute nimmt ihn wieder heraus. Alternativ die Rute auf dem Mauszeiger halten und per Rechtsklick auf einen Köderstapel laden. Der Tooltip der Rute zeigt den Slot. Ohne geladenen Köder zählt weiterhin ein Köder in der anderen Hand. Pro begonnenem Duell wird ein Köder verbraucht, auch wenn der Fisch später entkommt. Im Kreativmodus wird nichts verbraucht.
 
 | Köder | Wirkung |
 | --- | --- |
@@ -89,7 +93,7 @@ Alle folgenden Werkbankrezepte sind formlos. Die Rutenrezepte erzeugen eine neue
 | Kurbelkraft-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Redstone, 1 Amethystscherbe |
 | Wellenruhe-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Prismarinkristalle, 1 Leuchttintenbeutel |
 
-Die vorhandene Atzen-Münze und der Kreativtab Atzen bleiben erhalten. Zwei Goldklumpen ergeben formlos eine Münze. Ruten, Köder, Bücher und Fischeimer stehen im Kreativtab Werkzeuge. Fisch-Items stehen unter Nahrung; jede Art besitzt außerdem ein Spawn-Ei.
+Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“: Angeln, Köder, Bücher, Fische, Eimer und Spawn-Eier. Die Spawn-Eier erscheinen zusätzlich im Vanilla-Tab Spawn-Eier.
 
 ## Befehle
 

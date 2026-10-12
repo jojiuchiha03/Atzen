@@ -1,18 +1,16 @@
 package io.github.jojiuchiha03.atzen.item;
 
 import io.github.jojiuchiha03.atzen.Atzen;
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
 import java.util.List;
 import java.util.function.Function;
 
@@ -32,8 +30,10 @@ public final class AtzenItems {
     private AtzenItems() { }
 
     private static Item rod(String name, int durability, int enchantability, Item repairMaterial) {
-        return register(name, FishingRodItem::new,
-                new Item.Properties().durability(durability).enchantable(enchantability).repairable(repairMaterial));
+        // The bait sits in the container component; its plain text line is hidden, the slot tooltip shows it instead.
+        return register(name, AtzenRodItem::new,
+                new Item.Properties().durability(durability).enchantable(enchantability).repairable(repairMaterial)
+                        .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.CONTAINER, true)));
     }
 
     private static Item tome(String enchantment, int maxLevel) {
@@ -50,8 +50,6 @@ public final class AtzenItems {
         return Registry.register(BuiltInRegistries.ITEM, id, factory.apply(properties));
     }
 
-    public static void initialize() {
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
-                .register(entries -> ALL.forEach(entries::accept));
-    }
+    /** Loads the class so the items register; they are listed in the Atzen tab (see ModItems). */
+    public static void initialize() { }
 }

@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/bucket",
-    "layer1": "atzen:item/catfish"
+    "layer0": "atzen:item/catfish_bucket"
   }
 }

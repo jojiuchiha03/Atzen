@@ -1,8 +1,10 @@
 package io.github.jojiuchiha03.atzen;
 
+import io.github.jojiuchiha03.atzen.fish.AtzenFishRegistry;
+import io.github.jojiuchiha03.atzen.fish.FishSpecies;
+import io.github.jojiuchiha03.atzen.item.AtzenItems;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
@@ -15,35 +17,30 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Alle Items der Mod und der eigene Kreativ-Tab. Neues Item: eine Zeile
- * {@code register("name", Item::new, new Item.Properties())}, dazu
- * assets/atzen/items/name.json, models/item/name.json, die Textur und
- * ein Eintrag in lang/*.json.
+ * Der Kreativ-Tab „Atzen – Angeln“: alles aus der Mod an einer Stelle, in fester Reihenfolge
+ * (Angeln, Köder, Bücher, Fische, Eimer, Spawn-Eier). Neue Items gehören in {@link #ordered()}.
  */
 public final class ModItems {
-    private static final List<Item> TAB = new ArrayList<>();
-
-    public static final Item ATZEN_MUENZE = register("atzen_muenze", Item::new, new Item.Properties());
-
     private ModItems() {}
 
-    public static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {
-        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Atzen.id(name));
-        Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
-        TAB.add(item);
-        return item;
+    static List<Item> ordered() {
+        List<Item> items = new ArrayList<>(AtzenItems.ALL);
+        for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.fishItem(species));
+        for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.bucket(species));
+        for (FishSpecies species : FishSpecies.values()) items.add(AtzenFishRegistry.spawnEgg(species));
+        return items;
     }
 
     static void register() {
         ResourceKey<CreativeModeTab> tabKey = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Atzen.id("atzen"));
         CreativeModeTab tab = FabricCreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.atzen"))
-                .icon(() -> new ItemStack(ATZEN_MUENZE))
+                .icon(() -> new ItemStack(AtzenItems.TIDE_ROD))
                 .build();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tabKey, tab);
         // Der Vanilla-Builder hält seine Ausgabe geschützt, daher über Fabrics Event.
         CreativeModeTabEvents.modifyOutputEvent(tabKey).register(output -> {
-            for (Item item : TAB) {
+            for (Item item : ordered()) {
                 output.getDisplayStacks().add(new ItemStack(item));
                 output.getSearchTabStacks().add(new ItemStack(item));
             }

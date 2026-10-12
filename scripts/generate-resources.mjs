@@ -13,9 +13,9 @@ const items = {
   river_rod: ['Flussrute', 'River Rod', '10 % weniger Spannung, 5 % schnelleres Einholen.', '10% less strain, 5% faster reeling.'],
   iron_rod: ['Eisenrute', 'Iron Rod', '22 % weniger Spannung. Reparatur: Eisenbarren.', '22% less strain. Repair with iron ingots.'],
   tide_rod: ['Gezeitenrute', 'Tide Rod', '25 % schneller, 10 % weniger Spannung. Reparatur: Prismarin.', '25% faster, 10% less strain. Repair with prismarine shards.'],
-  worm_bait: ['Wurmköder', 'Worm Bait', 'Andere Hand: 15 % schneller einholen. Ein Köder pro Duell.', 'Other hand: reel 15% faster. One bait per battle.'],
-  glow_bait: ['Leuchtköder', 'Glow Bait', 'Andere Hand: 20 % weniger Fluchtdruck. Ein Köder pro Duell.', 'Other hand: 20% less surge strain. One bait per battle.'],
-  hearty_bait: ['Kraftköder', 'Hearty Bait', 'Andere Hand: 25 % schneller, aber 12 % mehr Spannung.', 'Other hand: 25% faster reeling, but 12% more strain.'],
+  worm_bait: ['Wurmköder', 'Worm Bait', 'Im Köder-Slot: 15 % schneller einholen. Ein Köder pro Duell.', 'In the bait slot: reel 15% faster. One bait per battle.'],
+  glow_bait: ['Leuchtköder', 'Glow Bait', 'Im Köder-Slot: 20 % weniger Fluchtdruck. Ein Köder pro Duell.', 'In the bait slot: 20% less surge strain. One bait per battle.'],
+  hearty_bait: ['Kraftköder', 'Hearty Bait', 'Im Köder-Slot: 25 % schneller, aber 12 % mehr Spannung.', 'In the bait slot: 25% faster reeling, but 12% more strain.'],
   steady_line_tome: ['Zauberbuch: Schnurmeister', 'Tome of Steady Line', 'Rechtsklick mit Angel in der anderen Hand: Schnurmeister +1.', 'Use with a rod in the other hand: Steady Line +1.'],
   reel_power_tome: ['Zauberbuch: Kurbelkraft', 'Tome of Reel Power', 'Rechtsklick mit Angel in der anderen Hand: Kurbelkraft +1.', 'Use with a rod in the other hand: Reel Power +1.'],
   calm_waters_tome: ['Zauberbuch: Wellenruhe', 'Tome of Calm Waters', 'Rechtsklick mit Angel in der anderen Hand: Wellenruhe +1.', 'Use with a rod in the other hand: Calm Waters +1.'],
@@ -82,19 +82,6 @@ const translations = {
   'fish.atzen.darter': ['Flitzer', 'Darter'],
   'fish.atzen.fighter': ['Kämpfer', 'Fighter'],
   'fish.atzen.bruiser': ['Brocken', 'Bruiser'],
-  'hud.atzen.title': ['FISCHDUELL', 'FISH BATTLE'],
-  'hud.atzen.practice': ['TRAINING', 'PRACTICE'],
-  'hud.atzen.tension': ['SCHNURSPANNUNG  %s %%', 'LINE TENSION  %s%%'],
-  'hud.atzen.stamina': ['FISCH-AUSDAUER  %s %%', 'FISH STAMINA  %s%%'],
-  'hud.atzen.danger': ['NACHGEBEN!', 'RELEASE NOW!'],
-  'hud.atzen.slack': ['SCHNUR ZU LOCKER!', 'LINE TOO LOOSE!'],
-  'hud.atzen.reeling': ['[%s] Einholen …', '[%s] Reeling …'],
-  'hud.atzen.hold': ['[%s] halten: einholen', 'Hold [%s]: reel in'],
-  'hud.atzen.controls': ['Loslassen: nachgeben   [%s]: Abbruch', 'Release: ease tension   [%s]: cancel'],
-  'hud.atzen.quality': ['Kontrolle im grünen Bereich: %s %%', 'Control in the green zone: %s%%'],
-  'hud.atzen.try_again': ['Achte auf Fluchten und die grüne Zone.', 'Watch the surges and the green zone.'],
-  'hud.atzen.no_rewards': ['Training – keine Beute, kein Verbrauch.', 'Practice – no loot, no items consumed.'],
-  'hud.atzen.ready': ['Bereit für den nächsten Wurf.', 'Ready for the next cast.'],
   'phase.atzen.steady': ['Jetzt einholen', 'Reel it in'],
   'phase.atzen.warning': ['Flucht steht bevor!', 'Surge incoming!'],
   'phase.atzen.surge': ['Der Fisch flüchtet!', 'The fish is surging!'],
@@ -112,11 +99,14 @@ const translations = {
   'message.atzen.enchanted': ['Angel verzaubert: %s %s', 'Rod enchanted: %s %s'],
   'message.atzen.client_required': ['Installiere Atzen auch auf deinem Client, um Angelduelle zu spielen.', 'Install Atzen on your client to play fishing battles.'],
   'message.atzen.already_fishing': ['Beende zuerst deinen aktuellen Wurf oder dein Duell.', 'Finish your current cast or battle first.'],
-  'message.atzen.help': ['Atzen: normal auswerfen und beim Biss rechtsklicken. Im Duell R halten, bei Fluchten loslassen. Köder in die andere Hand. /atzen practice startet ein Training ohne Beute, /atzen cancel bricht ab. Tasten sind einstellbar.', 'Atzen: cast normally, then right-click at a bite. Hold R to reel; release during surges. Put bait in your other hand. /atzen practice starts a no-loot training battle; /atzen cancel stops it. Keys are configurable.'],
+  'message.atzen.help': ['Atzen: normal auswerfen und beim Biss rechtsklicken. Im Duell R halten, bei knarzender Schnur und Fluchten loslassen. Köder im Inventar auf die Angel ziehen (Rechtsklick nimmt ihn heraus). /atzen practice startet ein Training ohne Beute, /atzen cancel bricht ab. Tasten sind einstellbar.', 'Atzen: cast normally, then right-click at a bite. Hold R to reel; ease off when the line creaks or the fish surges. Drop bait onto the rod in your inventory (right-click takes it out). /atzen practice starts a no-loot training battle; /atzen cancel stops it. Keys are configurable.'],
+  'tooltip.atzen.bait_slot': ['Köder: %s ×%s', 'Bait: %s ×%s'],
+  'tooltip.atzen.bait_slot_empty': ['Köder-Slot leer – Köder auf die Angel ziehen', 'Bait slot empty – drop bait onto the rod'],
+  'message.atzen.controls_hint': ['Erster Biss! Halte %s zum Einholen – hör auf die Schnur: knarzt sie, lass locker. %s bricht ab.', 'First bite! Hold %s to reel – listen to the line: when it creaks, ease off. %s cancels.'],
 };
 
-const de = { 'itemGroup.atzen': 'Atzen', 'item.atzen.atzen_muenze': 'Atzen-Münze' };
-const en = { 'itemGroup.atzen': 'Atzen', 'item.atzen.atzen_muenze': 'Atzen Coin' };
+const de = { 'itemGroup.atzen': 'Atzen – Angeln' };
+const en = { 'itemGroup.atzen': 'Atzen – Fishing' };
 for (const [id, [german, english, germanTip, englishTip]] of Object.entries(items)) {
   de[`item.atzen.${id}`] = german; en[`item.atzen.${id}`] = english;
   de[`tooltip.atzen.${id}`] = germanTip; en[`tooltip.atzen.${id}`] = englishTip;
@@ -141,7 +131,7 @@ for (const [id, [german, english, color]] of Object.entries(fish)) {
   de[`item.atzen.${id}_spawn_egg`] = `${german}-Spawn-Ei`; en[`item.atzen.${id}_spawn_egg`] = `${english} Spawn Egg`;
   json(`assets/atzen/models/item/${id}.json`, { parent: 'minecraft:item/generated', textures: { layer0: `atzen:item/${id}` } });
   json(`assets/atzen/models/item/${id}_bucket.json`, {
-    parent: 'minecraft:item/generated', textures: { layer0: 'minecraft:item/bucket', layer1: `atzen:item/${id}` },
+    parent: 'minecraft:item/generated', textures: { layer0: `atzen:item/${id}_bucket` },
   });
   for (const suffix of ['', '_bucket']) {
     json(`assets/atzen/items/${id}${suffix}.json`, { model: { type: 'minecraft:model', model: `atzen:item/${id}${suffix}` } });

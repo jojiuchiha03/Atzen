@@ -34,6 +34,8 @@ public final class Atzen implements ModInitializer {
                 (payload, context) -> BATTLES.input(context.player(), payload));
         ServerTickEvents.END_SERVER_TICK.register(BATTLES::tick);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BATTLES.disconnect(handler.getPlayer()));
+        // Before the world is saved: hooked fish get their AI back and battle dummies are gone.
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> BATTLES.clear());
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> BATTLES.clear());
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> BATTLES.registerCommands(dispatcher));
         LOGGER.info("Atzen geladen: fishing battles initialized for Minecraft 26.2");

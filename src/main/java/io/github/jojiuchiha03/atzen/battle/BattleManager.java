@@ -2,8 +2,15 @@ package io.github.jojiuchiha03.atzen.battle;
 
 import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.item.BattleEquipment;
 import io.github.jojiuchiha03.atzen.fish.AtzenFishEntity;
+import io.github.jojiuchiha03.atzen.fish.AtzenFishRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.phys.Vec3;
 import io.github.jojiuchiha03.atzen.fish.FishCatch;
 import io.github.jojiuchiha03.atzen.fish.FishSpecies;
 import io.github.jojiuchiha03.atzen.fish.FishSpecimen;
@@ -33,6 +40,8 @@ import java.util.UUID;
 public final class BattleManager {
     private final Map<UUID, Session> sessions = new HashMap<>();
     private final Map<UUID, Session> completing = new HashMap<>();
+    /** Fish swimming to or biting a float, by float UUID (see BiteHookGoal). */
+    private final Map<UUID, AtzenFishEntity> biters = new HashMap<>();
     private int nextId;
 
     public boolean interceptRetrieve(FishingHook hook, ItemStack rod, int nibble) {
@@ -40,21 +49,136 @@ public final class BattleManager {
         Session active = sessions.get(player.getUUID());
         if (active != null) return active.hook == hook;
         AtzenFishEntity liveFish = hook.getHookedIn() instanceof AtzenFishEntity fish ? fish : null;
+        if (liveFish == null && nibble > 0) {
+            // A fish from the world bit this float: the fight is against that very fish.
+            AtzenFishEntity biter = biters.get(hook.getUUID());
+            if (biter != null && biter.isAlive() && !biter.isBattleDummy() && biter.distanceToSqr(hook) < 9) liveFish = biter;
+        }
         if ((liveFish == null && (nibble <= 0 || hook.getHookedIn() != null))
                 || (liveFish != null && !liveFish.isAlive()) || !ServerPlayNetworking.canSend(player, BattlePayload.TYPE)) return false;
         InteractionHand hand = player.getMainHandItem() == rod ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         if (player.getItemInHand(hand) != rod) return false;
-        ItemStack bait = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+        // Bait loaded into the rod's slot comes first; bait held in the other hand still works.
+        ItemStack loaded = AtzenRodItem.bait(rod);
+        ItemStack bait = !loaded.isEmpty() ? loaded
+                : player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Random random = new Random(player.getRandom().nextLong());
         FishSpecimen specimen = liveFish != null ? liveFish.specimen()
                 : FishSpecies.choose(FishCatch.isSwamp(player.level(), hook.blockPosition()), random).roll(random);
         FishingBattle battle = new FishingBattle(specimen.species().style(), random.nextLong(),
                 specimen.tune(BattleEquipment.tuning(player, rod, bait)));
-        if (BattleEquipment.isBait(bait)) bait.consume(1, player);
+        if (!loaded.isEmpty()) AtzenRodItem.consumeBait(rod, player);
+        else if (BattleEquipment.isBait(bait)) bait.consume(1, player);
         Session session = new Session(++nextId, player, hook, rod, hand, battle, specimen, liveFish);
         sessions.put(player.getUUID(), session);
+        biters.remove(hook.getUUID());
+        if (liveFish == null) spawnDummy(session);
+        else {
+            liveFish.getNavigation().stop();
+            liveFish.setNoAi(true);
+            session.dummy = liveFish;
+        }
         send(session);
         return true;
+    }
+
+    /** The fish everyone sees on the line: a non-saved, invulnerable copy of the specimen that is being fought. */
+    private void spawnDummy(Session session) {
+        if (!(session.player.level() instanceof ServerLevel level)) return;
+        AtzenFishEntity dummy = AtzenFishRegistry.entity(session.specimen.species()).create(level, EntitySpawnReason.TRIGGERED);
+        if (dummy == null) return;
+        dummy.becomeBattleDummy(session.specimen);
+        dummy.snapTo(session.anchor.x, session.anchor.y - 0.35, session.anchor.z, session.player.getYRot(), 0);
+        session.dummy = dummy;
+        level.addFreshEntity(dummy);
+        level.sendParticles(ParticleTypes.SPLASH, session.anchor.x, session.anchor.y + 0.1, session.anchor.z, 14, 0.3, 0.1, 0.3, 0.12);
+    }
+
+    public boolean ownsDummy(AtzenFishEntity fish) {
+        for (Session session : sessions.values()) if (session.dummy == fish && session.liveFish == null) return true;
+        return false;
+    }
+
+    public boolean claimBite(FishingHook hook, AtzenFishEntity fish) {
+        AtzenFishEntity current = biters.get(hook.getUUID());
+        if (current != null && current != fish && current.isAlive()) return false;
+        biters.put(hook.getUUID(), fish);
+        return true;
+    }
+
+    public void releaseBite(FishingHook hook, AtzenFishEntity fish) {
+        biters.remove(hook.getUUID(), fish);
+    }
+
+    public boolean hasBiter(FishingHook hook) {
+        AtzenFishEntity fish = biters.get(hook.getUUID());
+        if (fish != null && !fish.isAlive()) biters.remove(hook.getUUID());
+        return fish != null && fish.isAlive();
+    }
+
+    /**
+     * Server-side choreography, visible to every player: the fish circles under the float, thrashes when it is
+     * about to run, leaps out of the water during a surge and is dragged towards the angler as the fight is won.
+     * The float follows the fish so the line moves with it.
+     */
+    private void animate(Session session) {
+        if (session.hook == null || !(session.player.level() instanceof ServerLevel level)) return;
+        FishingBattle battle = session.battle;
+        int t = battle.elapsed();
+        if (session.reeling && session.inputAge <= 20 && t % 7 == 0) session.player.swing(session.hand, true);
+        if (session.dummy == null || session.dummy.isRemoved()) return;
+
+        Vec3 toAngler = session.player.position().subtract(session.anchor).multiply(1, 0, 1);
+        Vec3 wanted = session.anchor.add(toAngler.scale(battle.progress() / 100.0 * 0.6));
+        // Only drag the fish over water; at the shore it stays where it last could swim.
+        if (level.getFluidState(BlockPos.containing(wanted.x, session.anchor.y - 0.3, wanted.z)).is(FluidTags.WATER)) {
+            session.center = new Vec3(wanted.x, session.anchor.y, wanted.z);
+        }
+        FishingBattle.Phase phase = battle.phase();
+        session.angle += switch (phase) { case STEADY -> 0.10; case WARNING -> 0.05; case SURGE -> 0.32; case RECOVERY -> 0.06; };
+        double radius = phase == FishingBattle.Phase.SURGE ? 1.1 : 0.55;
+        double x = session.center.x + Math.cos(session.angle) * radius;
+        double z = session.center.z + Math.sin(session.angle) * radius;
+        double y = session.anchor.y - 0.35;
+        float pitch = 0;
+        switch (phase) {
+            case WARNING -> {
+                x += (session.player.getRandom().nextDouble() - 0.5) * 0.25;
+                z += (session.player.getRandom().nextDouble() - 0.5) * 0.25;
+                if (t % 4 == 0) level.sendParticles(ParticleTypes.BUBBLE, x, y + 0.3, z, 4, 0.2, 0.05, 0.2, 0.02);
+            }
+            case SURGE -> {
+                int cycle = t % 18;
+                if (cycle < 12) {
+                    double arc = Math.sin(cycle / 12.0 * Math.PI);
+                    y += arc * 1.4;
+                    pitch = (float) ((6 - cycle) * -9.0);
+                }
+                if (cycle == 0 || cycle == 12) {
+                    level.sendParticles(ParticleTypes.SPLASH, x, session.anchor.y + 0.1, z, 18, 0.35, 0.1, 0.35, 0.15);
+                    level.playSound(null, x, session.anchor.y, z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.5f,
+                            1.1f + session.player.getRandom().nextFloat() * 0.3f);
+                }
+            }
+            case RECOVERY -> y -= 0.15;
+            case STEADY -> {
+                if (t % 10 == 0) level.sendParticles(ParticleTypes.BUBBLE, x, y + 0.2, z, 2, 0.1, 0.05, 0.1, 0.01);
+            }
+        }
+        float yaw = (float) Math.toDegrees(Math.atan2(Math.sin(session.angle), Math.cos(session.angle)));
+        session.dummy.snapTo(x, y, z, yaw, pitch);
+        session.dummy.setYHeadRot(yaw);
+        session.dummy.setYBodyRot(yaw);
+        session.dummy.setDeltaMovement(Vec3.ZERO);
+        session.hook.setPos(x, session.anchor.y, z);
+        session.hook.setDeltaMovement(Vec3.ZERO);
+    }
+
+    private static void removeDummy(Session session) {
+        if (session.dummy == null || session.dummy.isRemoved()) return;
+        // A real fish from the world swims on (unless it was caught, then finish() removes it); a dummy vanishes.
+        if (session.dummy == session.liveFish) session.dummy.setNoAi(false);
+        else session.dummy.discard();
     }
 
     public boolean isBattling(FishingHook hook) {
@@ -94,11 +218,7 @@ public final class BattleManager {
                 finish(session);
                 continue;
             }
-            if (session.hook != null && session.battle.phase() == FishingBattle.Phase.SURGE
-                    && session.battle.elapsed() % 6 == 0) {
-                player.level().sendParticles(ParticleTypes.SPLASH, session.hook.getX(), session.hook.getY() + 0.15,
-                        session.hook.getZ(), 5, 0.3, 0.1, 0.3, 0.08);
-            }
+            animate(session);
             if (session.battle.elapsed() % 2 == 0 || previous != session.battle.phase()) send(session);
         }
     }
@@ -106,6 +226,12 @@ public final class BattleManager {
     private void finish(Session session) {
         // Remove before giving loot, and guard re-entry through the retrieve mixin.
         sessions.remove(session.player.getUUID());
+        if (session.dummy != null && session.player.level() instanceof ServerLevel level) {
+            boolean caught = session.battle.result() == FishingBattle.Result.CAUGHT;
+            level.sendParticles(caught ? ParticleTypes.SPLASH : ParticleTypes.BUBBLE_POP, session.dummy.getX(),
+                    session.anchor.y + 0.1, session.dummy.getZ(), caught ? 30 : 12, 0.4, 0.2, 0.4, 0.2);
+        }
+        removeDummy(session);
         send(session);
         if (session.hook != null) {
             if (session.battle.result() == FishingBattle.Result.CAUGHT && !session.hook.isRemoved()) {
@@ -161,13 +287,18 @@ public final class BattleManager {
 
     public void disconnect(ServerPlayer player) {
         Session session = sessions.remove(player.getUUID());
+        if (session != null) removeDummy(session);
         if (session != null && session.hook != null) session.hook.discard();
     }
 
     public void clear() {
-        sessions.values().forEach(session -> { if (session.hook != null) session.hook.discard(); });
+        sessions.values().forEach(session -> {
+            removeDummy(session);
+            if (session.hook != null) session.hook.discard();
+        });
         sessions.clear();
         completing.clear();
+        biters.clear();
     }
 
     private int practice(ServerPlayer player, FishStyle style) {
@@ -216,6 +347,10 @@ public final class BattleManager {
         final FishingBattle battle;
         final FishSpecimen specimen;
         final AtzenFishEntity liveFish;
+        final Vec3 anchor;
+        Vec3 center;
+        AtzenFishEntity dummy;
+        double angle;
         boolean reeling;
         int inputAge;
 
@@ -229,6 +364,8 @@ public final class BattleManager {
             this.battle = battle;
             this.specimen = specimen;
             this.liveFish = liveFish;
+            this.anchor = hook != null ? hook.position() : player.position();
+            this.center = anchor;
         }
     }
 }

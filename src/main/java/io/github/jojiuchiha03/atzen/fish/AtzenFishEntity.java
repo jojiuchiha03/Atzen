@@ -1,6 +1,10 @@
 package io.github.jojiuchiha03.atzen.fish;
 
+import io.github.jojiuchiha03.atzen.Atzen;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,6 +24,8 @@ import java.util.stream.Stream;
 public final class AtzenFishEntity extends Cod {
     private final FishSpecies species;
     private FishSpecimen specimen;
+    /** Shown on the line during a battle; never saved, never bucketed, never drops anything. */
+    private boolean battleDummy;
 
     public AtzenFishEntity(EntityType<? extends Cod> type, Level level, FishSpecies species) {
         super(type, level);
@@ -29,6 +35,30 @@ public final class AtzenFishEntity extends Cod {
 
     public FishSpecimen specimen() { return specimen; }
 
+    public void becomeBattleDummy(FishSpecimen hooked) {
+        battleDummy = true;
+        setNoAi(true);
+        setInvulnerable(true);
+        setSilent(true);
+        setSpecimen(hooked);
+    }
+
+    public boolean isBattleDummy() { return battleDummy; }
+
+    @Override public void tick() {
+        // A dummy whose battle is gone (server restart, crash of the session) must not linger.
+        if (battleDummy && !level().isClientSide() && !Atzen.BATTLES.ownsDummy(this)) { discard(); return; }
+        super.tick();
+    }
+
+    @Override public boolean shouldBeSaved() { return !battleDummy && super.shouldBeSaved(); }
+
+    @Override public boolean removeWhenFarAway(double distance) { return !battleDummy && super.removeWhenFarAway(distance); }
+
+    @Override protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        return battleDummy ? InteractionResult.PASS : super.mobInteract(player, hand);
+    }
+
     private void setSpecimen(FishSpecimen specimen) {
         this.specimen = specimen;
         if (!level().isClientSide()) {
@@ -37,6 +67,11 @@ public final class AtzenFishEntity extends Cod {
             getAttribute(Attributes.MAX_HEALTH).setBaseValue(3 + specimen.sizeFraction() * 5);
             setHealth(getMaxHealth());
         }
+    }
+
+    @Override protected void registerGoals() {
+        super.registerGoals();
+        goalSelector.addGoal(1, new BiteHookGoal(this));
     }
 
     @Override public int getMaxSchoolSize() {
@@ -88,6 +123,7 @@ public final class AtzenFishEntity extends Cod {
     }
 
     @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean causedByPlayer) {
+        if (battleDummy) return;
         super.dropCustomDeathLoot(level, source, causedByPlayer);
         spawnAtLocation(level, FishCatch.create(specimen, level, blockPosition(), -1, ""));
     }
