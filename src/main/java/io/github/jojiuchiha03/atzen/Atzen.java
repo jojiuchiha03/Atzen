@@ -25,6 +25,7 @@ public final class Atzen implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        AtzenSounds.initialize();
         ModItems.register();
         AtzenItems.initialize();
         AtzenFishRegistry.initialize();

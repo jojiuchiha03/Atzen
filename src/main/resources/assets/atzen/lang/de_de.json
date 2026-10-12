@@ -82,5 +82,16 @@
   "habitat.atzen.freshwater": "Gewässer",
   "message.atzen.controls_hint": "Erster Biss! Halte %s zum Einholen – hör auf die Schnur: knarzt sie, lass locker. %s bricht ab.",
   "tooltip.atzen.bait_slot": "Köder: %s ×%s",
-  "tooltip.atzen.bait_slot_empty": "Köder-Slot leer – Köder auf die Angel ziehen"
+  "tooltip.atzen.bait_slot_empty": "Köder-Slot leer – Köder auf die Angel ziehen",
+  "subtitles.atzen.bite": "Fisch beißt an",
+  "subtitles.atzen.hook_set": "Angel schlägt an",
+  "subtitles.atzen.warning": "Fisch sammelt Kraft",
+  "subtitles.atzen.reel": "Rolle ratscht",
+  "subtitles.atzen.creak": "Schnur knarzt",
+  "subtitles.atzen.slack": "Schnur hängt durch",
+  "subtitles.atzen.leap": "Fisch springt",
+  "subtitles.atzen.snap": "Schnur reißt",
+  "subtitles.atzen.catch": "Fang gelandet",
+  "subtitles.atzen.escape": "Fisch entkommt",
+  "subtitles.atzen.bait": "Köder eingelegt"
 }

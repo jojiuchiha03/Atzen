@@ -2,6 +2,7 @@ package io.github.jojiuchiha03.atzen.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jojiuchiha03.atzen.Atzen;
+import io.github.jojiuchiha03.atzen.AtzenSounds;
 import io.github.jojiuchiha03.atzen.battle.FishingBattle;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import io.github.jojiuchiha03.atzen.network.ReelPayload;
@@ -16,7 +17,6 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -63,7 +63,7 @@ public final class AtzenClient implements ClientModInitializer {
             outroTicks = 0;
             if (client.player != null) {
                 orbitStartYaw = client.player.getYRot() + 180;
-                client.player.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.7f, 1.1f);
+                client.player.playSound(AtzenSounds.HOOK_SET, 0.8f, 1.0f);
                 if (!hintShown) {
                     hintShown = true;
                     client.player.sendSystemMessage(Component.translatable("message.atzen.controls_hint",
@@ -76,14 +76,11 @@ public final class AtzenClient implements ClientModInitializer {
                 client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
             }
         } else if (state.phase() != payload.phase() && payload.phase() == FishingBattle.Phase.WARNING && client.player != null) {
-            client.player.playSound(SoundEvents.NOTE_BLOCK_PLING.value(), 0.5f, 0.65f);
+            client.player.playSound(AtzenSounds.WARNING, 0.7f, 1.0f);
         }
         if (payload.result() != FishingBattle.Result.ACTIVE && (state == null || state.result() == FishingBattle.Result.ACTIVE)) {
             outroTicks = BattleCamera.OUTRO;
-            if (client.player != null) {
-                if (payload.result() == FishingBattle.Result.CAUGHT) client.player.playSound(SoundEvents.PLAYER_LEVELUP, 0.5f, 1.4f);
-                else if (payload.result() == FishingBattle.Result.SNAPPED) client.player.playSound(SoundEvents.LEAD_BREAK, 0.9f, 0.9f);
-            }
+            // the outcome sound comes from the server, for everyone around
         }
         state = payload;
         packetAge = 0;
@@ -120,10 +117,10 @@ public final class AtzenClient implements ClientModInitializer {
         float tension = displayedTension;
         int every = tension >= 85 ? 3 : tension >= 70 ? 6 : tension >= 55 ? 12 : 0;
         if (every > 0 && ticks % every == 0) {
-            player.playSound(SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), 0.25f + tension / 250f, 0.6f + tension / 110f);
+            player.playSound(AtzenSounds.CREAK, 0.25f + tension / 220f, 0.8f + tension / 250f);
         }
-        if (reeling && ticks % 4 == 0) player.playSound(SoundEvents.WOODEN_BUTTON_CLICK_ON, 0.15f, 1.6f + displayedProgress / 200f);
-        if (state.slack() && ticks % 12 == 0) player.playSound(SoundEvents.FISHING_BOBBER_THROW, 0.3f, 0.5f);
+        if (reeling && ticks % 2 == 0) player.playSound(AtzenSounds.REEL, 0.35f, 0.9f + displayedProgress / 400f);
+        if (state.slack() && ticks % 12 == 0) player.playSound(AtzenSounds.SLACK, 0.4f, 1.0f);
     }
 
     static boolean fighting() { return state != null; }

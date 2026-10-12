@@ -1,5 +1,6 @@
 package io.github.jojiuchiha03.atzen.battle;
 
+import io.github.jojiuchiha03.atzen.AtzenSounds;
 import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
@@ -156,8 +157,8 @@ public final class BattleManager {
                 }
                 if (cycle == 0 || cycle == 12) {
                     level.sendParticles(ParticleTypes.SPLASH, x, session.anchor.y + 0.1, z, 18, 0.35, 0.1, 0.35, 0.15);
-                    level.playSound(null, x, session.anchor.y, z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.5f,
-                            1.1f + session.player.getRandom().nextFloat() * 0.3f);
+                    if (cycle == 0) level.playSound(null, x, session.anchor.y, z, AtzenSounds.LEAP, SoundSource.NEUTRAL, 0.8f,
+                            0.9f + session.player.getRandom().nextFloat() * 0.2f);
                 }
             }
             case RECOVERY -> y -= 0.15;
@@ -259,10 +260,14 @@ public final class BattleManager {
                 }
             }
         }
-        session.player.level().playSound(null, session.player.blockPosition(),
-                session.battle.result() == FishingBattle.Result.CAUGHT
-                        ? SoundEvents.EXPERIENCE_ORB_PICKUP : SoundEvents.FISHING_BOBBER_RETRIEVE,
-                SoundSource.PLAYERS, 0.7f, session.battle.result() == FishingBattle.Result.CAUGHT ? 1.3f : 0.7f);
+        // The outcome for everyone around: the catch, a snapping line, a fish that got away.
+        var outcome = switch (session.battle.result()) {
+            case CAUGHT -> AtzenSounds.CATCH;
+            case SNAPPED -> AtzenSounds.SNAP;
+            case ESCAPED, TIMEOUT -> AtzenSounds.ESCAPE;
+            default -> SoundEvents.FISHING_BOBBER_RETRIEVE;
+        };
+        session.player.level().playSound(null, session.player.blockPosition(), outcome, SoundSource.PLAYERS, 0.8f, 1.0f);
     }
 
     private void send(Session session) {

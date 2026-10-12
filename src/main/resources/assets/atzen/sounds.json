@@ -1,0 +1,70 @@
+{
+  "bite": {
+    "subtitle": "subtitles.atzen.bite",
+    "sounds": [
+      "atzen:bite"
+    ]
+  },
+  "hook_set": {
+    "subtitle": "subtitles.atzen.hook_set",
+    "sounds": [
+      "atzen:hook_set"
+    ]
+  },
+  "warning": {
+    "subtitle": "subtitles.atzen.warning",
+    "sounds": [
+      "atzen:warning"
+    ]
+  },
+  "reel": {
+    "subtitle": "subtitles.atzen.reel",
+    "sounds": [
+      "atzen:reel1",
+      "atzen:reel2",
+      "atzen:reel3"
+    ]
+  },
+  "creak": {
+    "subtitle": "subtitles.atzen.creak",
+    "sounds": [
+      "atzen:creak"
+    ]
+  },
+  "slack": {
+    "subtitle": "subtitles.atzen.slack",
+    "sounds": [
+      "atzen:slack"
+    ]
+  },
+  "leap": {
+    "subtitle": "subtitles.atzen.leap",
+    "sounds": [
+      "atzen:leap"
+    ]
+  },
+  "snap": {
+    "subtitle": "subtitles.atzen.snap",
+    "sounds": [
+      "atzen:snap"
+    ]
+  },
+  "catch": {
+    "subtitle": "subtitles.atzen.catch",
+    "sounds": [
+      "atzen:catch"
+    ]
+  },
+  "escape": {
+    "subtitle": "subtitles.atzen.escape",
+    "sounds": [
+      "atzen:escape"
+    ]
+  },
+  "bait": {
+    "subtitle": "subtitles.atzen.bait",
+    "sounds": [
+      "atzen:bait"
+    ]
+  }
+}

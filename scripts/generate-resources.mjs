@@ -102,6 +102,17 @@ const translations = {
   'message.atzen.help': ['Atzen: normal auswerfen und beim Biss rechtsklicken. Im Duell R halten, bei knarzender Schnur und Fluchten loslassen. Köder im Inventar auf die Angel ziehen (Rechtsklick nimmt ihn heraus). /atzen practice startet ein Training ohne Beute, /atzen cancel bricht ab. Tasten sind einstellbar.', 'Atzen: cast normally, then right-click at a bite. Hold R to reel; ease off when the line creaks or the fish surges. Drop bait onto the rod in your inventory (right-click takes it out). /atzen practice starts a no-loot training battle; /atzen cancel stops it. Keys are configurable.'],
   'tooltip.atzen.bait_slot': ['Köder: %s ×%s', 'Bait: %s ×%s'],
   'tooltip.atzen.bait_slot_empty': ['Köder-Slot leer – Köder auf die Angel ziehen', 'Bait slot empty – drop bait onto the rod'],
+  'subtitles.atzen.bite': ['Fisch beißt an', 'Fish bites'],
+  'subtitles.atzen.hook_set': ['Angel schlägt an', 'Rod strikes'],
+  'subtitles.atzen.warning': ['Fisch sammelt Kraft', 'Fish gathers strength'],
+  'subtitles.atzen.reel': ['Rolle ratscht', 'Reel clicks'],
+  'subtitles.atzen.creak': ['Schnur knarzt', 'Line creaks'],
+  'subtitles.atzen.slack': ['Schnur hängt durch', 'Line goes slack'],
+  'subtitles.atzen.leap': ['Fisch springt', 'Fish leaps'],
+  'subtitles.atzen.snap': ['Schnur reißt', 'Line snaps'],
+  'subtitles.atzen.catch': ['Fang gelandet', 'Catch landed'],
+  'subtitles.atzen.escape': ['Fisch entkommt', 'Fish escapes'],
+  'subtitles.atzen.bait': ['Köder eingelegt', 'Bait loaded'],
   'message.atzen.controls_hint': ['Erster Biss! Halte %s zum Einholen – hör auf die Schnur: knarzt sie, lass locker. %s bricht ab.', 'First bite! Hold %s to reel – listen to the line: when it creaks, ease off. %s cancels.'],
 };
 

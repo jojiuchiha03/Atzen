@@ -1,5 +1,6 @@
 package io.github.jojiuchiha03.atzen.mixin;
 
+import io.github.jojiuchiha03.atzen.AtzenSounds;
 import io.github.jojiuchiha03.atzen.Atzen;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -15,7 +16,6 @@ import io.github.jojiuchiha03.atzen.fish.BiteTarget;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -36,7 +36,7 @@ public abstract class FishingHookMixin implements BiteTarget {
         timeUntilLured = 0;
         hook.getEntityData().set(DATA_BITING, true);
         hook.setDeltaMovement(hook.getDeltaMovement().add(0, -0.4 * (0.6 + hook.getRandom().nextFloat() * 0.4), 0));
-        hook.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.25f, 1 + (hook.getRandom().nextFloat() - hook.getRandom().nextFloat()) * 0.4f);
+        hook.playSound(AtzenSounds.BITE, 0.6f, 1 + (hook.getRandom().nextFloat() - hook.getRandom().nextFloat()) * 0.4f);
         if (hook.level() instanceof ServerLevel level) {
             level.sendParticles(ParticleTypes.BUBBLE, hook.getX(), hook.getY() + 0.5, hook.getZ(), 12, 0.2, 0, 0.2, 0.2);
             level.sendParticles(ParticleTypes.FISHING, hook.getX(), hook.getY() + 0.5, hook.getZ(), 12, 0.2, 0, 0.2, 0.2);

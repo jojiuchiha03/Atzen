@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2026-10-12
+
+### Neu
+- Eigene Angel-Sounds, synthetisiert von `scripts/sounds.py` (keine fremden Aufnahmen): Anbiss-Plopp, Anschlag, Warn-Brodeln vor der Flucht, Ratschen der Rolle, knarzende Schnur unter Spannung, schlaffe Schnur, Fischsprung, Schnurriss, Fang-Fanfare, entkommender Fisch und Köder-Einlegen. Mit Untertiteln. Fang, Riss und Entkommen hören jetzt auch die Spieler in der Nähe.
+
 ## [0.3.0] - 2026-10-12
 
 ### Neu

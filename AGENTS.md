@@ -10,6 +10,7 @@
 - Items: Angelzubehör wird in `AtzenItems`, Fische in `AtzenFishRegistry` registriert (`Properties.setId(key)` ist Pflicht). Die Reihenfolge im Kreativtab legt `ModItems.ordered()` fest.
   Dazu `assets/atzen/items/<name>.json`, `models/item/<name>.json`, PNG-Textur (64×64, in `scripts/draw-textures.py`) und Einträge in beiden Sprachdateien ergänzen.
   Generierte Ressourcen und Übersetzungen auch in `scripts/generate-resources.mjs` pflegen.
+- Sounds erzeugt `python3 scripts/sounds.py OUT` als WAV (reine Synthese); danach mit ffmpeg/libvorbis mono nach `assets/atzen/sounds/*.ogg`, Ereignisse in `AtzenSounds` und `sounds.json`.
 - Texturen (Items, Eimer, Fischhäute, alle 64×64) zeichnet `python3 scripts/draw-textures.py` neu; Farben und Formen dort ändern, nicht in den PNGs.
   `scripts/import-textures.ps1` (alte Bildvorlagen aus `art/`) nicht mehr ausführen, es würde die gezeichneten Texturen überschreiben.
 - Blöcke analog: `BlockBehaviour.Properties...setId(blockKey)`, plus `BlockItem` mit `useBlockDescriptionPrefix()`, `blockstates/`.

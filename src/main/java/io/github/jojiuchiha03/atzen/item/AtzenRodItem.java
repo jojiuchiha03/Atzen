@@ -1,5 +1,6 @@
 package io.github.jojiuchiha03.atzen.item;
 
+import io.github.jojiuchiha03.atzen.AtzenSounds;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
@@ -60,7 +61,7 @@ public final class AtzenRodItem extends FishingRodItem {
                 setBait(rod, cursor.copy());
                 carried.set(loaded);
             }
-            player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 0.9f + player.getRandom().nextFloat() * 0.3f);
+            player.playSound(AtzenSounds.BAIT, 0.8f, 0.9f + player.getRandom().nextFloat() * 0.3f);
             return true;
         }
         if (action == ClickAction.SECONDARY && cursor.isEmpty() && !loaded.isEmpty()) {
@@ -83,7 +84,7 @@ public final class AtzenRodItem extends FishingRodItem {
             if (room <= 0) return true;
             ItemStack taken = slot.safeTake(target.getCount(), room, player);
             setBait(rod, taken.copyWithCount(loaded.getCount() + taken.getCount()));
-            player.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 1.0f);
+            player.playSound(AtzenSounds.BAIT, 0.8f, 1.0f);
             return true;
         }
         if (target.isEmpty() && !loaded.isEmpty()) {

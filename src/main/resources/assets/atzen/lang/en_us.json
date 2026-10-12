@@ -82,5 +82,16 @@
   "habitat.atzen.freshwater": "Waters",
   "message.atzen.controls_hint": "First bite! Hold %s to reel – listen to the line: when it creaks, ease off. %s cancels.",
   "tooltip.atzen.bait_slot": "Bait: %s ×%s",
-  "tooltip.atzen.bait_slot_empty": "Bait slot empty – drop bait onto the rod"
+  "tooltip.atzen.bait_slot_empty": "Bait slot empty – drop bait onto the rod",
+  "subtitles.atzen.bite": "Fish bites",
+  "subtitles.atzen.hook_set": "Rod strikes",
+  "subtitles.atzen.warning": "Fish gathers strength",
+  "subtitles.atzen.reel": "Reel clicks",
+  "subtitles.atzen.creak": "Line creaks",
+  "subtitles.atzen.slack": "Line goes slack",
+  "subtitles.atzen.leap": "Fish leaps",
+  "subtitles.atzen.snap": "Line snaps",
+  "subtitles.atzen.catch": "Catch landed",
+  "subtitles.atzen.escape": "Fish escapes",
+  "subtitles.atzen.bait": "Bait loaded"
 }
