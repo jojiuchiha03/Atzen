@@ -151,20 +151,69 @@ def inside(pts, x, y):
 
 # ---------------------------------------------------------------- fish
 
+def F(length, height, back, side, belly, fins, pattern="none", tail="fork", **extra):
+    return dict(length=length, height=height, back=back, side=side, belly=belly, fins=fins, pattern=pattern, tail=tail, **extra)
+
+
 FISH = {
-    # length, height, hump (head bluntness), back, side, belly, fins, pattern, tail
-    "river_trout": dict(length=40, height=12, back="#5f6b52", side="#b9c2bd", belly="#efe9e0", fins="#8f8a78",
-                        stripe="#e0839a", pattern="trout", tail="square"),
-    "perch":       dict(length=36, height=16, back="#4f6a2a", side="#b7b54a", belly="#efe1b0", fins="#e5672b",
-                        pattern="bars", tail="fork", spiny=True),
-    "pike":        dict(length=48, height=10, back="#3f5228", side="#7f8c3e", belly="#e6e2b6", fins="#a07a3a",
-                        pattern="spots", tail="fork", snout=1.6),
-    "carp":        dict(length=36, height=19, back="#6b4a1c", side="#c48d2e", belly="#efd27a", fins="#c1542a",
-                        pattern="scales", tail="fork"),
-    "catfish":     dict(length=44, height=13, back="#3c3446", side="#7a6f8a", belly="#d9d2c8", fins="#5a5068",
-                        pattern="none", tail="round", barbels=True, flathead=True),
-    "golden_koi":  dict(length=36, height=15, back="#f2f0ea", side="#fbf8f2", belly="#ffffff", fins="#f5c24a",
-                        pattern="koi", tail="veil"),
+    # salmonids
+    "river_trout": F(40, 12, "#5f6b52", "#b9a88a", "#efe2c8", "#8f7a58", "redspots", "square"),
+    "rainbow_trout": F(40, 12, "#5a6e5a", "#c8ccc4", "#f2eee6", "#9a8f80", "trout", "square", stripe="#e0839a"),
+    "grayling": F(38, 11, "#4a5260", "#9aa2b4", "#e2e2e8", "#8a5a8a", "speckle", sail=True),
+    "salmon": F(46, 13, "#3e5a70", "#c9d2da", "#f4f4f2", "#7a8a96", "speckle", "square"),
+    "sea_trout": F(44, 13, "#4a5a64", "#c2cad0", "#f2f2ee", "#8a949a", "speckle", "square"),
+    # freshwater predators
+    "pike": F(48, 10, "#3f5228", "#7f8c3e", "#e6e2b6", "#a07a3a", "spots", snout=1.6),
+    "zander": F(44, 10, "#5e6650", "#a8ae98", "#e8e8dc", "#8a8a6a", "bars", spiny=True),
+    "perch": F(36, 16, "#4f6a2a", "#b7b54a", "#efe1b0", "#e5672b", "bars", spiny=True),
+    "catfish": F(44, 13, "#3c3446", "#7a6f8a", "#d9d2c8", "#5a5068", "none", "round", barbels=True, flathead=True),
+    "eel": F(52, 6, "#3e3c26", "#6a6438", "#d8cc98", "#4a4628", "none", "round", eel=True),
+    "asp": F(42, 11, "#4a5a66", "#b8c4cc", "#eef2f4", "#9aa0a8"),
+    # coarse fish
+    "carp": F(36, 19, "#6b4a1c", "#c48d2e", "#efd27a", "#c1542a", "scales"),
+    "barbel": F(42, 11, "#6a5a3a", "#b8a070", "#eadcb0", "#b0743a", "none", barbels=True),
+    "roach": F(30, 13, "#4a5a5e", "#c2cacc", "#f2f2ee", "#d0503a", "scales"),
+    "rudd": F(30, 13, "#6a6a3a", "#d0b858", "#f2e6a8", "#d8402a", "scales"),
+    "bream": F(34, 19, "#5a5236", "#a8986a", "#e0d4a8", "#6a5a48", "scales"),
+    "tench": F(34, 13, "#3e4a26", "#6a7a3a", "#c8b860", "#4a5228", "none", "round"),
+    "chub": F(38, 12, "#4e5a5e", "#a8b0a8", "#e8e8e0", "#b06a4a", "scales"),
+    # cod family
+    "atlantic_cod": F(44, 13, "#6a6040", "#b8a878", "#ece4cc", "#8a7a50", "speckle", "square", barbels=True),
+    "saithe": F(44, 12, "#34404a", "#6a7884", "#c8d0d6", "#4a5660", "lateral", "square"),
+    "alaska_pollock": F(42, 11, "#5a5844", "#a8a488", "#e8e4d4", "#7a7a60", "speckle", "square"),
+    "haddock": F(42, 12, "#4a4e58", "#9aa0a8", "#e8eaee", "#5a5e66", "haddock", "square", barbels=True),
+    "hake": F(46, 10, "#5e6a74", "#a8b4bc", "#e8ecf0", "#7a8690", "none", "square", snout=1.3),
+    "whiting": F(40, 10, "#8a8676", "#c8c4b4", "#f0eee6", "#9a9684", "none", "square"),
+    # herring family
+    "herring": F(36, 9, "#2e5a7e", "#b8c8d4", "#f2f6f8", "#8aa0b0"),
+    "sardine": F(32, 8, "#2a5a86", "#a8bccc", "#eef4f8", "#8a9eb0", "speckle"),
+    "anchovy": F(32, 6, "#2e5470", "#8aa6b8", "#e4ecf0", "#7a90a0", "lateral"),
+    "sprat": F(28, 7, "#3a6080", "#b4c4d0", "#f0f4f6", "#8a9cac"),
+    # perch-like sea fish
+    "sea_bass": F(40, 12, "#4a5864", "#a4b0bc", "#eef0f2", "#7a8692", "none", spiny=True),
+    "gilthead_bream": F(34, 17, "#5a6878", "#b4bcc4", "#eef0f2", "#8a929a", "lateral"),
+    "red_snapper": F(38, 15, "#a83a34", "#e0645a", "#f4c4b8", "#c84a40", "none", spiny=True),
+    "red_mullet": F(34, 10, "#b8483a", "#e88a6a", "#f6dcc8", "#e0a040", "none", barbels=True),
+    "grouper": F(44, 16, "#5a3e26", "#8a6a46", "#c8aa80", "#6a4a30", "spots", "round", spiny=True),
+    "barracuda": F(52, 8, "#4a5a68", "#a8b4c0", "#eef2f4", "#6a7884", "bars", snout=1.4),
+    # mackerels and tunas
+    "mackerel": F(40, 10, "#1e5a6a", "#7aa8b8", "#eef2f2", "#6a8a96", "mackerel", finlets=True),
+    "tuna": F(44, 15, "#1a2a50", "#6a7aa0", "#dce2ec", "#e0c040", "none", finlets=True),
+    "skipjack": F(40, 14, "#22345a", "#8a9ab4", "#e8ecf2", "#6a7a94", "belly_stripes", finlets=True),
+    "swordfish": F(40, 12, "#2e3a56", "#7a88a4", "#d8dce6", "#4a5674", "none", sword=True),
+    # flatfish (seen from above)
+    "plaice": F(36, 22, "#7a6a4a", "#8a7a56", "#8a7a56", "#6a5a3c", "orange_spots", flat=True),
+    "flounder": F(34, 22, "#6a5e44", "#7a6e50", "#7a6e50", "#5a503a", "speckle", flat=True),
+    "sole": F(40, 18, "#7a6648", "#8a7454", "#8a7454", "#5e4c34", "speckle", flat=True),
+    "turbot": F(34, 28, "#5e5644", "#6e6650", "#6e6650", "#4e4838", "speckle", flat=True),
+    "halibut": F(44, 22, "#4e4a42", "#5e5a50", "#5e5a50", "#3e3a34", "speckle", flat=True),
+    # other sea fish
+    "redfish": F(36, 14, "#b8402e", "#e06a4a", "#f4b8a0", "#c84a36", "none", spiny=True),
+    "monkfish": F(40, 26, "#6a5a44", "#7a6a50", "#7a6a50", "#4e4232", "speckle", "round", flat=True, monk=True),
+    "gurnard": F(38, 11, "#b8483a", "#e07a5a", "#f2d0c0", "#4a8aa8", "none", wings=True),
+    "wolffish": F(46, 11, "#4a525a", "#7a828a", "#c4c8cc", "#5a6068", "bars", "round", eel=True),
+    # the special one
+    "golden_koi": F(36, 15, "#f2f0ea", "#fbf8f2", "#ffffff", "#f5c24a", "koi", "veil"),
 }
 
 
@@ -177,6 +226,8 @@ def fish_fields(spec, seed):
 
 
 def body_half_height(spec, u):
+    if spec.get("eel"):
+        return math.sin(min(1.0, u / 0.12) * math.pi / 2) ** 0.4 * (1 - 0.45 * u)
     hump = 0.55 if spec.get("flathead") else 0.42
     if u < hump:
         t = u / hump
@@ -256,6 +307,26 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
                     cu = (cu + 0.5) % 1
                 if abs(math.hypot(cu - 0.5, cv - 0.2) - 0.55) < 0.1:
                     colour = shade(base, light * 0.75)
+            elif pat == "redspots" and 0.12 < u < 0.95:
+                for k, (su, sv, sr) in enumerate(spots):
+                    if ((u - su) / (sr * 0.55)) ** 2 + ((v - sv) / (sr * 1.6)) ** 2 < 1:
+                        colour = (200, 60, 50, 255) if k % 3 == 0 else back[0]
+            elif pat == "speckle" and 0.1 < u < 0.97 and v < 0.4:
+                if (int(x * 7 + y * 13) % 11) == 0:
+                    colour = back[0]
+            elif pat == "lateral" and 0.12 < u < 0.97 and abs(v + 0.05) < 0.12:
+                colour = shade(belly, light + 0.15)
+            elif pat == "haddock" and 0.12 < u < 0.97:
+                if abs(v + 0.1 - 0.15 * u) < 0.07:
+                    colour = back[0]
+                if ((u - 0.33) / 0.05) ** 2 + ((v + 0.25) / 0.16) ** 2 < 1:
+                    colour = (30, 28, 34, 255)
+            elif pat == "mackerel" and 0.15 < u < 0.95 and v < -0.05:
+                if math.sin(u * 60 + math.sin(v * 9) * 2.2) > 0.35:
+                    colour = back[0]
+            elif pat == "belly_stripes" and 0.15 < u < 0.95 and v > 0.05:
+                if int((v + 1) * 9) % 2 == 0:
+                    colour = back[1]
             elif pat == "koi":
                 for su, sv, sr in koi:
                     if ((u - su) / sr) ** 2 + ((v - sv) / (sr * 2.4)) ** 2 < 1:
@@ -273,7 +344,10 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
     # dorsal fin
     top = lambda u: -body_half_height(spec, u) * H / 2
     d0, d1 = (0.32, 0.72) if not spec.get("spiny") else (0.28, 0.7)
-    pts = [at(d0, top(d0) + 1), at(d0 + 0.08, top(d0) - H * 0.26), at(d1 - 0.05, top(d1) - H * 0.14), at(d1, top(d1) + 1)]
+    rise = 0.55 if spec.get("sail") else 0.26
+    if spec.get("sail"):
+        d0, d1 = 0.22, 0.66
+    pts = [at(d0, top(d0) + 1), at(d0 + 0.08, top(d0) - H * rise), at(d1 - 0.05, top(d1) - H * rise * 0.55), at(d1, top(d1) + 1)]
     polygon(px, pts, lambda x, y: fins[2] if (x + y) % 3 else fins[1])
     if spec.get("spiny"):
         for k in range(5):
@@ -281,6 +355,20 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
             x0, y0 = at(uu, top(uu))
             x1, y1 = at(uu + 0.02, top(uu) - H * 0.32)
             line(px, x0, y0, x1, y1, fins[1])
+    if spec.get("finlets"):
+        for k in range(5):
+            uu = 0.74 + k * 0.04
+            for sign in (-1, 1):
+                edge = body_half_height(spec, uu) * H / 2 * sign
+                polygon(px, [at(uu, edge), at(uu + 0.02, edge + sign * H * 0.08), at(uu + 0.035, edge)], fins[3])
+    if spec.get("sword"):
+        sx, sy = at(0.0, -H * 0.02)
+        tip = at(-0.55, -H * 0.04)
+        line(px, sx, sy, tip[0], tip[1], back[2], 2.2)
+        line(px, sx, sy + 1, tip[0], tip[1] + 0.5, back[1], 1.2)
+    if spec.get("wings"):
+        polygon(px, [at(0.22, 0), at(0.42, H * 0.55), at(0.6, H * 0.35), at(0.36, -H * 0.05)],
+                lambda x, y: fins[3] if (x - y) % 3 else fins[2])
     # belly fins
     for u0, size in ((0.3, 0.2), (0.62, 0.15)):
         b = body_half_height(spec, u0) * H / 2
@@ -308,14 +396,80 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
             line(px, sx, sy + 1, sx - 9 * scale, sy + 8 * scale, back[2])
 
 
+def draw_flatfish(px, ox, oy, scale, angle, name, seed):
+    """A flatfish from above: an oval body inside a fringe of fin, a fan tail, both eyes on top near the head."""
+    spec = FISH[name]
+    L, H = spec["length"] * scale, spec["height"] * scale
+    body, fins = ramp(spec["back"]), ramp(spec["fins"])
+    ca, sa = math.cos(angle), math.sin(angle)
+    rnd = random.Random(seed)
+    spots = [(rnd.uniform(0.15, 0.85), rnd.uniform(-0.7, 0.7)) for _ in range(12)]
+    for y in range(N):
+        for x in range(N):
+            dx, dy = x + 0.5 - ox, y + 0.5 - oy
+            fx, fy = dx * ca + dy * sa, -dx * sa + dy * ca
+            u, v = fx / L, fy / (H / 2)
+            if spec.get("monk"):
+                head = ((u - 0.3) / 0.32) ** 2 + (v / 1.0) ** 2
+                tailbody = 0.3 <= u <= 1.0 and abs(v) <= 0.45 * (1 - (u - 0.3) / 0.9)
+                inside_body = head <= 1 or tailbody
+                fringe = head <= 1.15 and not inside_body
+            else:
+                e = ((u - 0.5) / 0.5) ** 2 + v ** 2
+                inside_body = e <= 0.78
+                fringe = 0.78 < e <= 1.0
+            tail = 0.97 <= u <= 1.22 and abs(v) <= 0.18 + (u - 0.97) * 1.6
+            if inside_body:
+                light = lit((u - 0.45) * 0.8, v * 0.8)
+                c = shade(body, light * 1.05 + 0.1)
+                pat = spec["pattern"]
+                if pat == "orange_spots" and any(((u - su) / 0.045) ** 2 + ((v - sv) / 0.16) ** 2 < 1 for su, sv in spots):
+                    c = shade(ramp("#e0782a"), light + 0.15)
+                elif pat == "speckle" and (int(x * 7 + y * 13) % 9) == 0:
+                    c = body[0]
+                px[y][x] = c
+            elif fringe or tail:
+                px[y][x] = fins[2] if (x + y) % 3 else fins[1]
+    # both eyes on the upper side, close to the head
+    for eu, ev in ((0.14, -0.28), (0.2, -0.02)):
+        ex, ey = ox + eu * L * ca - ev * H / 2 * sa, oy + eu * L * sa + ev * H / 2 * ca
+        r = max(1.4, H * 0.06)
+        for yy in range(int(ey - r) - 1, int(ey + r) + 2):
+            for xx in range(int(ex - r) - 1, int(ex + r) + 2):
+                d = math.hypot(xx + 0.5 - ex, yy + 0.5 - ey)
+                if d <= r:
+                    put(px, xx, yy, (235, 226, 196, 255) if d > r * 0.5 else (20, 18, 24, 255))
+    if spec.get("monk"):
+        mx, my = ox + 0.02 * L, oy
+        line(px, mx, my - H * 0.35, mx, my + H * 0.35, body[0], 1.5)
+
+
+def draw_any(px, ox, oy, scale, angle, name, seed):
+    if FISH[name].get("flat"):
+        draw_flatfish(px, ox, oy, scale, angle, name, seed)
+    else:
+        draw_fish(px, ox, oy, scale, angle, name, seed)
+
+
+def item_length(spec):
+    if spec.get("flat"):
+        return spec["length"] * 1.22
+    if spec.get("sword"):
+        return spec["length"] * 1.8
+    return spec["length"] * (1.36 if spec["tail"] == "veil" else 1.24)
+
+
 def fish_item(name):
     px = canvas()
     spec = FISH[name]
-    L = spec["length"]
-    total = L * (1.36 if spec["tail"] == "veil" else 1.24)
+    total = item_length(spec)
     scale = 56 / total
+    if spec.get("flat"):
+        scale = min(scale, 50 / spec["height"])
     ox = (N - total * scale * 0.98) / 2 + 1
-    draw_fish(px, ox, 37, scale, -0.24, name, seed=sum(map(ord, name)))
+    if spec.get("sword"):
+        ox += spec["length"] * 0.55 * scale
+    draw_any(px, ox, 37 if not spec.get("flat") else 32, scale, -0.24, name, seed=sum(map(ord, name)))
     outline(px)
     return px
 
@@ -337,9 +491,11 @@ def bucket(name):
                 px[y][x] = metal[3] if d > 0.7 else shade(water, 0.4 + 0.35 * ((x - 8) / 50))
     # the fish lies in the water
     spec = FISH[name]
-    total = spec["length"] * (1.36 if spec["tail"] == "veil" else 1.24)
+    total = item_length(spec)
     scale = 40 / total
-    draw_fish(px, 11, 30, scale, -0.08, name, seed=sum(map(ord, name)))
+    ox = 11 + (spec["length"] * 0.55 * scale if spec.get("sword") else 0)
+    draw_any(px, ox, 30 if not spec.get("flat") else 28, scale * (0.8 if spec.get("flat") else 1), -0.08, name,
+             seed=sum(map(ord, name)))
     # front half of the rim and the body cover the fish's lower half
     for y in range(31, 64):
         for x in range(2, 63):
@@ -367,6 +523,7 @@ RODS = {
     "river_rod": dict(shaft="#9a6a35", wrap="#2f9c8f", grip="#5b3a1e", reel="#c9783a", tip="#e8d6a8"),
     "iron_rod":  dict(shaft="#4a4f57", wrap="#b8bec6", grip="#a3322c", reel="#c7ccd2", tip="#e2e6ea"),
     "tide_rod":  dict(shaft="#234a9a", wrap="#e3b53c", grip="#6b3aa0", reel="#e3b53c", tip="#5ff2f0", crystal=True),
+    "carbon_rod": dict(shaft="#26282c", wrap="#d8302c", grip="#3a3c42", reel="#b8bec6", tip="#e8e8ea", weave=True),
 }
 
 
@@ -403,6 +560,9 @@ def rod(name):
                 c = shade(tip, light + 0.2)
             else:
                 c = shade(shaft, light)
+                # carbon weave: a fine diagonal checker
+                if spec.get("weave") and (int(along) + int(across * 2)) % 3 == 0:
+                    c = shaft[min(4, shaft.index(c) + 1)] if c in shaft else c
             px[y][x] = c
     # butt cap
     disc(px, x0 + 1, y0 - 1, 3.2, wrap)
@@ -435,6 +595,69 @@ def rod(name):
             put(px, sx - 1, sy, (120, 230, 240, 255))
             put(px, sx, sy + 1, (120, 230, 240, 255))
             put(px, sx, sy - 1, (120, 230, 240, 255))
+    return px
+
+
+# ---------------------------------------------------------------- reels, lines, carbon fibre
+
+REELS = {"copper_reel": "#c9783a", "iron_reel": "#b8bec6", "diamond_reel": "#4fd8d0"}
+LINES = {"nylon_line": "#e8eef2", "braided_line": "#5fa04a", "carbon_line": "#3a3d44"}
+
+
+def reel(name):
+    """A spinning reel seen from the side: the spool with line on it, the foot and the crank."""
+    px = canvas()
+    metal = ramp(REELS[name])
+    dark = ramp("#3a3c42")
+    polygon(px, [(26, 8), (38, 8), (35, 22), (29, 22)], lambda x, y: shade(metal, 0.8 - (x - 26) / 30))   # foot
+    disc(px, 32, 36, 19, metal, ring=0.62)
+    disc(px, 32, 36, 11, ramp("#e8e2d0"))                                                                     # wound line
+    for k in range(4):
+        a = k * math.pi / 2 + 0.4
+        line(px, 32 + 12 * math.cos(a), 36 + 12 * math.sin(a), 32 + 17 * math.cos(a), 36 + 17 * math.sin(a), metal[1], 1.5)
+    disc(px, 32, 36, 4.5, metal)
+    line(px, 32, 36, 52, 50, dark[2], 3)                                                                      # crank arm
+    disc(px, 53, 51, 4.2, dark)
+    if name == "diamond_reel":
+        for sx, sy in ((14, 18), (50, 22), (18, 54)):
+            put(px, sx, sy, (210, 255, 250, 255))
+    outline(px)
+    return px
+
+
+def line_spool(name):
+    """A spool of fishing line: wooden flanges, the wound line in its colour and a loose end."""
+    px = canvas()
+    wood = ramp("#8a5a32")
+    colour = ramp(LINES[name])
+    for y in range(18, 47):
+        for x in range(14, 51):
+            nx = (x + 0.5 - 32) / 18
+            c = shade(colour, lit(nx * 0.9, 0) + 0.05)
+            if (y + (x // 3)) % 4 == 0:
+                c = colour[1] if name != "carbon_line" else colour[3]
+            px[y][x] = c
+    for x0 in (8, 50):
+        for y in range(10, 55):
+            for x in range(x0, x0 + 6):
+                px[y][x] = shade(wood, 0.7 - abs(y - 32) / 60)
+    line(px, 50, 30, 58, 50, colour[3], 1.2)
+    if name == "carbon_line":
+        for sx in range(18, 48, 6):
+            put(px, sx, 22, (200, 205, 215, 255))
+    outline(px)
+    return px
+
+
+def carbon_fiber():
+    """A sheet of woven carbon fibre."""
+    px = canvas()
+    base = ramp("#2a2c32")
+    pts = [(10, 16), (48, 8), (54, 46), (16, 56)]
+    polygon(px, pts, lambda x, y: base[3] if ((x // 4) + (y // 4)) % 2 == 0 else base[1])
+    for i in range(0, 40, 8):
+        line(px, 12 + i, 14 - i * 0.2, 18 + i, 54 - i * 0.2, base[4], 1)
+    outline(px)
     return px
 
 
@@ -550,10 +773,19 @@ def tome(name):
 
 # ---------------------------------------------------------------- entity skins
 
-GEOMETRY = {  # width, height, body length, nose, tail length (model units = texture pixels)
-    "river_trout": (2, 3.5, 8, 1, 4), "perch": (2, 4.8, 6.5, 1, 4), "pike": (1.6, 2.8, 10, 2.5, 4),
-    "carp": (3, 4.8, 6.5, 1, 4), "catfish": (3, 2.8, 9, 1, 4), "golden_koi": (2, 3.5, 6.5, 1, 5),
-}
+def _geometry():
+    """Width, height, body length, nose and tail length of each model, read from FishSpecies.java (one source)."""
+    import re
+    java = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "java", "io", "github",
+                        "jojiuchiha03", "atzen", "fish", "FishSpecies.java")
+    found = {}
+    for m in re.finditer(r"^\s+([A-Z_]+)\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\s*([\d.]+)f,\s*([\d.]+)f,\s*([\d.]+)f,\s*([\d.]+)f,\s*([\d.]+)f",
+                         open(java, encoding="utf-8").read(), re.M):
+        found[m.group(1).lower()] = tuple(float(m.group(i)) for i in range(2, 7))
+    return found
+
+
+GEOMETRY = _geometry()
 
 
 def skin(name):
@@ -643,6 +875,11 @@ def main():
         save(os.path.join(item, name + ".png"), rod(name))
     for name in TOMES:
         save(os.path.join(item, name + ".png"), tome(name))
+    for name in REELS:
+        save(os.path.join(item, name + ".png"), reel(name))
+    for name in LINES:
+        save(os.path.join(item, name + ".png"), line_spool(name))
+    save(os.path.join(item, "carbon_fiber.png"), carbon_fiber())
     save(os.path.join(item, "worm_bait.png"), worm())
     save(os.path.join(item, "glow_bait.png"), glow())
     save(os.path.join(item, "hearty_bait.png"), hearty())

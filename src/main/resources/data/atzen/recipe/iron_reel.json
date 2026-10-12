@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "minecraft:iron_nugget",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "atzen:iron_reel",
+    "count": 1
+  }
+}

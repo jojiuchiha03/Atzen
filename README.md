@@ -2,7 +2,7 @@
 
 Fabric-Mod für **Minecraft Java 26.2**: Fische im Wasser beobachten, den Biss anschlagen und den Fang in einem Duell mit Schnurspannung, Fluchten und Ausdauer landen.
 
-**Stand: 0.2.0.** Enthält sechs Fischarten mit eigenen animierten 3D-Körperformen, individuellen Maßen, drei Angeln, drei Ködern und drei Verzauberungen. Deutsch und Englisch sind enthalten. Build-, Daten- und Logiktests sind eingerichtet. Ein Test in einer laufenden Minecraft-Welt steht noch aus; die EULA wurde für eine Testinstanz nicht bestätigt.
+**Stand: 0.5.0.** Enthält 48 Süß- und Salzwasserfische mit eigenen animierten 3D-Körperformen und Lebensräumen, vier Angeln, wechselbare Rollen, Schnüre und Köder sowie drei Verzauberungen. Deutsch und Englisch sind enthalten. Build-, Daten- und Logiktests sind eingerichtet. Ein Test in einer laufenden Minecraft-Welt steht noch aus; die EULA wurde für eine Testinstanz nicht bestätigt.
 
 ## Installation
 
@@ -24,7 +24,7 @@ Mit einer normalen Angel oder einer Atzen-Rute auswerfen. Beim Biss rechtsklicke
 | **R loslassen** | Nachgeben und Spannung abbauen |
 | **X** | Aktuelles Duell abbrechen |
 
-Es gibt kein HUD. Während des Duells kreist die Kamera langsam um dich und die Pose, der Fisch zappelt sichtbar an der Schnur, springt bei Fluchten aus dem Wasser und wird beim Einholen näher gezogen. Die Spannung hörst du: Je lauter und schneller die Schnur knarzt, desto näher ist sie am Reißen; bei hoher Spannung und während Fluchten wackelt die Kamera. Danach geht es weich zurück in deine eigene Ansicht.
+Über der Hotbar zeigt eine schmale **Spannungsleiste**, was zu tun ist: grüner Bereich = R halten und einholen, rot = nachgeben; darunter die Ausdauer des Fisches. Ein kurzer Hinweis (Einholen / Nachgeben / Loslassen / Festhalten / Straffen) blinkt, wenn es eilt. Während des Duells kreist die Kamera langsam um dich und die Pose, der Fisch zappelt sichtbar an der Schnur, springt bei Fluchten aus dem Wasser und wird beim Einholen näher gezogen. Die Spannung hörst du: Je lauter und schneller die Schnur knarzt, desto näher ist sie am Reißen; bei hoher Spannung und während Fluchten wackelt die Kamera. Danach geht es weich zurück in deine eigene Ansicht.
 
 Die Tasten lassen sich unter Steuerung → Atzen: Angeln ändern. Zwischen 30 und 65 % Spannung holst du besonders effizient ein. Bei 100 % reißt die Schnur. Bleibt sie drei Sekunden unter 8 %, entkommt der Fisch. Vor jeder Flucht gibt es eine Warnphase; während der Flucht solltest du nachgeben. Jedes Duell hat maximal 60 Sekunden Zeit.
 
@@ -34,34 +34,51 @@ Bei normalen Bissen bleiben die Vanilla-Regeln für Schätze, Müll, Glück und 
 
 ## Fische und 3D-Modelle
 
-Alle sechs Arten schwimmen als Tiere im Wasser. Jede Art besitzt eine eigene Körperform und Textur; Schwanz und Brustflossen sind animiert. Der Hecht hat eine längliche Schnauze, Karpfen und Barsch einen hohen Körper, der Wels Barteln und der Goldkoi einen längeren Schwanz. Die sichtbare Größe richtet sich nach der individuellen Länge.
+48 Arten schwimmen als Tiere im Wasser, jede mit eigener Körperform und Textur; Schwanz und Flossen sind animiert. Plattfische liegen flach mit beiden Augen oben, der Schwertfisch trägt sein Schwert, Welse, Barben und Dorsche haben Barteln. Die sichtbare Größe richtet sich nach der individuellen Länge.
 
-| Art | Länge | Mögliches Gewicht, ca. | Natürliches Vorkommen | Duellstil |
-| --- | --- | --- | --- | --- |
-| Flussforelle | 18–80 cm | 0,07–8,03 kg | Flüsse, seltener Seen | Flitzer |
-| Barsch | 12–55 cm | 0,03–3,35 kg | Flüsse und Sümpfe, seltener Seen | Kämpfer |
-| Hecht | 35–150 cm | 0,30–30,24 kg | Flüsse und Sümpfe, seltener Seen | Kämpfer |
-| Karpfen | 25–110 cm | 0,36–38,76 kg | Sümpfe und Mangrovensümpfe, seltener Seen | Brocken |
-| Wels | 40–220 cm | 0,51–107,33 kg | Sümpfe und Mangrovensümpfe, seltener Seen | Brocken |
-| Goldkoi | 15–75 cm | 0,06–8,98 kg | Selten in Flüssen und Sümpfen | Flitzer |
+| Lebensraum | Arten |
+| --- | --- |
+| Flüsse | Bachforelle, Regenbogenforelle, Äsche, Lachs, Meerforelle, Hecht, Zander, Flussbarsch, Aal, Rapfen, Barbe, Rotauge, Döbel |
+| Seen | Hecht, Zander, Flussbarsch, Karpfen, Brasse, Rotfeder, Schleie |
+| Sümpfe | Wels, Karpfen, Schleie, Aal, Goldkoi |
+| Kalte Gewässer | Bachforelle, Äsche, Lachs, Meerforelle |
+| Ozean | Kabeljau, Seelachs, Schellfisch, Seehecht, Wittling, Hering, Sprotte, Wolfsbarsch, Makrele, Scholle, Flunder, Seezunge, Steinbutt, Knurrhahn |
+| Warmer Ozean | Sardine, Sardelle, Dorade, Roter Schnapper, Rotbarbe, Zackenbarsch, Barracuda, Thunfisch, Bonito, Schwertfisch |
+| Kalter Ozean | Alaska-Seelachs, Heilbutt, Rotbarsch, Seewolf, Lachs |
+| Tiefer Ozean | Seeteufel, Heilbutt, Thunfisch, Schwertfisch, Rotbarsch |
 
-Fische spawnen in jedem Wasser mit freiem Himmel darüber, auch oberhalb des Meeresspiegels (Seen, Bergflüsse), aber nicht in Höhlen. Seen und Teiche außerhalb von Fluss- und Sumpfbiomen sind dünner besetzt; der Goldkoi bleibt Flüssen und Sümpfen vorbehalten.
+Seltene Arten (Zander, Aal, Wels, Zackenbarsch, Heilbutt, Seeteufel u. a.) sind lila markiert, legendäre (Schwertfisch, Goldkoi) golden. Die genaue Gewichtung je Lebensraum steht in `FishSpecies.java`.
 
-Gewichte folgen einer artspezifischen Länge³-Kurve mit ±12 % Variation. Kleinere Exemplare sind häufiger; die obersten 15 % des Längenbereichs gelten als Trophäenfische. Die Werte sind Spielbalance, keine biologische Vermessungsdatenbank. Bei normalen Angelbissen werden Arten gewichtet ausgewählt: In Sümpfen sind Welse und Karpfen häufiger, der Goldkoi macht ungefähr 1 % der Fischart-Auswahl aus.
+Fische spawnen in jedem Wasser mit freiem Himmel darüber, auch oberhalb des Meeresspiegels (Seen, Bergflüsse), aber nicht in Höhlen. Welche Arten auftauchen und anbeißen, hängt vom Lebensraum des Bioms ab.
+
+Gewichte folgen einer artspezifischen Länge³-Kurve mit ±12 % Variation. Kleinere Exemplare sind häufiger; die obersten 15 % des Längenbereichs gelten als Trophäenfische. Die Werte sind Spielbalance, keine biologische Vermessungsdatenbank. Bei normalen Angelbissen wird die Art nach dem Lebensraum am Haken gewichtet ausgewählt.
 
 Fänge speichern Art, Länge, Gewicht, Größenklasse, Fangbiom, Koordinaten, Welt-Tag, Angler und die Kontrolle während des Duells. Die Angaben stehen im Tooltip; die Rohdaten liegen in `minecraft:custom_data` unter `atzen_fish`. Individuelle Fänge sind nicht stapelbar.
 
-Lebende Fische lassen sich mit einem Wassereimer aufnehmen und wieder freilassen. Länge, Gewicht und Gesundheit bleiben erhalten. Hechte und Welse sind Einzelgänger; die anderen Arten können artgleiche Schwärme bilden. Getötete Fische liefern ebenfalls einen vermessenen Wildfang. Alle sechs Fisch-Items sind essbar und können zu gebratenem Kabeljau gekocht werden; dabei gehen die Fangdaten verloren.
+Lebende Fische lassen sich mit einem Wassereimer aufnehmen und wieder freilassen. Länge, Gewicht und Gesundheit bleiben erhalten. Raubfische, Plattfische und seltene Arten sind Einzelgänger; Heringsartige ziehen in großen Schwärmen. Getötete Fische liefern ebenfalls einen vermessenen Wildfang. Alle Fisch-Items sind essbar und können zu gebratenem Kabeljau gekocht werden; dabei gehen die Fangdaten verloren.
 
 ## Angeln, Köder und Verzauberungen
 
-| Angel | Haltbarkeit | Bonus | Reparaturmaterial |
+| Angel | Haltbarkeit | Eigenschaft | Reparaturmaterial |
 | --- | --- | --- | --- |
-| Flussrute | 128 | 10 % weniger Spannung, 5 % schneller einholen | Kupferbarren |
-| Eisenrute | 384 | 22 % weniger Spannung | Eisenbarren |
-| Gezeitenrute | 512 | 10 % weniger Spannung, 25 % schneller einholen | Prismarinscherben |
+| Flussrute | 128 | etwas weniger Spannung, etwas schneller | Kupferbarren |
+| Eisenrute | 384 | deutlich weniger Spannung | Eisenbarren |
+| Gezeitenrute | 512 | weniger Spannung, schnell | Prismarinscherben |
+| **Carbonrute** | 1024 | **am besten:** 34 % weniger Spannung, 20 % schneller, ruhigere Fluchten | Carbonfaser |
 
-Jede Atzen-Rute hat einen **Köder-Slot**: Köder im Inventar auf die Rute ziehen (ein anderer Köder wird getauscht), Rechtsklick auf die Rute nimmt ihn wieder heraus. Alternativ die Rute auf dem Mauszeiger halten und per Rechtsklick auf einen Köderstapel laden. Der Tooltip der Rute zeigt den Slot. Ohne geladenen Köder zählt weiterhin ein Köder in der anderen Hand. Pro begonnenem Duell wird ein Köder verbraucht, auch wenn der Fisch später entkommt. Im Kreativmodus wird nichts verbraucht.
+Jede Atzen-Rute hat drei **Ausrüstungs-Slots: Rolle, Schnur, Köder.** Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht und landet auf dem Mauszeiger. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt erst den Köder, dann die Schnur, dann die Rolle heraus. Alternativ die Rute auf dem Mauszeiger halten und per Rechtsklick auf ein Teil klicken. Der Tooltip zeigt die drei Slots und die Gesamtwirkung. Ohne geladenen Köder zählt weiterhin ein Köder in der anderen Hand. Pro begonnenem Duell wird ein Köder verbraucht. Im Kreativmodus wird nichts verbraucht.
+
+| Rolle | Wirkung |
+| --- | --- |
+| Kupferrolle | 8 % schneller einholen |
+| Eisenrolle | 15 % schneller, Fluchten 5 % schwächer |
+| Diamantrolle | 28 % schneller, Fluchten 12 % schwächer |
+
+| Schnur | Wirkung |
+| --- | --- |
+| Nylonschnur | 10 % weniger Spannung |
+| Geflochtene Schnur | 20 % weniger Spannung, 5 % schneller |
+| **Carbonschnur** | **am besten:** 34 % weniger Spannung, Fluchten 15 % schwächer |
 
 | Köder | Wirkung |
 | --- | --- |
@@ -86,6 +103,14 @@ Alle folgenden Werkbankrezepte sind formlos. Die Rutenrezepte erzeugen eine neue
 | Flussrute | 1 Angel, 2 Kupferbarren, 1 Faden |
 | Eisenrute | 1 Flussrute, 3 Eisenbarren, 1 Leder |
 | Gezeitenrute | 1 Eisenrute, 3 Prismarinscherben, 1 Herz des Meeres, 1 Diamant |
+| Carbonfaser | Kohleblock im Hochofen |
+| Carbonrute | Eisenrute, 3 Carbonfaser, 1 Diamant |
+| Kupferrolle | 2 Kupferbarren, 1 Eisennugget, 1 Stock |
+| Eisenrolle | 2 Eisenbarren, 1 Eisennugget, 1 Redstone |
+| Diamantrolle | Eisenrolle, Diamant, Gold, Redstone |
+| Nylonschnur | 3 Faden, 1 Schleimball |
+| Geflochtene Schnur | Nylonschnur, 3 Faden |
+| Carbonschnur | Geflochtene Schnur, 2 Carbonfaser |
 | 6 Wurmköder | 1 Verrottetes Fleisch, 1 Weizensamen |
 | 4 Leuchtköder | 1 Wurmköder, 1 Leuchttintenbeutel |
 | 4 Kraftköder | 1 Roher Lachs, 1 Seetang, 1 Weizen |
@@ -93,7 +118,7 @@ Alle folgenden Werkbankrezepte sind formlos. Die Rutenrezepte erzeugen eine neue
 | Kurbelkraft-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Redstone, 1 Amethystscherbe |
 | Wellenruhe-Zauberbuch | 1 Buch, 1 Lapislazuli, 1 Prismarinkristalle, 1 Leuchttintenbeutel |
 
-Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“: Angeln, Köder, Bücher, Fische, Eimer und Spawn-Eier. Die Spawn-Eier erscheinen zusätzlich im Vanilla-Tab Spawn-Eier.
+Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“: Angeln, Rollen, Schnüre, Köder, Carbonfaser, Bücher, Fische, Eimer und Spawn-Eier. Die Spawn-Eier erscheinen zusätzlich im Vanilla-Tab Spawn-Eier.
 
 ## Befehle
 

@@ -17,10 +17,12 @@ import net.minecraft.util.Mth;
 
 public final class AtzenFishRenderer extends MobRenderer<AtzenFishEntity, LivingEntityRenderState, AtzenFishModel> {
     private final Identifier texture;
+    private final boolean flat;
 
     private AtzenFishRenderer(EntityRendererProvider.Context context, FishSpecies species, ModelLayerLocation layer) {
-        super(context, new AtzenFishModel(context.bakeLayer(layer)), 0.2f);
+        super(context, new AtzenFishModel(context.bakeLayer(layer), species), 0.2f);
         texture = Atzen.id("textures/entity/fish/" + species.id() + ".png");
+        flat = species.flat();
     }
 
     public static void register() {
@@ -37,7 +39,8 @@ public final class AtzenFishRenderer extends MobRenderer<AtzenFishEntity, Living
     @Override protected void setupRotations(LivingEntityRenderState state, PoseStack poses, float rotation, float scale) {
         super.setupRotations(state, poses, rotation, scale);
         poses.mulPose(Axis.YP.rotationDegrees(4.3f * Mth.sin(0.6f * state.ageInTicks)));
-        if (!state.isInWater) {
+        // stranded fish lie on their side; a flatfish already does
+        if (!state.isInWater && !flat) {
             poses.translate(0.1f, 0.1f, -0.1f);
             poses.mulPose(Axis.ZP.rotationDegrees(90));
         }

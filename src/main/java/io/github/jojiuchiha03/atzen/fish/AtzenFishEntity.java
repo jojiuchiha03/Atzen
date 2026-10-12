@@ -75,7 +75,7 @@ public final class AtzenFishEntity extends Cod {
     }
 
     @Override public int getMaxSchoolSize() {
-        return species == FishSpecies.PIKE || species == FishSpecies.CATFISH ? 1 : 5;
+        return species.maxGroup() > 1 ? species.maxGroup() + 1 : 1;
     }
 
     @Override public AbstractSchoolingFish startFollowing(AbstractSchoolingFish leader) {

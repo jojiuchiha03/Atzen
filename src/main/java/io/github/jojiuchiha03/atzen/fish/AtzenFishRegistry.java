@@ -62,27 +62,20 @@ public final class AtzenFishRegistry {
                     AtzenFishRegistry::canSpawn);
             FISH.put(species, item(species.id(), Item::new, new Item.Properties().stacksTo(1)
                     .food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.1f).build())
-                    .rarity(species == FishSpecies.GOLDEN_KOI ? Rarity.EPIC : Rarity.COMMON)));
+                    .rarity(switch (species.rarity()) {
+                        case LEGENDARY -> Rarity.EPIC;
+                        case RARE -> Rarity.RARE;
+                        default -> Rarity.COMMON;
+                    })));
             BUCKETS.put(species, item(species.id() + "_bucket", properties -> new MobBucketItem(type, Fluids.WATER,
                     SoundEvents.BUCKET_EMPTY_FISH, properties), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
             EGGS.put(species, item(species.id() + "_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(type)));
-            // Rivers and swamps are the home waters; every other overworld lake or pond gets a thinner population.
-            var home = switch (species) {
-                case RIVER_TROUT -> BiomeSelectors.tag(BiomeTags.IS_RIVER);
-                case CATFISH, CARP -> BiomeSelectors.includeByKey(Biomes.SWAMP, Biomes.MANGROVE_SWAMP);
-                default -> BiomeSelectors.tag(BiomeTags.IS_RIVER).or(BiomeSelectors.includeByKey(Biomes.SWAMP, Biomes.MANGROVE_SWAMP));
-            };
-            boolean rare = species == FishSpecies.PIKE || species == FishSpecies.CATFISH;
-            int weight = species == FishSpecies.GOLDEN_KOI ? 1 : rare ? 4 : 10;
-            int group = rare ? 1 : 4;
-            BiomeModifications.addSpawn(home, MobCategory.WATER_AMBIENT, type, weight, 1, group);
-            if (species != FishSpecies.GOLDEN_KOI) {
-                BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld()
-                                .and(BiomeSelectors.tag(BiomeTags.IS_RIVER).negate())
-                                .and(BiomeSelectors.tag(BiomeTags.IS_OCEAN).negate())
-                                .and(BiomeSelectors.tag(BiomeTags.IS_BEACH).negate())
-                                .and(BiomeSelectors.includeByKey(Biomes.SWAMP, Biomes.MANGROVE_SWAMP).negate()),
-                        MobCategory.WATER_AMBIENT, type, rare ? 2 : 5, 1, group);
+            // Each fish spawns in the biomes of every habitat it lives in, as often as it bites there.
+            for (Habitat habitat : Habitat.values()) {
+                int weight = species.weight(habitat);
+                if (weight > 0) {
+                    BiomeModifications.addSpawn(habitat.biomes(), MobCategory.WATER_AMBIENT, type, weight, 1, species.maxGroup());
+                }
             }
         }
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> EGGS.values().forEach(entries::accept));

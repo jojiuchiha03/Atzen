@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0] - 2026-10-12
+
+### Neu
+- Wechselbare Ausrüstung: Jede Atzen-Rute hat Slots für Rolle, Schnur und Köder (auf die Rute ziehen zum Einsetzen/Tauschen, Rechtsklick zum Herausnehmen). Der Tooltip zeigt alle drei Slots und die Gesamtwirkung.
+- Neue Rollen (Kupfer, Eisen, Diamant) und Schnüre (Nylon, Geflochten, Carbon); neue Carbonrute. Carbon ist bei Rute und Schnur das Beste. Carbonfaser aus Kohleblöcken im Hochofen.
+- 48 statt 6 Fischarten: heimische Süßwasserfische (Raubfische, Friedfische, Salmoniden) und Meeresfische (Dorschartige, Heringsartige, Barschartige, Makrelen/Thun, Plattfische u. a.), mit eigenen Formen und Texturen.
+- Lebensräume: Fluss, See, Sumpf, kalte Gewässer, Ozean, warmer, kalter und tiefer Ozean bestimmen, welche Arten spawnen und anbeißen.
+- Spannungsleiste über der Hotbar mit grünem Bereich, Ausdauer des Fisches und Hinweis, ob R gehalten oder losgelassen werden soll.
+
+### Geändert
+- Neue Kameraführung im Drill: über die Schulter des Anglers auf den Fisch, langsamer Schulterwechsel, rückt bei Fluchten näher, gleitet ruckelfrei und geht nicht durch Wände.
+- Plattfische liegen flach mit beiden Augen oben; Schwertfisch mit Schwert; Barteln bei Wels, Barbe, Kabeljau und Schellfisch.
+
 ## [0.4.0] - 2026-10-12
 
 ### Neu

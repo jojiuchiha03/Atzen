@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:iron_nugget",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "atzen:copper_reel",
+    "count": 1
+  }
+}

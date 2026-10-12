@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.phys.Vec3;
 import io.github.jojiuchiha03.atzen.fish.FishCatch;
 import io.github.jojiuchiha03.atzen.fish.FishSpecies;
+import io.github.jojiuchiha03.atzen.fish.Habitat;
 import io.github.jojiuchiha03.atzen.fish.FishSpecimen;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import io.github.jojiuchiha03.atzen.network.ReelPayload;
@@ -65,7 +66,7 @@ public final class BattleManager {
                 : player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Random random = new Random(player.getRandom().nextLong());
         FishSpecimen specimen = liveFish != null ? liveFish.specimen()
-                : FishSpecies.choose(FishCatch.isSwamp(player.level(), hook.blockPosition()), random).roll(random);
+                : FishSpecies.choose(Habitat.at((ServerLevel) player.level(), hook.blockPosition()), random).roll(random);
         FishingBattle battle = new FishingBattle(specimen.species().style(), random.nextLong(),
                 specimen.tune(BattleEquipment.tuning(player, rod, bait)));
         if (!loaded.isEmpty()) AtzenRodItem.consumeBait(rod, player);

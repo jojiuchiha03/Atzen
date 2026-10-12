@@ -13,6 +13,14 @@ const items = {
   river_rod: ['Flussrute', 'River Rod', '10 % weniger Spannung, 5 % schnelleres Einholen.', '10% less strain, 5% faster reeling.'],
   iron_rod: ['Eisenrute', 'Iron Rod', '22 % weniger Spannung. Reparatur: Eisenbarren.', '22% less strain. Repair with iron ingots.'],
   tide_rod: ['Gezeitenrute', 'Tide Rod', '25 % schneller, 10 % weniger Spannung. Reparatur: Prismarin.', '25% faster, 10% less strain. Repair with prismarine shards.'],
+  carbon_rod: ['Carbonrute', 'Carbon Rod', 'Die beste Rute: 34 % weniger Spannung, 20 % schneller, ruhiger bei Fluchten.', 'The best rod: 34% less strain, 20% faster, steadier during runs.'],
+  copper_reel: ['Kupferrolle', 'Copper Reel', 'Rollen-Slot: 8 % schneller einholen.', 'Reel slot: reel 8% faster.'],
+  iron_reel: ['Eisenrolle', 'Iron Reel', 'Rollen-Slot: 15 % schneller, 5 % weniger Fluchtdruck.', 'Reel slot: 15% faster, 5% less surge strain.'],
+  diamond_reel: ['Präzisionsrolle', 'Precision Reel', 'Rollen-Slot: 28 % schneller, 12 % weniger Fluchtdruck.', 'Reel slot: 28% faster, 12% less surge strain.'],
+  nylon_line: ['Nylonschnur', 'Nylon Line', 'Schnur-Slot: 10 % weniger Spannung.', 'Line slot: 10% less strain.'],
+  braided_line: ['Geflochtene Schnur', 'Braided Line', 'Schnur-Slot: 20 % weniger Spannung, 5 % schneller.', 'Line slot: 20% less strain, 5% faster.'],
+  carbon_line: ['Carbonschnur', 'Carbon Line', 'Die beste Schnur: 34 % weniger Spannung, 15 % weniger Fluchtdruck.', 'The best line: 34% less strain, 15% less surge strain.'],
+  carbon_fiber: ['Kohlefaser', 'Carbon Fiber', 'Aus einem Kohleblock im Hochofen. Für Carbonrute und Carbonschnur.', 'From a coal block in a blast furnace. For the carbon rod and line.'],
   worm_bait: ['Wurmköder', 'Worm Bait', 'Im Köder-Slot: 15 % schneller einholen. Ein Köder pro Duell.', 'In the bait slot: reel 15% faster. One bait per battle.'],
   glow_bait: ['Leuchtköder', 'Glow Bait', 'Im Köder-Slot: 20 % weniger Fluchtdruck. Ein Köder pro Duell.', 'In the bait slot: 20% less surge strain. One bait per battle.'],
   hearty_bait: ['Kraftköder', 'Hearty Bait', 'Im Köder-Slot: 25 % schneller, aber 12 % mehr Spannung.', 'In the bait slot: 25% faster reeling, but 12% more strain.'],
@@ -29,7 +37,7 @@ for (const id of Object.keys(items)) {
   json(`assets/atzen/items/${id}.json`, { model: { type: 'minecraft:model', model: `atzen:item/${id}` } });
 }
 
-const rods = ['river_rod', 'iron_rod', 'tide_rod'].map(id => `atzen:${id}`);
+const rods = ['river_rod', 'iron_rod', 'tide_rod', 'carbon_rod'].map(id => `atzen:${id}`);
 json('data/atzen/tags/item/rods.json', { values: ['minecraft:fishing_rod', ...rods] });
 for (const tag of ['fishing', 'durability', 'vanishing']) {
   json(`data/minecraft/tags/item/enchantable/${tag}.json`, { replace: false, values: rods });
@@ -52,6 +60,13 @@ const recipes = {
   river_rod: ['minecraft:fishing_rod', 'minecraft:copper_ingot', 'minecraft:copper_ingot', 'minecraft:string'],
   iron_rod: ['atzen:river_rod', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:leather'],
   tide_rod: ['atzen:iron_rod', 'minecraft:prismarine_shard', 'minecraft:prismarine_shard', 'minecraft:prismarine_shard', 'minecraft:heart_of_the_sea', 'minecraft:diamond'],
+  carbon_rod: ['atzen:iron_rod', 'atzen:carbon_fiber', 'atzen:carbon_fiber', 'atzen:carbon_fiber', 'minecraft:diamond'],
+  copper_reel: ['minecraft:copper_ingot', 'minecraft:copper_ingot', 'minecraft:iron_nugget', 'minecraft:stick'],
+  iron_reel: ['minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_nugget', 'minecraft:redstone'],
+  diamond_reel: ['atzen:iron_reel', 'minecraft:diamond', 'minecraft:gold_ingot', 'minecraft:redstone'],
+  nylon_line: ['minecraft:string', 'minecraft:string', 'minecraft:string', 'minecraft:slime_ball'],
+  braided_line: ['atzen:nylon_line', 'minecraft:string', 'minecraft:string', 'minecraft:string'],
+  carbon_line: ['atzen:braided_line', 'atzen:carbon_fiber', 'atzen:carbon_fiber'],
   worm_bait: ['minecraft:rotten_flesh', 'minecraft:wheat_seeds'],
   glow_bait: ['atzen:worm_bait', 'minecraft:glow_ink_sac'],
   hearty_bait: ['minecraft:salmon', 'minecraft:kelp', 'minecraft:wheat'],
@@ -62,7 +77,7 @@ const recipes = {
 for (const [id, ingredients] of Object.entries(recipes)) {
   const count = id === 'worm_bait' ? 6 : id.endsWith('_bait') ? 4 : 1;
   json(`data/atzen/recipe/${id}.json`, {
-    type: 'minecraft:crafting_shapeless', category: id.endsWith('_rod') ? 'equipment' : 'misc',
+    type: 'minecraft:crafting_shapeless', category: /_(rod|reel|line)$/.test(id) ? 'equipment' : 'misc',
     ingredients, result: { id: `atzen:${id}`, count },
   });
   json(`data/atzen/advancement/recipes/${id}.json`, {
@@ -75,7 +90,23 @@ for (const [id, ingredients] of Object.entries(recipes)) {
   });
 }
 
+json('data/atzen/recipe/carbon_fiber.json', {
+  type: 'minecraft:blasting', category: 'misc', ingredient: 'minecraft:coal_block',
+  result: { id: 'atzen:carbon_fiber' }, experience: 0.5, cookingtime: 200,
+});
+
 const translations = {
+  'tooltip.atzen.gear.reel': ['Rolle: %s', 'Reel: %s'],
+  'tooltip.atzen.gear.line': ['Schnur: %s', 'Line: %s'],
+  'tooltip.atzen.gear.bait': ['Köder: %s', 'Bait: %s'],
+  'tooltip.atzen.gear.empty': ['– leer –', '– empty –'],
+  'tooltip.atzen.gear.count': ['%s ×%s', '%s ×%s'],
+  'tooltip.atzen.gear.stats': ['Spannung %s · Einholen %s · Fluchtdruck %s', 'Strain %s · Reeling %s · Surge %s'],
+  'hud.atzen.advice.reel': ['%s halten – einholen', 'Hold %s – reel in'],
+  'hud.atzen.advice.ease': ['Nachgeben', 'Ease off'],
+  'hud.atzen.advice.release': ['Loslassen!', 'Let go!'],
+  'hud.atzen.advice.brace': ['Flucht naht – bereit machen', 'A run is coming – get ready'],
+  'hud.atzen.advice.slack': ['Schnur zu locker – %s halten!', 'Line too loose – hold %s!'],
   'key.category.atzen.fishing': ['Atzen: Angeln', 'Atzen: Fishing'],
   'key.atzen.reel': ['Schnur einholen (halten)', 'Reel in (hold)'],
   'key.atzen.cancel': ['Angelduell abbrechen', 'Cancel fishing battle'],
@@ -100,8 +131,6 @@ const translations = {
   'message.atzen.client_required': ['Installiere Atzen auch auf deinem Client, um Angelduelle zu spielen.', 'Install Atzen on your client to play fishing battles.'],
   'message.atzen.already_fishing': ['Beende zuerst deinen aktuellen Wurf oder dein Duell.', 'Finish your current cast or battle first.'],
   'message.atzen.help': ['Atzen: normal auswerfen und beim Biss rechtsklicken. Im Duell R halten, bei knarzender Schnur und Fluchten loslassen. Köder im Inventar auf die Angel ziehen (Rechtsklick nimmt ihn heraus). /atzen practice startet ein Training ohne Beute, /atzen cancel bricht ab. Tasten sind einstellbar.', 'Atzen: cast normally, then right-click at a bite. Hold R to reel; ease off when the line creaks or the fish surges. Drop bait onto the rod in your inventory (right-click takes it out). /atzen practice starts a no-loot training battle; /atzen cancel stops it. Keys are configurable.'],
-  'tooltip.atzen.bait_slot': ['Köder: %s ×%s', 'Bait: %s ×%s'],
-  'tooltip.atzen.bait_slot_empty': ['Köder-Slot leer – Köder auf die Angel ziehen', 'Bait slot empty – drop bait onto the rod'],
   'subtitles.atzen.bite': ['Fisch beißt an', 'Fish bites'],
   'subtitles.atzen.hook_set': ['Angel schlägt an', 'Rod strikes'],
   'subtitles.atzen.warning': ['Fisch sammelt Kraft', 'Fish gathers strength'],
@@ -128,11 +157,53 @@ json('assets/atzen/lang/en_us.json', en);
 console.log(`Generated models, recipes, advancements, enchantments and translations for ${Object.keys(items).length} items.`);
 
 const fish = {
-  river_trout: ['Flussforelle', 'River Trout', 0xB9A2A0],
-  perch: ['Barsch', 'Perch', 0x86A848],
+  river_trout: ['Bachforelle', 'Brown Trout', 0xB9A2A0],
+  rainbow_trout: ['Regenbogenforelle', 'Rainbow Trout', 0xC88AA8],
+  grayling: ['Äsche', 'Grayling', 0x8C93A8],
+  salmon: ['Atlantischer Lachs', 'Atlantic Salmon', 0xC9CFD6],
+  sea_trout: ['Meerforelle', 'Sea Trout', 0xB8C2C8],
   pike: ['Hecht', 'Pike', 0x566E3A],
+  zander: ['Zander', 'Zander', 0x8A9478],
+  perch: ['Flussbarsch', 'Perch', 0x86A848],
+  catfish: ['Wels', 'Wels Catfish', 0x73638A],
+  eel: ['Aal', 'Eel', 0x4A4A30],
+  asp: ['Rapfen', 'Asp', 0xA8B4BC],
   carp: ['Karpfen', 'Carp', 0xBE8540],
-  catfish: ['Wels', 'Catfish', 0x73638A],
+  barbel: ['Barbe', 'Barbel', 0xA89060],
+  roach: ['Rotauge', 'Roach', 0xB8C0C4],
+  rudd: ['Rotfeder', 'Rudd', 0xC8A848],
+  bream: ['Brasse', 'Bream', 0x9C8A5A],
+  tench: ['Schleie', 'Tench', 0x5A7038],
+  chub: ['Döbel', 'Chub', 0x9AA0A0],
+  atlantic_cod: ['Kabeljau', 'Atlantic Cod', 0x9C8A5E],
+  saithe: ['Seelachs', 'Saithe', 0x4E5A60],
+  alaska_pollock: ['Alaska-Seelachs', 'Alaska Pollock', 0x8A8A70],
+  haddock: ['Schellfisch', 'Haddock', 0x7A7E84],
+  hake: ['Seehecht', 'Hake', 0x9AA4AE],
+  whiting: ['Wittling', 'Whiting', 0xB4B0A0],
+  herring: ['Hering', 'Herring', 0x5E86A8],
+  sardine: ['Sardine', 'Sardine', 0x4E7EA0],
+  anchovy: ['Sardelle', 'Anchovy', 0x5A8098],
+  sprat: ['Sprotte', 'Sprat', 0x6A90A8],
+  sea_bass: ['Wolfsbarsch', 'Sea Bass', 0x9AA6B0],
+  gilthead_bream: ['Dorade', 'Gilthead Bream', 0xB0B8C0],
+  red_snapper: ['Roter Schnapper', 'Red Snapper', 0xD0504A],
+  red_mullet: ['Rotbarbe', 'Red Mullet', 0xE07858],
+  grouper: ['Zackenbarsch', 'Grouper', 0x7A5A3A],
+  barracuda: ['Barrakuda', 'Barracuda', 0x8A98A4],
+  mackerel: ['Makrele', 'Mackerel', 0x3E7A8A],
+  tuna: ['Blauflossen-Thun', 'Bluefin Tuna', 0x2A3E6A],
+  skipjack: ['Echter Bonito', 'Skipjack Tuna', 0x3A4E7A],
+  swordfish: ['Schwertfisch', 'Swordfish', 0x4A5A7A],
+  plaice: ['Scholle', 'Plaice', 0x8A7A5A],
+  flounder: ['Flunder', 'Flounder', 0x7A6E50],
+  sole: ['Seezunge', 'Sole', 0x8A7650],
+  turbot: ['Steinbutt', 'Turbot', 0x6A6250],
+  halibut: ['Heilbutt', 'Halibut', 0x5E5A50],
+  redfish: ['Rotbarsch', 'Redfish', 0xD05A3A],
+  monkfish: ['Seeteufel', 'Monkfish', 0x6A5A44],
+  gurnard: ['Knurrhahn', 'Gurnard', 0xC8604A],
+  wolffish: ['Seewolf', 'Atlantic Wolffish', 0x6A7078],
   golden_koi: ['Goldkoi', 'Golden Koi', 0xFFD95B],
 };
 for (const [id, [german, english, color]] of Object.entries(fish)) {
@@ -172,10 +243,16 @@ const fishTranslations = {
   'catch.atzen.day': ['Welt-Tag: %s', 'World day: %s'],
   'catch.atzen.quality': ['Kontrolle: %s %% | Angler: %s', 'Control: %s%% | Angler: %s'],
   'catch.atzen.wild': ['Wildfang', 'Wild catch'],
-  'habitat.atzen.swamp': ['Sumpfgewässer', 'Swamp waters'],
-  'habitat.atzen.freshwater': ['Gewässer', 'Waters'],
+  'habitat.atzen.river': ['Fluss', 'River'],
+  'habitat.atzen.lake': ['See', 'Lake'],
+  'habitat.atzen.swamp': ['Sumpf', 'Swamp'],
+  'habitat.atzen.cold': ['Kaltes Gewässer', 'Cold waters'],
+  'habitat.atzen.ocean': ['Meer', 'Sea'],
+  'habitat.atzen.warm_ocean': ['Warmes Meer', 'Warm sea'],
+  'habitat.atzen.cold_ocean': ['Nordmeer', 'Northern sea'],
+  'habitat.atzen.deep_ocean': ['Tiefsee', 'Deep sea'],
 };
 for (const [key, [german, english]] of Object.entries(fishTranslations)) { de[key] = german; en[key] = english; }
 json('assets/atzen/lang/de_de.json', de);
 json('assets/atzen/lang/en_us.json', en);
-console.log('Generated six fish species with buckets, spawn eggs, cooking recipes and catch translations.');
+console.log(`Generated ${Object.keys(fish).length} fish species with buckets, spawn eggs, cooking recipes and catch translations.`);

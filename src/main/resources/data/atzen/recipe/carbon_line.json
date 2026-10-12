@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:braided_line",
+    "atzen:carbon_fiber",
+    "atzen:carbon_fiber"
+  ],
+  "result": {
+    "id": "atzen:carbon_line",
+    "count": 1
+  }
+}

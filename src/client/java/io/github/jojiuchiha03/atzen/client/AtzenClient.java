@@ -12,6 +12,8 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
@@ -20,8 +22,8 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * No HUD: a fight is shown through the orbiting camera (see {@link BattleCamera}), the fish on the line,
- * camera shake and sound. Tension creaks louder and faster the closer the line is to snapping.
+ * A fight is shown through the camera (see {@link BattleCamera}), the fish on the line, camera shake and
+ * sound, plus one slim tension gauge above the hotbar (see {@link TensionGauge}) that says whether to reel.
  */
 public final class AtzenClient implements ClientModInitializer {
     static KeyMapping reelKey;
@@ -34,7 +36,6 @@ public final class AtzenClient implements ClientModInitializer {
     static int cameraTicks;
     /** Ticks left for blending back to the player's own view after a fight. */
     static int outroTicks;
-    static float orbitStartYaw;
     private static CameraType previousCamera;
     private static boolean hintShown;
     private static int ticks;
@@ -49,8 +50,9 @@ public final class AtzenClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(BattlePayload.TYPE, (payload, context) -> receive(payload, context.client()));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> clear(client));
         ClientTickEvents.END_CLIENT_TICK.register(AtzenClient::tick);
+        HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Atzen.id("line_tension"), TensionGauge::render);
         ClientTooltipComponentCallback.EVENT.register(data ->
-                data instanceof AtzenRodItem.BaitTooltip bait ? new BaitSlotTooltip(bait) : null);
+                data instanceof AtzenRodItem.GearTooltip gear ? new GearSlotsTooltip(gear) : null);
     }
 
     private static void receive(BattlePayload payload, Minecraft client) {
@@ -60,9 +62,9 @@ public final class AtzenClient implements ClientModInitializer {
             displayedProgress = payload.progress();
             reeling = false;
             cameraTicks = 0;
+            BattleCamera.reset();
             outroTicks = 0;
             if (client.player != null) {
-                orbitStartYaw = client.player.getYRot() + 180;
                 client.player.playSound(AtzenSounds.HOOK_SET, 0.8f, 1.0f);
                 if (!hintShown) {
                     hintShown = true;

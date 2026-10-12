@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": "minecraft:coal_block",
+  "result": {
+    "id": "atzen:carbon_fiber"
+  },
+  "experience": 0.5,
+  "cookingtime": 200
+}

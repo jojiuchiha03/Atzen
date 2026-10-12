@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.level.biome.Biomes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -17,10 +16,6 @@ import java.util.Locale;
 public final class FishCatch {
     private FishCatch() { }
 
-    public static boolean isSwamp(ServerLevel level, BlockPos pos) {
-        var biome = level.getBiome(pos);
-        return biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP);
-    }
 
     public static ItemStack create(FishSpecimen fish, ServerLevel level, BlockPos pos, int quality, String angler) {
         ItemStack stack = new ItemStack(AtzenFishRegistry.fishItem(fish.species()));
@@ -34,8 +29,7 @@ public final class FishCatch {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.put("atzen_fish", data));
 
         List<Component> lines = new ArrayList<>(measurementLore(fish));
-        lines.add(Component.translatable("catch.atzen.location", Component.translatable(isSwamp(level, pos)
-                ? "habitat.atzen.swamp" : "habitat.atzen.freshwater"), pos.getX(), pos.getZ()).withStyle(ChatFormatting.GRAY));
+        lines.add(Component.translatable("catch.atzen.location", Component.translatable(Habitat.at(level, pos).translationKey()), pos.getX(), pos.getZ()).withStyle(ChatFormatting.GRAY));
         lines.add(Component.translatable("catch.atzen.day", level.getOverworldClockTime() / 24000 + 1).withStyle(ChatFormatting.GRAY));
         lines.add(quality < 0 ? Component.translatable("catch.atzen.wild").withStyle(ChatFormatting.DARK_GRAY)
                 : Component.translatable("catch.atzen.quality", quality, angler).withStyle(ChatFormatting.AQUA));
@@ -54,8 +48,11 @@ public final class FishCatch {
     public static List<Component> measurementLore(FishSpecimen fish) {
         return List.of(
                 Component.translatable(fish.species().rarityKey()).append(" · ")
-                        .append(Component.translatable(fish.sizeKey())).withStyle(fish.species() == FishSpecies.GOLDEN_KOI
-                                ? ChatFormatting.GOLD : ChatFormatting.AQUA),
+                        .append(Component.translatable(fish.sizeKey())).withStyle(switch (fish.species().rarity()) {
+                            case LEGENDARY -> ChatFormatting.GOLD;
+                            case RARE -> ChatFormatting.LIGHT_PURPLE;
+                            default -> ChatFormatting.AQUA;
+                        }),
                 Component.translatable("catch.atzen.measurements", String.format(Locale.ROOT, "%.1f", fish.lengthCm()),
                         String.format(Locale.ROOT, "%.2f", fish.weightKg())).withStyle(ChatFormatting.GRAY));
     }
