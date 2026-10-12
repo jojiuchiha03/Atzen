@@ -48,6 +48,12 @@ public final class CameraController {
     private static long lastFrame;
     private static CameraType previousType;
     private static AtzenFishEntity watched;
+    /** The fight shot on screen; it only changes after it has been held a while, so the camera does not jump around. */
+    private static FishAction shotAction = FishAction.CALM;
+    private static int shotHeld;
+    /** Smoothed direction from the angler to the fish, so a fish swimming past does not swing the camera around. */
+    private static Vec3 heading;
+    private static double frameSeconds = 0.016;
 
     private CameraController() { }
 
@@ -88,6 +94,19 @@ public final class CameraController {
         if (restless > 0) restless--;
         if (trophyTicks > 0) trophyTicks--;
 
+        BattlePayload fight = AtzenClient.state;
+        FishAction wanted = fight == null || fight.pending() != null ? FishAction.CALM : switch (fight.action()) {
+            case RUN, DIVE, SIDE, JUMP -> fight.action();
+            default -> FishAction.CALM;
+        };
+        shotHeld++;
+        // Jumps cut in at once (they are short); every other shot is held at least two seconds.
+        if (wanted != shotAction && (wanted == FishAction.JUMP || shotAction == FishAction.JUMP || shotHeld >= 40)) {
+            if (shotAction != FishAction.JUMP || shotHeld >= 20) {
+                shotAction = wanted;
+                shotHeld = 0;
+            }
+        }
         State next = choose(client);
         if (next != state) {
             state = next;
@@ -141,9 +160,10 @@ public final class CameraController {
         smoothFocus = null;
     }
 
+    /** A new fight: start on the calm shot; the camera glides there from wherever it is. */
     static void reset() {
-        smoothPosition = null;
-        smoothFocus = null;
+        shotAction = FishAction.CALM;
+        shotHeld = 0;
     }
 
     /** Returns {x, y, z, yRot, xRot} for the camera, or null to keep vanilla's view. */
@@ -154,6 +174,7 @@ public final class CameraController {
         long now = System.nanoTime();
         double seconds = lastFrame == 0 ? 0.016 : Math.min(0.1, (now - lastFrame) / 1e9);
         lastFrame = now;
+        frameSeconds = seconds;
         float time = player.tickCount + partial;
         Vec3 eye = player.getEyePosition(partial);
         // Blend from the player's own eyes when they play in first person (vanilla is third person meanwhile).
@@ -164,21 +185,21 @@ public final class CameraController {
         Vec3[] shot = shot(client, player, eye, partial, time);
         if (shot != null) {
             Vec3 position = clip(client, shot[2] == null ? eye : shot[2], shot[0], player);
-            double follow = 1 - Math.exp(-seconds * (state == State.HOOKED ? 9 : 4));
+            double follow = 1 - Math.exp(-seconds * (state == State.HOOKED || shotAction == FishAction.JUMP ? 6 : 2.5));
             smoothPosition = smoothPosition == null ? position : smoothPosition.lerp(position, follow);
-            smoothFocus = smoothFocus == null ? shot[1] : smoothFocus.lerp(shot[1], 1 - Math.exp(-seconds * 7));
+            smoothFocus = smoothFocus == null ? shot[1] : smoothFocus.lerp(shot[1], 1 - Math.exp(-seconds * 5));
         }
         if (smoothPosition == null || smoothFocus == null) return null;
 
         Vec3 look = smoothFocus.subtract(smoothPosition);
         float yaw = (float) Math.toDegrees(Math.atan2(-look.x, look.z));
-        float pitch = (float) -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance()));
+        float pitch = Math.clamp((float) -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance())), -75f, 75f);
         BattlePayload fight = AtzenClient.state;
         if (fight != null && fight.result() == FishingBattle.Result.ACTIVE) {
-            float shake = Math.max(0, AtzenClient.displayedTension - 0.75f) / 0.25f * 1.2f
-                    + (fight.action() == FishAction.RUN && fight.pending() == null ? 0.35f : 0);
-            yaw += shake * (float) Math.sin(time * 2.7);
-            pitch += shake * (float) Math.cos(time * 3.3) * 0.6f;
+            // only a light tremor when the line is close to breaking
+            float shake = Math.max(0, AtzenClient.displayedTension - 0.8f) / 0.2f * 0.6f;
+            yaw += shake * (float) Math.sin(time * 1.9);
+            pitch += shake * (float) Math.cos(time * 2.3) * 0.5f;
         }
         float b = Mth.lerp(partial, previousBlend, blend);
         b = b * b * (3 - 2 * b);
@@ -193,8 +214,10 @@ public final class CameraController {
         Vec3 hookPos = hook != null ? hook.getPosition(partial) : eye.add(player.getLookAngle().scale(8));
         Vec3 fish = fishPosition(client, partial, hookPos);
         Vec3 toFish = fish.subtract(eye).multiply(1, 0, 1);
-        if (toFish.lengthSqr() < 1e-4) toFish = player.getLookAngle().multiply(1, 0, 1);
+        if (toFish.lengthSqr() < 0.25) toFish = heading != null ? heading : player.getLookAngle().multiply(1, 0, 1);
         toFish = toFish.normalize();
+        heading = heading == null || state == State.IDLE ? toFish : heading.lerp(toFish, 1 - Math.exp(-frameSeconds * 2.5)).normalize();
+        toFish = heading;
         Vec3 right = new Vec3(-toFish.z, 0, toFish.x);
         BattlePayload fight = AtzenClient.state;
         return switch (state) {
@@ -224,10 +247,10 @@ public final class CameraController {
     }
 
     private static Vec3[] fighting(Vec3 eye, Vec3 fish, Vec3 toFish, Vec3 right, BattlePayload fight, float time) {
-        FishAction action = fight == null ? FishAction.CALM : fight.pending() != null ? FishAction.CALM : fight.action();
-        return switch (action) {
-            // on the fish: beside it, low, the angler in the background
-            case RUN, DIVE -> new Vec3[] {fish.subtract(toFish.scale(2.6)).add(right.scale(2.2)).add(0, 1.1, 0), fish, null};
+        return switch (shotAction) {
+            // on the fish: beside it, a little above the water, the angler in the background
+            case RUN, DIVE -> new Vec3[] {fish.subtract(toFish.scale(2.6)).add(right.scale(2.2)).add(0, 1.4, 0), fish,
+                    fish.add(0, 1.0, 0)};
             // wide and high: the fish heading for cover
             case SIDE -> new Vec3[] {eye.subtract(toFish.scale(4.5)).add(0, 3.2, 0), eye.lerp(fish, 0.7), null};
             // tight behind the angler, the leap in front

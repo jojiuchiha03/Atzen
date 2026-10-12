@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.1] - 2026-10-12
+
+### Behoben
+- Ruhigere Kamera im Drill: Einstellungen wechseln erst nach zwei Sekunden statt bei jeder Fischaktion (Sprünge schneiden sofort), weicheres Nachführen, die Richtung zum Fisch wird geglättet (kein Herumschwenken, wenn der Fisch nah vorbeischwimmt), kein Sprung beim Übergang vom Biss in den Drill, Fischeinstellung prallt nicht mehr am Ufer ab, Blickwinkel begrenzt, Wackeln nur noch kurz vor dem Reißen.
+
 ## [0.6.0] - 2026-10-12
 
 ### Neu
