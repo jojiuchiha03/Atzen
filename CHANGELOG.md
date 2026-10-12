@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.1] - 2026-10-12
+
+### Behoben
+- Kamera beim Auswerfen: Die Einstellung steht fest dort, wo du beim Wurf standest und hingesehen hast, statt mit jeder Mausbewegung mitzuwandern; der Blick hält mit der fliegenden Pose Schritt und bleibt nach dem Aufsetzen noch kurz auf ihr. Mausbewegungen während des Wurfs brechen die Szene nicht mehr ab, kleine Zuckungen gelten nicht als Umsehen, und der Wechsel zwischen erster und dritter Person flackert nicht mehr.
+
 ## [0.14.0] - 2026-10-12
 
 Die Stufen 0.8 bis 0.14 der Roadmap in einer Version.

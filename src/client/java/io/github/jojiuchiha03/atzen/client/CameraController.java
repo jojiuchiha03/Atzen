@@ -54,6 +54,12 @@ public final class CameraController {
     /** Smoothed direction from the angler to the fish, so a fish swimming past does not swing the camera around. */
     private static Vec3 heading;
     private static double frameSeconds = 0.016;
+    /** The cast: where the angler stood and looked when the float left, so the shot does not wander with the mouse. */
+    private static FishingHook castHook;
+    private static Vec3 castEye, castDir;
+    private static int landedAt = -1;
+    /** Ticks the cinematic view has been fully off; the camera type only goes back after a short pause. */
+    private static int idleTicks;
 
     private CameraController() { }
 
@@ -84,8 +90,9 @@ public final class CameraController {
             return;
         }
         // The angler moving or looking around takes the camera back while nothing is hooked.
-        if (lastPosition != null && (player.position().distanceToSqr(lastPosition) > 0.0025
-                || Math.abs(Mth.wrapDegrees(player.getYRot() - lastYaw)) > 2.5 || Math.abs(player.getXRot() - lastPitch) > 2.5)) {
+        // A small twitch of the mouse is not "looking around".
+        if (lastPosition != null && state != State.CASTING && (player.position().distanceToSqr(lastPosition) > 0.01
+                || Math.abs(Mth.wrapDegrees(player.getYRot() - lastYaw)) > 6 || Math.abs(player.getXRot() - lastPitch) > 6)) {
             restless = Math.max(restless, 30);
         }
         lastPosition = player.position();
@@ -117,11 +124,16 @@ public final class CameraController {
         previousBlend = blend;
         blend = state == State.IDLE ? Math.max(0, blend - 1 / 14f) : Math.min(1, blend + 1 / 12f);
         if (blend > 0 && previousType == null) {
+            idleTicks = 0;
             // Third person while the cinematic camera runs, so the angler and the rod are drawn and no hand floats.
             previousType = client.options.getCameraType();
             client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            idleTicks = 0;
         } else if (blend == 0 && previousBlend == 0) {
-            restore(client);
+            // Only back to the player's camera type after a short pause, so a quick change of shot does not flicker.
+            if (++idleTicks >= 20) restore(client);
+        } else {
+            idleTicks = 0;
         }
     }
 
@@ -137,8 +149,31 @@ public final class CameraController {
         }
         if (trophyTicks > 0) return State.TROPHY;
         FishingHook hook = client.player.fishing;
-        if (hook == null || hook.isRemoved() || restless > 0) return State.IDLE;
-        if (!hook.isInWater()) return hook.tickCount < 50 ? State.CASTING : State.IDLE;
+        if (hook == null || hook.isRemoved()) {
+            castHook = null;
+            return State.IDLE;
+        }
+        if (hook != castHook) {
+            // A new cast: fix the shot on where the angler stands and looks now.
+            castHook = hook;
+            castEye = client.player.getEyePosition();
+            Vec3 look = client.player.getLookAngle().multiply(1, 0, 1);
+            castDir = look.lengthSqr() < 1e-4 ? new Vec3(0, 0, 1) : look.normalize();
+            landedAt = -1;
+            if (restless < 60) restless = 0;
+        }
+        if (landedAt < 0 && hook.isInWater()) landedAt = hook.tickCount;
+        // The flight and a moment on the landed float are one shot; moving the mouse meanwhile does not cut it.
+        if (restless < 60 && (landedAt < 0 ? hook.tickCount < 60 : hook.tickCount < landedAt + 25)) {
+            if (landedAt < 0 || hook.isInWater()) return State.CASTING;
+        }
+        if (state == State.CASTING) {
+            // Start watching for restlessness from here, not from where the mouse was during the cast.
+            lastYaw = client.player.getYRot();
+            lastPitch = client.player.getXRot();
+            lastPosition = client.player.position();
+        }
+        if (restless > 0 || !hook.isInWater()) return State.IDLE;
         watched = approaching(client, hook);
         if (((BiteTarget) hook).atzen$isBiting() || watched != null) return State.BITE;
         return State.WAITING;
@@ -187,7 +222,8 @@ public final class CameraController {
             Vec3 position = clip(client, shot[2] == null ? eye : shot[2], shot[0], player);
             double follow = 1 - Math.exp(-seconds * (state == State.HOOKED || shotAction == FishAction.JUMP ? 6 : 2.5));
             smoothPosition = smoothPosition == null ? position : smoothPosition.lerp(position, follow);
-            smoothFocus = smoothFocus == null ? shot[1] : smoothFocus.lerp(shot[1], 1 - Math.exp(-seconds * 5));
+            // The flying float is fast: the focus keeps up with it instead of trailing behind.
+            smoothFocus = smoothFocus == null ? shot[1] : smoothFocus.lerp(shot[1], 1 - Math.exp(-seconds * (state == State.CASTING ? 14 : 5)));
         }
         if (smoothPosition == null || smoothFocus == null) return null;
 
@@ -216,14 +252,19 @@ public final class CameraController {
         Vec3 toFish = fish.subtract(eye).multiply(1, 0, 1);
         if (toFish.lengthSqr() < 0.25) toFish = heading != null ? heading : player.getLookAngle().multiply(1, 0, 1);
         toFish = toFish.normalize();
-        heading = heading == null || state == State.IDLE ? toFish : heading.lerp(toFish, 1 - Math.exp(-frameSeconds * 2.5)).normalize();
+        if (state == State.CASTING && castDir != null) heading = castDir;
+        else heading = heading == null || state == State.IDLE ? toFish : heading.lerp(toFish, 1 - Math.exp(-frameSeconds * 2.5)).normalize();
         toFish = heading;
         Vec3 right = new Vec3(-toFish.z, 0, toFish.x);
         BattlePayload fight = AtzenClient.state;
         return switch (state) {
             case IDLE -> null;
-            case CASTING -> new Vec3[] {eye.subtract(player.getLookAngle().multiply(1, 0, 1).normalize().scale(2.6))
-                    .add(right.scale(0.8)).add(0, 0.45, 0), hookPos, null};
+            case CASTING -> {
+                Vec3 dir = castDir != null ? castDir : player.getLookAngle().multiply(1, 0, 1).normalize();
+                Vec3 from = castEye != null ? castEye : eye;
+                Vec3 side = new Vec3(-dir.z, 0, dir.x);
+                yield new Vec3[] {from.subtract(dir.scale(2.6)).add(side.scale(0.8)).add(0, 0.6, 0), hookPos, from};
+            }
             case WAITING -> {
                 double drift = Math.sin(time * 0.01) * 0.4;
                 yield new Vec3[] {eye.add(right.scale(1.7 + drift)).subtract(toFish.scale(0.9)).add(0, 0.05, 0),
