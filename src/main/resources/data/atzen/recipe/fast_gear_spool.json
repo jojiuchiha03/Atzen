@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:redstone",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "atzen:fast_gear_spool",
+    "count": 1
+  }
+}

@@ -91,6 +91,10 @@ public final class AtzenClient implements ClientModInitializer {
         }
         if (payload.result() != FishingBattle.Result.ACTIVE && (state == null || state.result() == FishingBattle.Result.ACTIVE)) {
             outroTicks = 30;
+            if (client.player != null) {
+                client.player.sendOverlayMessage(Component.translatable("result.atzen."
+                        + payload.result().name().toLowerCase(java.util.Locale.ROOT)));
+            }
             if (payload.result() == FishingBattle.Result.CAUGHT && !payload.has(BattlePayload.PRACTICE)) {
                 trophy = payload;
                 CameraController.trophy();

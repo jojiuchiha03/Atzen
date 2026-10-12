@@ -101,9 +101,18 @@ final class BiteHookGoal extends Goal {
             ((BiteTarget) target).atzen$bite(40);
             afterBite = 45;
         } else {
-            // Hold on just under the float while the angler can strike.
-            fish.setDeltaMovement((target.getX() - fish.getX()) * 0.3, (target.getY() - 0.45 - fish.getY()) * 0.15,
-                    (target.getZ() - fish.getZ()) * 0.3);
+            // It has taken the bait and swims off with it, out into open water: the float is pulled away from the bank.
+            Player owner = target.getPlayerOwner();
+            var away = owner == null ? net.minecraft.world.phys.Vec3.ZERO
+                    : target.position().subtract(owner.position()).multiply(1, 0, 1).normalize().scale(0.06);
+            var next = target.position().add(away);
+            if (fish.level().getFluidState(net.minecraft.core.BlockPos.containing(next.x, target.getY() - 0.3, next.z))
+                    .is(net.minecraft.tags.FluidTags.WATER)) {
+                target.setDeltaMovement(target.getDeltaMovement().add(away.scale(0.5)));
+            }
+            fish.setDeltaMovement((target.getX() + away.x * 4 - fish.getX()) * 0.3, (target.getY() - 0.45 - fish.getY()) * 0.15,
+                    (target.getZ() + away.z * 4 - fish.getZ()) * 0.3);
+            fish.getLookControl().setLookAt(fish.getX() + away.x * 10, fish.getY(), fish.getZ() + away.z * 10);
             afterBite--;
         }
     }

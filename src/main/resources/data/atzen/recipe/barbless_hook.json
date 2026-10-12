@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "minecraft:flint"
+  ],
+  "result": {
+    "id": "atzen:barbless_hook",
+    "count": 6
+  }
+}

@@ -19,7 +19,7 @@ public final class FishingBattle {
     public static final int DRAG_STEPS = 10;
     public static final double LANDING_DISTANCE = 4;
 
-    public enum Result { ACTIVE, CAUGHT, SNAPPED, SPOOLED, ESCAPED, TIMEOUT, CANCELLED }
+    public enum Result { ACTIVE, CAUGHT, SNAPPED, BITTEN, SPOOLED, ROD_BROKEN, ESCAPED, TIMEOUT, CANCELLED }
 
     /** What the angler does this tick. Steer is -1 (left), 0 or 1 (right), seen from the angler. */
     public record Input(boolean reeling, boolean lifting, int steer) {
@@ -55,6 +55,7 @@ public final class FishingBattle {
     private int reelTicks;
     private boolean slack;
     private boolean twisting;
+    private int overloadTicks;
     private boolean landable;
     private int goodTicks;
     private int ticks;
@@ -66,14 +67,19 @@ public final class FishingBattle {
         this.distance = Math.clamp(startDistance, 3, 40);
         this.hookHold = Math.clamp(hookHold + rig.hookBonus(), 20, 100);
         this.tension = fighter.power() * 0.5;
-        actionTicks = 20 + random.nextInt(20);
-        // The strike itself: the fish's first reaction is a run.
-        announce(FishAction.RUN, 10);
+        // The strike itself: the fish bolts straight out into open water before anything else.
+        start(FishAction.RUN);
+        actionTicks += 15;
     }
 
     /** Hook hold from the strike timing: ticks between the bite and the strike against the fish's ideal moment. */
     public static double strikeHold(int ticksAfterBite, int ideal) {
-        double quality = 1 - Math.min(1, Math.abs(ticksAfterBite - ideal) / 25.0);
+        return strikeHold(ticksAfterBite, ideal, 0.4);
+    }
+
+    /** As above; a sensitive rod lets the angler feel the bite, which widens the window for a good strike. */
+    public static double strikeHold(int ticksAfterBite, int ideal, double sensitivity) {
+        double quality = 1 - Math.min(1, Math.abs(ticksAfterBite - ideal) / (15 + 25 * Math.clamp(sensitivity, 0, 1)));
         return 55 + 45 * quality;
     }
 
@@ -95,7 +101,8 @@ public final class FishingBattle {
 
         // the rod: lifting raises it over a second, letting go lowers it faster
         double previousLift = lift;
-        lift = input.lifting() ? Math.min(1, lift + 0.06) : Math.max(0, lift - 0.1);
+        double liftRate = 0.06 * Math.clamp(1.15 - rig.rodWeight() * 0.4, 0.7, 1.1);
+        lift = input.lifting() ? Math.min(1, lift + liftRate) : Math.max(0, lift - 0.1);
         boolean rising = lift > previousLift, lowering = lift < previousLift;
         boolean reeling = input.reeling() && backlash == 0;
         if (input.lifting()) liftTicks++;
@@ -160,7 +167,7 @@ public final class FishingBattle {
             if (input.steer() == -sideDir) danger = Math.max(0, danger - 2.5);
             else danger += 1.4 * (phase == null ? 1 : phase.snags());
             if (danger >= 100) {
-                condition -= 0.22 / rig.abrasion();
+                condition -= 0.22 * rig.snagFactor() / rig.abrasion();
                 danger = 55;
                 shock(0.3 * strength);
             }
@@ -172,6 +179,17 @@ public final class FishingBattle {
             result = Result.SNAPPED;
             return;
         }
+        // the rod: overloaded above its rating, broken far above it
+        if (tension > rig.rodLoad()) overloadTicks++;
+        if (tension > rig.rodLoad() * 1.3) {
+            result = Result.ROD_BROKEN;
+            return;
+        }
+        // teeth: in a head shake a toothy fish can bite through a line without a steel leader
+        if (fighter.teeth() && !rig.toothGuard() && action == FishAction.SHAKE && warning == 0 && random.nextInt(250) == 0) {
+            result = Result.BITTEN;
+            return;
+        }
         if (distance + pumpSlack > rig.capacity()) {
             result = Result.SPOOLED;
             return;
@@ -181,7 +199,9 @@ public final class FishingBattle {
         // a rod held up keeps the line tight; a rod dropped without reeling leaves it hanging
         slack = !reeling && !input.lifting() && (tension < 0.12 * fighter.power() || pumpSlack > 0.4);
         double loss = 0;
-        if (slack) loss += rig.ability() == ReelAbility.FORGIVING ? 0.4 : 0.7;
+        if (slack) loss += (rig.ability() == ReelAbility.FORGIVING ? 0.4 : 0.7) * rig.slackLoss();
+        // a hook too weak for the load bends open
+        if (tension > rig.hookStrength()) loss += 0.6 + 2 * (tension / rig.hookStrength() - 1);
         if (action == FishAction.SHAKE && warning == 0) loss += tension > 0.7 * breakingLoad() || slack ? 0.6 : 0.08;
         if (action == FishAction.JUMP && warning == 0 && actionTicks > 4) {
             if (rig.ability() == ReelAbility.JUMP_MASTER && lift < 0.2) loss += 0;
@@ -366,6 +386,10 @@ public final class FishingBattle {
     public int elapsed() { return elapsed; }
     public double tension() { return tension; }
     public double tensionShare() { return tension / rig.lineStrength(); }
+    /** Tension against the rod's rating; above 1 the rod is overloaded. */
+    public double rodStrain() { return tension / rig.rodLoad(); }
+    /** Ticks the rod spent overloaded: it takes extra wear. */
+    public int overloadTicks() { return overloadTicks; }
     public double distance() { return distance; }
     public double lineOut() { return distance + pumpSlack; }
     public double stamina() { return stamina; }

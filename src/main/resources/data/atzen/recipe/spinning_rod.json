@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:river_rod",
+    "minecraft:iron_ingot",
+    "minecraft:string",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "atzen:spinning_rod",
+    "count": 1
+  }
+}

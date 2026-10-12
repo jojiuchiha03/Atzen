@@ -95,4 +95,37 @@ public enum BaitType {
     public static final double BARE_HOOK = 0.4;
 
     public String translationKey() { return "item.atzen." + id; }
+
+    /** Weight in grams: what the rod has to cast. */
+    public double grams() {
+        return switch (this) {
+            case WORM -> 3;
+            case MAGGOT -> 1;
+            case CORN -> 2;
+            case BREAD -> 2;
+            case BOILIE -> 15;
+            case BAITFISH -> 40;
+            case FISH_STRIP -> 20;
+            case LARVA -> 1;
+            case SHRIMP -> 8;
+            case GLOW -> 5;
+            case HEARTY -> 10;
+            case SPINNER -> 8;
+            case SPOON -> 15;
+            case WOBBLER -> 18;
+            case SOFT_LURE -> 20;
+            case POPPER -> 25;
+            case JIG -> 30;
+            case STREAMER -> 4;
+            case DRY_FLY -> 1;
+            case NYMPH -> 3;
+            case ANCIENT -> 60;
+            case REED_KING -> 25;
+            case CURRENT -> 50;
+            case DEEP_LIGHT -> 30;
+        };
+    }
+
+    /** Flies are cast with the fly line, not by their own weight. */
+    public boolean fly() { return this == STREAMER || this == DRY_FLY || this == NYMPH; }
 }

@@ -9,8 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** The fight without Minecraft: a scripted angler plays it with different tackle. */
 class FishingBattleTest {
-    static final Rig BASIC = new Rig(7, 0.35, 1, 4, 0.65, 0.115, 5, 120, 1.15, ReelAbility.FORGIVING, 1, 1, 0);
-    static final Rig GOOD = new Rig(20, 0.15, 1.6, 9, 0.6, 0.165, 9, 200, 1.15, ReelAbility.FINE_DRAG, 1, 1, 0);
+    static final Rig BASIC = Rig.of(7, 0.35, 1, 4, 0.65, 7, 0.115, 5, 120, ReelAbility.FORGIVING);
+    /** The same with a steel leader, for toothy fish. */
+    static final Rig BASIC_STEEL = new Rig(7, 0.35, 1, 4, 0.65, 7, 0.3, 0.115, 5, 120, 1.15, ReelAbility.FORGIVING, 9, 1, 0.4,
+            true, 1, 1, 0);
+    /** Carbon rod, diamond reel, carbon line, a large hook and a steel leader. */
+    static final Rig GOOD = new Rig(20, 0.15, 1.6, 9, 0.6, 24, 0.25, 0.165, 9, 200, 1.15, ReelAbility.FINE_DRAG, 18, 1, 0.4,
+            true, 1, 1, 0);
 
     /** A competent angler: lands when it can, stops reeling in runs, steers against cover, pumps when the fish holds. */
     static FishingBattle play(Fighter fighter, Rig rig, long seed) {
@@ -65,7 +70,7 @@ class FishingBattleTest {
     @Test
     void skillLandsEveryCommonFishWithFittingTackle() {
         Object[][] cases = {{FishSpecies.ROACH, 30.0, Rig.VANILLA}, {FishSpecies.PERCH, 40.0, BASIC},
-                {FishSpecies.PIKE, 100.0, BASIC}, {FishSpecies.CARP, 80.0, BASIC}, {FishSpecies.CATFISH, 180.0, GOOD}};
+                {FishSpecies.PIKE, 100.0, BASIC_STEEL}, {FishSpecies.CARP, 80.0, BASIC}, {FishSpecies.CATFISH, 180.0, GOOD}};
         for (Object[] c : cases) {
             Fighter fighter = fish((FishSpecies) c[0], (double) c[1]);
             int caught = 0, ticks = 0;
@@ -124,7 +129,7 @@ class FishingBattleTest {
 
     @Test
     void aSlackLineLetsTheFishThrowTheHook() {
-        FishingBattle battle = new FishingBattle(fish(FishSpecies.PIKE, 100), BASIC, 15, 90, 1);
+        FishingBattle battle = new FishingBattle(fish(FishSpecies.CARP, 80), BASIC, 15, 90, 1);
         while (battle.result() == FishingBattle.Result.ACTIVE) battle.tick(FishingBattle.Input.NONE);
         assertEquals(FishingBattle.Result.ESCAPED, battle.result());
     }
@@ -164,5 +169,48 @@ class FishingBattleTest {
         assertEquals(distance, battle.distance());
         assertEquals(elapsed, battle.elapsed());
         assertFalse(battle.land());
+    }
+
+    @Test
+    void teethBiteThroughWithoutASteelLeader() {
+        Fighter pike = fish(FishSpecies.PIKE, 100);
+        Rig bare = Rig.of(20, 0.15, 1.6, 9, 0.6, 24, 0.165, 9, 200, ReelAbility.FINE_DRAG);
+        int bitten = 0;
+        for (long seed = 0; seed < 40; seed++) {
+            if (play(pike, bare, seed).result() == FishingBattle.Result.BITTEN) bitten++;
+            assertNotEquals(FishingBattle.Result.BITTEN, play(pike, GOOD, seed).result());
+        }
+        assertTrue(bitten >= 4, "bitten " + bitten);
+    }
+
+    @Test
+    void aBigFishOverloadsALightRod() {
+        Fighter catfish = fish(FishSpecies.CATFISH, 180);
+        Rig bamboo = Rig.of(20, 0.15, 1.6, 2.5, 0.8, 5, 0.165, 9, 200, ReelAbility.FINE_DRAG);
+        int broken = 0;
+        for (long seed = 0; seed < 20; seed++) if (play(catfish, bamboo, seed).result() == FishingBattle.Result.ROD_BROKEN) broken++;
+        assertTrue(broken >= 15, "broken " + broken);
+    }
+
+    @Test
+    void aSmallHookBendsOpenOnABigFish() {
+        Fighter carp = fish(FishSpecies.CARP, 80);
+        Rig tiny = new Rig(20, 0.15, 1.6, 9, 0.6, 24, 0.25, 0.165, 9, 200, 1.15, ReelAbility.FINE_DRAG, 4, 1, 1, false, 1, 1, 0);
+        int lost = 0, kept = 0;
+        for (long seed = 0; seed < 20; seed++) {
+            if (play(carp, tiny, seed).result() == FishingBattle.Result.ESCAPED) lost++;
+            if (play(carp, GOOD, seed).result() == FishingBattle.Result.CAUGHT) kept++;
+        }
+        assertTrue(lost > 10 && kept > 17, "lost " + lost + ", kept " + kept);
+    }
+
+    @Test
+    void theFishBoltsStraightAfterTheStrike() {
+        FishingBattle battle = new FishingBattle(fish(FishSpecies.PIKE, 100), BASIC_STEEL, 10, 90, 4);
+        for (int i = 0; i < 3; i++) battle.adjustDrag(-1);
+        assertEquals(FishAction.RUN, battle.action());
+        assertNull(battle.pending());
+        for (int i = 0; i < 20; i++) battle.tick(FishingBattle.Input.NONE);
+        assertTrue(battle.distance() > 10);
     }
 }

@@ -77,8 +77,8 @@ class FishSpecimenTest {
     void malformedFishAndTackleCannotPoisonTheSimulation() {
         assertThrows(IllegalArgumentException.class, () -> new FishSpecimen(FishSpecies.PIKE, Double.NaN, 1));
         assertThrows(IllegalArgumentException.class, () -> new FishSpecimen(FishSpecies.PIKE, 100, -1));
-        assertThrows(IllegalArgumentException.class, () -> new Rig(0, 0.1, 1, 1, 0.5, 0.1, 1, 10, 1, ReelAbility.NONE, 1, 1, 0));
+        assertThrows(IllegalArgumentException.class, () -> Rig.of(0, 0.1, 1, 1, 0.5, 5, 0.1, 1, 10, ReelAbility.NONE));
         assertThrows(IllegalArgumentException.class,
-                () -> new Rig(5, 0.1, 1, 1, 0.5, Double.POSITIVE_INFINITY, 1, 10, 1, ReelAbility.NONE, 1, 1, 0));
+                () -> Rig.of(5, 0.1, 1, 1, 0.5, 5, Double.POSITIVE_INFINITY, 1, 10, ReelAbility.NONE));
     }
 }

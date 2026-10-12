@@ -13,6 +13,9 @@ import io.github.jojiuchiha03.atzen.item.AtzenItems;
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.item.BaitType;
 import io.github.jojiuchiha03.atzen.item.BattleEquipment;
+import io.github.jojiuchiha03.atzen.item.GearSlot;
+import io.github.jojiuchiha03.atzen.item.HookType;
+import io.github.jojiuchiha03.atzen.item.RodType;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import io.github.jojiuchiha03.atzen.network.ReelPayload;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -103,10 +106,14 @@ public final class BattleManager {
             int[] weights = fighter.weights().clone();
             weights[FishAction.JUMP.ordinal()] += 3;
             fighter = new Fighter(fighter.power(), fighter.endurance(), fighter.speed(), fighter.weight(), weights,
-                    fighter.strikeIdeal(), fighter.salt(), null);
+                    fighter.strikeIdeal(), fighter.salt(), fighter.teeth(), null);
         }
         int sinceBite = liveFish != null && nibble <= 0 ? fighter.strikeIdeal() : ((BiteTarget) hook).atzen$ticksSinceBite();
-        double hold = FishingBattle.strikeHold(sinceBite, fighter.strikeIdeal());
+        RodType rodType = BattleEquipment.rodType(rod);
+        double hold = FishingBattle.strikeHold(sinceBite, fighter.strikeIdeal(), rodType.sensitivity());
+        // A circle hook sets itself; a fish far too small for the rod is hardly felt.
+        if (AtzenItems.hook(AtzenRodItem.get(rod, GearSlot.HOOK)) == HookType.CIRCLE) hold = Math.max(hold, 85);
+        if (fighter.weight() < rodType.fishMin()) hold -= 15;
         Rig rig = BattleEquipment.rig(player, rod, bait);
         FishingBattle battle = new FishingBattle(fighter, rig, Math.sqrt(hook.distanceToSqr(player)), hold, random.nextLong());
         if (!loaded.isEmpty()) AtzenRodItem.consumeBait(rod, player);
@@ -339,22 +346,29 @@ public final class BattleManager {
                         session.player.sendSystemMessage(Component.translatable("message.atzen.boss_caught",
                                 Component.translatable(boss.translationKey())).withStyle(ChatFormatting.GOLD));
                     }
-                    session.rod.hurtAndBreak(damage, session.player, session.hand);
+                    // an overloaded rod wears faster
+                    session.rod.hurtAndBreak(damage + session.battle.overloadTicks() / 20, session.player, session.hand);
                 } finally {
                     completing.remove(session.hook.getUUID());
                 }
             } else {
                 session.hook.discard();
-                if (result == FishingBattle.Result.SNAPPED || result == FishingBattle.Result.SPOOLED) {
+                if (result == FishingBattle.Result.SNAPPED || result == FishingBattle.Result.SPOOLED
+                        || result == FishingBattle.Result.BITTEN) {
                     AtzenRodItem.loseLure(session.rod);
                 }
-                if (result != FishingBattle.Result.CANCELLED) session.rod.hurtAndBreak(1, session.player, session.hand);
+                if (result == FishingBattle.Result.ROD_BROKEN) {
+                    // The blank cracks: a quarter of its life is gone.
+                    session.rod.hurtAndBreak(Math.max(1, session.rod.getMaxDamage() / 4), session.player, session.hand);
+                } else if (result != FishingBattle.Result.CANCELLED) {
+                    session.rod.hurtAndBreak(1, session.player, session.hand);
+                }
             }
         }
         // The outcome for everyone around: the catch, a snapping line, a fish that got away.
         var outcome = switch (result) {
             case CAUGHT -> AtzenSounds.CATCH;
-            case SNAPPED, SPOOLED -> AtzenSounds.SNAP;
+            case SNAPPED, SPOOLED, BITTEN, ROD_BROKEN -> AtzenSounds.SNAP;
             case ESCAPED, TIMEOUT -> AtzenSounds.ESCAPE;
             default -> SoundEvents.FISHING_BOBBER_RETRIEVE;
         };

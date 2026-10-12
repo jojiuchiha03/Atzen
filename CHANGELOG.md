@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0] - 2026-10-12
+
+### Neu
+- Fünf Rutentypen: Bambus-, Spinn-, Karpfen-, Fliegen- und Big-Game-Rute. Jede Rute hat Wurfgewicht, Belastbarkeit, Flex (Aktion), Sensibilität, Gewicht, Haltbarkeit und Fischgrößenbereich; keine ist überall die beste.
+- Rutenbelastung: Über der Belastbarkeit nutzt sich die Rute schneller ab, beim 1,3-Fachen knackt sie (ein Viertel Haltbarkeit weg, Fisch weg).
+- Sechs Wechselspulen (Flach-, Tief-, Leicht-, verstärkte Spule, Schnell- und Kraftübersetzung).
+- Vorfächer: Fluorocarbon (fast unsichtbar, abriebfest) und Stahl (gegen Zähne). Hecht, Zander, Barrakuda, Seewolf, Seeteufel, Schilfkönig und Tiefenwächter können eine Schnur ohne Stahlvorfach durchbeißen.
+- Acht Haken (klein/normal/groß, Drilling, Schonhaken, Karpfen-, Offset-, Circle-Haken) mit Größe und Festigkeit: zu große Haken schrecken ab, zu schwache biegen auf.
+- Die Rute hat jetzt sechs Slots: Rolle, Spule, Schnur, Vorfach, Haken, Köder. Ältere Ruten behalten ihre Teile.
+- Wurfweite hängt von Rute, Spule und Ködergewicht ab; Fliegen brauchen Fliegenrute und Fliegenrolle.
+- Schnurdurchmesser: dünne Geflochtene passt in größerer Menge auf die Spule.
+- Sensible Ruten vergrößern das Zeitfenster für einen guten Anschlag; zu kleine Fische spürt eine schwere Rute kaum.
+- Nach dem Anschlag flüchtet der Fisch sofort ins Freiwasser; schon beim Biss zieht er die Pose vom Ufer weg.
+- Ergebnis des Drills als Einblendung (Fang, Schnurbruch, durchgebissen, Rute überlastet …).
+
 ## [0.6.1] - 2026-10-12
 
 ### Behoben

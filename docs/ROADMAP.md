@@ -26,6 +26,11 @@ Legende: ✅ fertig · 🔶 teilweise · ⬜ offen
 | 8 Köder | 🔶 alle 18 aus der Liste + Leucht-/Kraft-/Bossköder, Artvorlieben, Verschleiß; Futtermischungen, Alterung offen |
 | 9 Fische | ✅ 50 Arten inkl. Karausche und Stör, 6 Seltenheitsstufen, artspezifisches Drillverhalten |
 | 10 Drill | ✅ Spannung, Ausdauer, Hakenhalt, Schnurkapazität, Schnurzustand, Bremse, Pumpen, Gegensteuern, Spezialaktionen; Kescher-Landung kommt in 0.8.0 |
+| 4 Ruten | ✅ (0.7.0) Bambus, Spinn, Karpfen, Fliege, Big-Game + 4 ältere, alle Attribute aus 4.6, Rutenbelastung und Bruch |
+| 5.5 Spulen | ✅ (0.7.0) alle sechs; Schnurdurchmesser bestimmt die Kapazität |
+| 6 Vorfächer | ✅ (0.7.0) Fluorocarbon, Stahl; Durchbeißen ohne Stahl |
+| 7 Haken | ✅ (0.7.0) alle sechs Arten (Einzelhaken in drei Größen), Größe, Festigkeit, Hakverhalten |
+| 3.2 Wurfweite | 🔶 (0.7.0) Rute, Spule, Ködergewicht; Hindernisse beim Wurf offen |
 | 18 Bosse | ✅ alle vier mit Bedingungen, Phasen, Eigenheiten, Trophäen; Lexikon-Eintrag kommt mit 0.12.0 |
 
 ## Stufen
@@ -33,7 +38,7 @@ Legende: ✅ fertig · 🔶 teilweise · ⬜ offen
 | Version | Inhalt | Anforderungen |
 | --- | --- | --- |
 | ✅ **0.6.0** | Kamera-Controller mit Zuständen (Wurf, Warten am Köder, Biss, Anschlag, Drill, Sprung, Landung), Bremse einstellbar, Schnurkapazität, Hakenhalt, Pumpen, längere Drills, Schnurbruch nach Zugkraft/Tragkraft; Rollentypen mit Spezialfähigkeiten; 25 Köder mit Artvorlieben; Seltenheit in 6 Stufen; alle vier Bossfische | 3, 5.1–5.4, 6.5, 8, 9.4, 10, 18 |
-| 0.7.0 | Rutentypen (Bambus, Spinn, Karpfen, Fliege, Big-Game) mit Attributen, Spulen, Vorfächer (Fluo, Stahl), Haken | 4, 5.5, 6, 7 |
+| ✅ 0.7.0 | Rutentypen (Bambus, Spinn, Karpfen, Fliege, Big-Game) mit Attributen, Spulen, Vorfächer (Fluo, Stahl), Haken | 4, 5.5, 6, 7 |
 | 0.8.0 | Kescher (klein/Karpfen/Großfisch) mit aktiver Landung, Trophäenansicht, Setzkescher | 3.6, 10.6, 14, 15.1 |
 | 0.9.0 | Rutenhalter, Doppelständer, Rod Pod, Bissanzeiger, mehrere Ruten gleichzeitig | 13 |
 | 0.10.0 | Unterwasser-Netz, Haltungsbedingungen, einfache Zucht | 15.2–15.4 |

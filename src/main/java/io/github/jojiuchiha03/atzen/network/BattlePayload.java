@@ -17,7 +17,7 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                             float tension, float drag, int dragStep, float stamina, float distance, float lineOut,
                             float capacity, float hookHold, float condition, float danger, int sideDir, float lift,
                             int flags, int secondsLeft, int quality, FishSpecies species, float lengthCm, float weightKg,
-                            int bossPhase, int fishEntityId, int strike)
+                            int bossPhase, int fishEntityId, int strike, float rodStrain)
         implements CustomPacketPayload {
     public static final int SLACK = 1, LANDABLE = 2, TANGLED = 4, PRACTICE = 8, FAKING = 16, TWIST = 32;
     public static final Type<BattlePayload> TYPE = new Type<>(Atzen.id("battle"));
@@ -31,7 +31,7 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                     buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
                     buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readByte(), buf.readFloat(),
                     buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readEnum(FishSpecies.class), buf.readFloat(),
-                    buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
+                    buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat());
         }
 
         public void encode(RegistryFriendlyByteBuf buf, BattlePayload value) {
@@ -60,6 +60,7 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
             buf.writeVarInt(value.bossPhase());
             buf.writeVarInt(value.fishEntityId());
             buf.writeVarInt(value.strike());
+            buf.writeFloat(value.rodStrain());
         }
     };
 
@@ -78,6 +79,6 @@ public record BattlePayload(int battleId, FishingBattle.Result result, FishActio
                 (float) battle.hookHold(), (float) battle.condition(), (float) battle.danger(), battle.sideDir(),
                 (float) battle.lift(), flags, Math.max(0, (battle.maxTicks() - battle.elapsed() + 19) / 20), battle.quality(),
                 specimen.species(), (float) specimen.lengthCm(), (float) specimen.weightKg(), battle.bossPhase(),
-                fishEntityId, strike);
+                fishEntityId, strike, (float) battle.rodStrain());
     }
 }

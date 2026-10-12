@@ -2,6 +2,9 @@ package io.github.jojiuchiha03.atzen.item;
 
 import io.github.jojiuchiha03.atzen.AtzenSounds;
 import io.github.jojiuchiha03.atzen.battle.Rig;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.Level;
 import java.util.Optional;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -16,9 +19,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
- * A fishing rod with three slots — reel, line and bait — filled in the inventory like a bundle: click a reel, a
- * line or bait onto the rod to fit it (whatever was in that slot comes back onto the cursor), right-click the rod
- * with an empty cursor to take the bait out, then the line, then the reel. Holding the rod on the cursor and
+ * A fishing rod with six slots — reel, spool, line, leader, hook and bait — filled in the inventory like a bundle:
+ * click a part onto the rod to fit it (whatever was in that slot comes back onto the cursor), right-click the rod
+ * with an empty cursor to take the parts out again, from the bait back to the reel. Holding the rod on the cursor and
  * right-clicking gear in a slot fits it as well. Each bite uses one bait.
  */
 public final class AtzenRodItem extends FishingRodItem {
@@ -28,10 +31,8 @@ public final class AtzenRodItem extends FishingRodItem {
         NonNullList<ItemStack> slots = NonNullList.withSize(GearSlot.values().length, ItemStack.EMPTY);
         ItemContainerContents contents = rod.get(DataComponents.CONTAINER);
         if (contents == null) return slots;
-        NonNullList<ItemStack> stored = NonNullList.withSize(GearSlot.values().length, ItemStack.EMPTY);
-        contents.copyInto(stored);
-        // Every item goes by its kind into its slot; rods from 0.3.0 kept their bait in the first position.
-        for (ItemStack stack : stored) {
+        // Every item goes by its kind into its slot, so rods from older versions keep their gear.
+        for (ItemStack stack : (Iterable<ItemStack>) contents.allItemsCopyStream()::iterator) {
             GearSlot slot = GearSlot.of(stack);
             if (slot != null && slots.get(slot.ordinal()).isEmpty()) slots.set(slot.ordinal(), stack);
         }
@@ -98,9 +99,9 @@ public final class AtzenRodItem extends FishingRodItem {
         return true;
     }
 
-    /** The slot that comes out first when the rod is emptied: bait, then line, then reel. */
+    /** The slot that comes out first when the rod is emptied: from the bait back to the reel. */
     private static GearSlot outermost(ItemStack rod) {
-        for (GearSlot slot : new GearSlot[] {GearSlot.BAIT, GearSlot.LINE, GearSlot.REEL}) {
+        for (GearSlot slot : new GearSlot[] {GearSlot.BAIT, GearSlot.HOOK, GearSlot.LEADER, GearSlot.LINE, GearSlot.SPOOL, GearSlot.REEL}) {
             if (!get(rod, slot).isEmpty()) return slot;
         }
         return null;
@@ -161,10 +162,22 @@ public final class AtzenRodItem extends FishingRodItem {
 
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack rod) {
-        return Optional.of(new GearTooltip(get(rod, GearSlot.REEL), get(rod, GearSlot.LINE), get(rod, GearSlot.BAIT),
-                BattleEquipment.preview(rod)));
+        ItemStack[] slots = new ItemStack[GearSlot.values().length];
+        for (GearSlot slot : GearSlot.values()) slots[slot.ordinal()] = get(rod, slot);
+        return Optional.of(new GearTooltip(slots, BattleEquipment.preview(rod), AtzenItems.rod(rod), BattleEquipment.castFactor(rod)));
     }
 
-    /** What the tooltip shows: the three slots and what the whole set does. */
-    public record GearTooltip(ItemStack reel, ItemStack line, ItemStack bait, Rig rig) implements TooltipComponent { }
+    /** Casting: how far the float flies depends on rod, spool and bait (see {@link BattleEquipment#castFactor}). */
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        boolean casting = player.fishing == null;
+        InteractionResult result = super.use(level, player, hand);
+        if (casting && !level.isClientSide() && player.fishing != null) {
+            player.fishing.setDeltaMovement(player.fishing.getDeltaMovement().scale(BattleEquipment.castFactor(player.getItemInHand(hand))));
+        }
+        return result;
+    }
+
+    /** What the tooltip shows: the slots, the rod's attributes and what the whole set does. */
+    public record GearTooltip(ItemStack[] slots, Rig rig, RodType rod, double cast) implements TooltipComponent { }
 }

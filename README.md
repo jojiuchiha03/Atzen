@@ -2,14 +2,14 @@
 
 Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 50 Fischarten mit eigenen Lebensräumen, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
 
-**Stand: 0.6.1.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
+**Stand: 0.7.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
 ## Installation
 
 Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und Fabric API **0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `atzen-0.6.1.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `atzen-0.7.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
 ## Der Angelvorgang
@@ -57,15 +57,51 @@ Eine Zustandsmaschine für den ganzen Wurf: **Wurf** (Schulter, folgt der Pose),
 
 ## Ausrüstung
 
-Jede Atzen-Rute hat drei Slots: **Rolle, Schnur, Köder**. Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt erst den Köder, dann die Schnur, dann die Rolle heraus. Der Tooltip zeigt die Slots, Tragkraft, Schnurmenge, Einzug, Kraft und die Fähigkeit der Rolle. Ohne Schnur angelt die Rute mit einfachem Faden (3,5 kg).
+Jede Atzen-Rute hat sechs Slots: **Rolle, Spule, Schnur, Vorfach, Haken, Köder**. Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt die Teile wieder heraus, vom Köder bis zur Rolle. Der Tooltip zeigt die Slots, die Werte der Rute, Tragkraft, Schnurmenge, Einzug, Kraft und die Fähigkeit der Rolle. Ohne Schnur angelt die Rute mit einfachem Faden (3,5 kg), ohne Haken mit einem normalen Einzelhaken.
 
-| Rute | Hubkraft | Flex | Besonderheit |
+| Rute | Belastbar | Hub | Flex | Gefühl | Wurfgewicht | Fische | Wurfweite |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Angel (Vanilla) | 5 kg | 3 kg | 50 % | 60 % | 5–30 g | bis 5 kg | ×1,0 |
+| Bambusrute | 5 kg | 2,5 kg | 80 % | 90 % | 1–15 g | bis 3 kg | ×0,8 |
+| Flussrute | 7 kg | 4 kg | 65 % | 70 % | 5–30 g | bis 6 kg | ×1,05 |
+| Spinnrute | 10 kg | 5 kg | 45 % | 80 % | 5–40 g | 0,2–10 kg | ×1,3 |
+| Fliegenrute | 8 kg | 4 kg | 75 % | 95 % | Fliegen | 0,1–6 kg | ×1,25 mit Fliege + Fliegenrolle |
+| Eisenrute | 13 kg | 7 kg | 35 % | 55 % | 10–60 g | bis 15 kg | ×1,1 |
+| Gezeitenrute | 15 kg | 6 kg | 50 % | 60 % | 15–80 g | bis 25 kg | ×1,2 (+15 % Einzug) |
+| Karpfenrute | 17 kg | 8 kg | 50 % | 50 % | 15–120 g | 2–30 kg | ×1,5 |
+| **Carbonrute** | 24 kg | **9 kg** | 60 % | 80 % | 10–80 g | bis 60 kg | ×1,35 – die beste Allround-Rute |
+| Big-Game-Rute | 42 kg | 14 kg | 30 % | 25 % | 40–300 g | 10–400 kg | ×1,1, schwer |
+
+Eine steife Rute (wenig Flex) pumpt hart, gibt aber jeden Ruck weiter; eine weiche federt Fluchten ab. Über der Belastbarkeit ist die Rute überlastet (Anzeige „Rute … %“ wird rot, mehr Verschleiß), beim 1,3-Fachen knackt sie. Sensibilität vergrößert das Zeitfenster für einen guten Anschlag; Fische unter dem Größenbereich spürt die Rute kaum. Ein Köder außerhalb des Wurfgewichts fliegt kürzer.
+
+| Spule | Wirkung |
+| --- | --- |
+| Flachspule | Würfe +15 %, Schnur −30 % |
+| Tiefspule | Schnur +60 %, Würfe −5 % |
+| Leichtspule | Würfe +20 % (unter 10 g noch mehr), Kraft −15 % |
+| Verstärkte Spule | Kraft +20 %, keine Perücke am Baitcaster |
+| Schnellübersetzung | Einzug +35 %, Kraft −20 % |
+| Kraftübersetzung | Kraft +40 %, Einzug −25 % |
+
+| Vorfach | Wirkung |
+| --- | --- |
+| Fluorocarbon | fast unsichtbar: scheue Fische (Forellen, Karpfen, Schleie, Wolfsbarsch) beißen 25 % lieber; Hindernisse schaden weniger |
+| Stahl | Zähne beißen nicht durch; scheue Fische meiden es (−30 %) |
+
+Ohne Stahlvorfach können Hecht, Zander, Barrakuda, Seewolf, Seeteufel, Schilfkönig und Tiefenwächter bei Kopfstößen die Schnur durchbeißen.
+
+| Haken | Größe | Hält | Besonderheit |
 | --- | --- | --- | --- |
-| Angel (Vanilla) | 3 kg | mittel | – |
-| Flussrute | 4 kg | sehr weich | verzeiht Rucke, +5 % Einzug |
-| Eisenrute | 7 kg | steif | pumpt hart, gibt Rucke weiter |
-| Gezeitenrute | 6 kg | mittel | +15 % Einzug |
-| **Carbonrute** | **9 kg** | weich | die beste: kräftig und geschmeidig, +10 % Einzug |
+| Einzelhaken, klein | klein | 4 kg | für kleine, vorsichtige Fische |
+| Einzelhaken | mittel | 9 kg | Standard |
+| Einzelhaken, groß | groß | 18 kg | für Großfische, schreckt kleine ab |
+| Drilling | mittel | 8 kg | mit Kunstködern +15 Hakenhalt, mit Naturködern −10 |
+| Schonhaken | mittel | 7 kg | ohne Widerhaken: fällt bei schlaffer Schnur leichter heraus |
+| Karpfenhaken | mittel | 14 kg | mit Boilie, Mais, Strömungsköder +20 |
+| Offsethaken | mittel | 10 kg | mit Gummifisch +20, hängt halb so oft an Hindernissen |
+| Circle Hook | groß | 16 kg | hakt sich selbst, Anschlag-Zeitpunkt egal |
+
+Ist ein Haken zu schwach für die Last, biegt er auf und verliert Halt; ist er viel größer als das Maul des Fisches, beißt der seltener.
 
 | Schnur | Tragkraft | Dehnung | Abrieb |
 | --- | --- | --- | --- |
@@ -151,7 +187,16 @@ Alle Werkbankrezepte sind formlos.
 | Eisenrute | Flussrute, 3 Eisenbarren, Leder |
 | Gezeitenrute | Eisenrute, 3 Prismarinscherben, Herz des Meeres, Diamant |
 | Carbonrute | Eisenrute, 3 Kohlefaser, Diamant |
+| Bambusrute | 3 Bambus, 2 Faden |
+| Spinnrute | Flussrute, Eisenbarren, Faden, Feder |
+| Karpfenrute | Eisenrute, 2 Eisenbarren, Leder, Schleimball |
+| Fliegenrute | Bambusrute, 2 Federn, Faden, Kupferbarren |
+| Big-Game-Rute | Carbonrute, Netheritplatten, Eisenblock, Leder |
 | Kohlefaser | Kohleblock im Hochofen |
+| Spulen | Flach: Eisen + Kupfer · Tief: 2 Eisen + Kupfer · Leicht: Kupfer + Feder · Verstärkt: 2 Eisen + Obsidian · Schnell: Eisen + Redstone + Gold · Kraft: Eisen + Kolben + Kupfer |
+| 4 Fluorocarbon-Vorfach | Monofile Schnur, Glasscheibe |
+| 4 Stahlvorfach | Eisenbarren, Faden |
+| Haken | klein: 8 aus 1 Eisennugget · normal: 6 aus 2 Nuggets · groß: 4 aus 1 Eisenbarren · Drilling: 4 aus 3 Nuggets · Schon: 6 aus 2 Nuggets + Feuerstein · Karpfen: 4 aus Eisen + Feuerstein · Offset: 4 aus Eisen + Schleim · Circle: 4 aus Eisen + Kupfer |
 | Kupfer-Stationärrolle | 2 Kupferbarren, Eisennugget, Stock |
 | Eisen-Stationärrolle | 2 Eisenbarren, Eisennugget, Redstone |
 | Diamant-Stationärrolle | Eisenrolle, Diamant, Goldbarren, Redstone |

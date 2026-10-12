@@ -261,6 +261,19 @@ public enum FishSpecies {
         return boss() == null;
     }
 
+    /** Sharp teeth: without a steel leader they can bite through the line. */
+    public boolean teeth() {
+        return switch (this) {
+            case PIKE, ZANDER, BARRACUDA, WOLFFISH, MONKFISH, REED_KING, DEEP_WARDEN -> true;
+            default -> false;
+        };
+    }
+
+    /** Shy fish notice a visible leader and a big hook. */
+    public boolean shy() {
+        return diet() == Diet.SALMONID || this == CARP || this == TENCH || this == GRAYLING || this == SEA_BASS;
+    }
+
     private boolean jumper() {
         return switch (this) {
             case RIVER_TROUT, RAINBOW_TROUT, GRAYLING, SALMON, SEA_TROUT, PIKE, ASP, BARRACUDA, SWORDFISH, SEA_BASS,

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:piston",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "atzen:power_gear_spool",
+    "count": 1
+  }
+}

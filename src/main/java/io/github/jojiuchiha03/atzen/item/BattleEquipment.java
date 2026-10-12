@@ -31,18 +31,56 @@ public final class BattleEquipment {
         RodType rodType = AtzenItems.rod(rod);
         boolean atzen = rod.getItem() instanceof AtzenRodItem;
         ReelType reel = atzen ? AtzenItems.reel(AtzenRodItem.get(rod, GearSlot.REEL)) : null;
+        SpoolType spool = atzen ? AtzenItems.spool(AtzenRodItem.get(rod, GearSlot.SPOOL)) : null;
         LineType line = atzen ? AtzenItems.line(AtzenRodItem.get(rod, GearSlot.LINE)) : null;
+        LeaderType leader = atzen ? AtzenItems.leader(AtzenRodItem.get(rod, GearSlot.LEADER)) : null;
+        HookType hook = atzen ? AtzenItems.hook(AtzenRodItem.get(rod, GearSlot.HOOK)) : null;
         if (line == null) line = LineType.STRING;
+        if (hook == null) hook = HookType.SINGLE;
         BaitType baitType = AtzenItems.bait(bait);
         double power = 1 + 0.08 * reelPower;
+        double speed = (reel == null ? Rig.VANILLA.reelSpeed() : reel.speed()) * (spool == null ? 1 : spool.speed());
+        double force = (reel == null ? Rig.VANILLA.reelForce() : reel.force()) * (spool == null ? 1 : spool.force());
+        // Capacities are for 0.30 mm line: thin braid fits more, thick mono less.
+        double capacity = (reel == null ? Rig.VANILLA.capacity() : reel.capacity()) * (spool == null ? 1 : spool.capacity())
+                * line.capacityFactor();
+        ReelAbility ability = reel == null ? ReelAbility.NONE : reel.ability();
+        // A reinforced spool cannot tangle.
+        if (ability == ReelAbility.BAITCASTER && spool == SpoolType.REINFORCED) ability = ReelAbility.NONE;
         Rig rig = new Rig(line.strength() * (1 + 0.08 * steadyLine), line.stretch(), line.abrasion(), rodType.power(),
-                rodType.flex(),
-                (reel == null ? Rig.VANILLA.reelSpeed() : reel.speed()) * rodType.speed() * power,
-                (reel == null ? Rig.VANILLA.reelForce() : reel.force()) * power,
-                reel == null ? Rig.VANILLA.capacity() : reel.capacity(), Rig.VANILLA.dragLimit(),
-                reel == null ? ReelAbility.NONE : reel.ability(), 1, 1 - 0.12 * calmWaters, 0);
+                rodType.flex(), rodType.load(), rodType.weight(), speed * rodType.speed() * power, force * power, capacity,
+                Rig.VANILLA.dragLimit(), ability, hook.strength(), hook.slack(),
+                (leader == null ? 1 : leader.snags()) * (hook == HookType.OFFSET ? 0.5 : 1),
+                leader != null && leader.toothGuard(), 1, 1 - 0.12 * calmWaters, hook.holdWith(baitType));
         if (baitType != null) rig = rig.scaled(baitType.strain(), baitType.drain(), baitType.run());
         return rig;
+    }
+
+    /** The rod's type, for strike sensitivity and the fish size it is meant for. */
+    public static RodType rodType(ItemStack rod) { return AtzenItems.rod(rod); }
+
+    /**
+     * How far the float flies: the rod's casting power, the spool, and whether the bait fits the rod's casting
+     * weight (too light or too heavy shortens the cast). Flies need a fly rod and a fly reel.
+     */
+    public static double castFactor(ItemStack rod) {
+        RodType type = AtzenItems.rod(rod);
+        double factor = type.cast();
+        if (!(rod.getItem() instanceof AtzenRodItem)) return factor;
+        SpoolType spool = AtzenItems.spool(AtzenRodItem.get(rod, GearSlot.SPOOL));
+        if (spool != null) factor *= spool.cast();
+        BaitType bait = AtzenItems.bait(AtzenRodItem.bait(rod));
+        if (bait != null) {
+            if (bait.fly()) {
+                boolean flyGear = type == RodType.FLY && AtzenItems.reel(AtzenRodItem.get(rod, GearSlot.REEL)) == ReelType.FLY;
+                factor *= flyGear ? 1.25 : 0.6;
+            } else if (bait.grams() < type.castMin() || bait.grams() > type.castMax()) {
+                factor *= 0.7;
+            } else if (spool == SpoolType.LIGHT && bait.grams() < 10) {
+                factor *= 1.1;
+            }
+        }
+        return factor;
     }
 
     public static boolean isBait(ItemStack stack) {
@@ -61,6 +99,16 @@ public final class BattleEquipment {
         if ((type == BaitType.DRY_FLY || type == BaitType.NYMPH || type == BaitType.STREAMER)
                 && AtzenItems.reel(AtzenRodItem.get(rod, GearSlot.REEL)) != ReelType.FLY) appeal *= 0.6;
         if (type == BaitType.GLOW && night) appeal *= 1.6;
+        if (rod.getItem() instanceof AtzenRodItem) {
+            LeaderType leader = AtzenItems.leader(AtzenRodItem.get(rod, GearSlot.LEADER));
+            if (leader != null) appeal *= species.shy() ? leader.shyAppeal() : leader.appeal();
+            HookType hook = AtzenItems.hook(AtzenRodItem.get(rod, GearSlot.HOOK));
+            // A hook much bigger than the fish's mouth scares it off.
+            int size = hook == null ? 2 : hook.size();
+            int mouth = species.maxLength() <= 45 ? 1 : species.maxLength() <= 110 ? 2 : 3;
+            if (size > mouth + 1) appeal *= 0.5;
+            else if (size > mouth && species.shy()) appeal *= 0.75;
+        }
         return appeal;
     }
 

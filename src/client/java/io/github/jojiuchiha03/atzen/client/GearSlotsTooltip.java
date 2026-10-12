@@ -9,26 +9,24 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-/** A rod's tooltip: three inventory-style slots (reel, line, bait) with their contents and what the set does. */
+/**
+ * A rod's tooltip: six inventory-style slots (reel, spool, line, leader, hook, bait) with their contents, the rod's
+ * attributes and what the whole set does.
+ */
 final class GearSlotsTooltip implements ClientTooltipComponent {
     private static final int SLOT = 18;
     private static final int ROW = 20;
+    private static final int LINES = 3;
     private final AtzenRodItem.GearTooltip data;
 
     GearSlotsTooltip(AtzenRodItem.GearTooltip data) { this.data = data; }
 
-    private ItemStack stack(GearSlot slot) {
-        return switch (slot) {
-            case REEL -> data.reel();
-            case LINE -> data.line();
-            case BAIT -> data.bait();
-        };
-    }
+    private ItemStack stack(GearSlot slot) { return data.slots()[slot.ordinal()]; }
 
     private Component label(GearSlot slot) {
         ItemStack stack = stack(slot);
         Component content = stack.isEmpty() ? Component.translatable("tooltip.atzen.gear.empty")
-                : slot == GearSlot.BAIT ? Component.translatable("tooltip.atzen.gear.count", stack.getHoverName(), stack.getCount())
+                : slot == GearSlot.BAIT && stack.getCount() > 1 ? Component.translatable("tooltip.atzen.gear.count", stack.getHoverName(), stack.getCount())
                 : stack.getHoverName();
         return Component.translatable(slot.translationKey(), content);
     }
@@ -37,22 +35,24 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
         return String.format(Locale.GERMAN, value >= 10 ? "%.0f" : "%.1f", value);
     }
 
-    /** Breaking load, line capacity, retrieve speed (m/s) and winch force of the whole set. */
-    private Component summary() {
+    private Component[] summary() {
         var rig = data.rig();
-        return Component.translatable("tooltip.atzen.gear.stats", number(rig.lineStrength()), number(rig.capacity()),
-                number(rig.reelSpeed() * 20), number(rig.reelForce()));
+        var rod = data.rod();
+        return new Component[] {
+                Component.translatable("tooltip.atzen.gear.rod", number(rod.load()), number(rod.power()),
+                        Math.round(rod.flex() * 100), Math.round(rod.sensitivity() * 100), number(rod.castMin()),
+                        number(rod.castMax()), number(rod.fishMin()), number(rod.fishMax()), number(data.cast())),
+                Component.translatable("tooltip.atzen.gear.stats", number(rig.lineStrength()), number(rig.capacity()),
+                        number(rig.reelSpeed() * 20), number(rig.reelForce())),
+                Component.translatable("tooltip.atzen.gear.ability", Component.translatable(rig.ability().translationKey()))};
     }
 
-    private Component ability() {
-        return Component.translatable("tooltip.atzen.gear.ability", Component.translatable(data.rig().ability().translationKey()));
-    }
-
-    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + 22; }
+    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + LINES * 10 + 2; }
 
     @Override
     public int getWidth(Font font) {
-        int width = Math.max(font.width(summary()), font.width(ability()));
+        int width = 0;
+        for (Component line : summary()) width = Math.max(width, font.width(line));
         for (GearSlot slot : GearSlot.values()) width = Math.max(width, SLOT + 6 + font.width(label(slot)));
         return width;
     }
@@ -81,7 +81,10 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
             boolean empty = stack(slot).isEmpty();
             graphics.text(font, label(slot), x + SLOT + 5, y + slot.ordinal() * ROW + 6, empty ? 0xFF9A9A9A : 0xFFFFFFFF, true);
         }
-        graphics.text(font, summary(), x, y + GearSlot.values().length * ROW + 2, 0xFF7FD8C8, true);
-        graphics.text(font, ability(), x, y + GearSlot.values().length * ROW + 12, 0xFFE8C860, true);
+        int[] colours = {0xFFB8C4CC, 0xFF7FD8C8, 0xFFE8C860};
+        Component[] lines = summary();
+        for (int i = 0; i < lines.length; i++) {
+            graphics.text(font, lines[i], x, y + GearSlot.values().length * ROW + 2 + i * 10, colours[i], true);
+        }
     }
 }

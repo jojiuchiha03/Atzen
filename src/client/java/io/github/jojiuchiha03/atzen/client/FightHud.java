@@ -110,8 +110,9 @@ final class FightHud {
         }
         // the numbers: line out, drag step, hook hold
         Component info = Component.translatable("hud.atzen.info", Math.round(state.lineOut()), Math.round(state.capacity()),
-                state.dragStep(), FishingBattle.DRAG_STEPS, Math.round(state.hookHold()));
-        graphics.text(font, info, (graphics.guiWidth() - font.width(info)) / 2, y + 14, 0xFFB8C4CC, true);
+                state.dragStep(), FishingBattle.DRAG_STEPS, Math.round(state.hookHold()), Math.round(state.rodStrain() * 100));
+        graphics.text(font, info, (graphics.guiWidth() - font.width(info)) / 2, y + 14,
+                state.rodStrain() > 1 ? 0xFFFF7A5C : 0xFFB8C4CC, true);
 
         if (AtzenClient.cameraTicks < 50 && state.strike() > 0) {
             String quality = state.strike() >= 90 ? "perfect" : state.strike() >= 72 ? "good" : "late";

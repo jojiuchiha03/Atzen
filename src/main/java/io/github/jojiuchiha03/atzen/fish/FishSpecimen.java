@@ -34,6 +34,6 @@ public record FishSpecimen(FishSpecies species, double lengthCm, double weightKg
             case DARTER -> 1.3; case FIGHTER -> 1.1; case BRUISER -> 0.9;
         };
         return new Fighter(power, endurance, speed, weightKg, species.actionWeights(), species.diet().strikeIdeal(),
-                species.salt(), null);
+                species.salt(), species.teeth(), null);
     }
 }

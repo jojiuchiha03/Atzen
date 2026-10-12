@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "atzen:steel_leader",
+    "count": 4
+  }
+}

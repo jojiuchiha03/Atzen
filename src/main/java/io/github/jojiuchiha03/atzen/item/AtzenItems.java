@@ -26,10 +26,21 @@ public final class AtzenItems {
     public static final Item IRON_ROD = rod("iron_rod", 384, 12, Items.IRON_INGOT);
     public static final Item TIDE_ROD = rod("tide_rod", 512, 18, Items.PRISMARINE_SHARD);
     public static final Item CARBON_ROD = rod("carbon_rod", 1024, 22, CARBON_FIBER);
+    public static final Item BAMBOO_ROD = rod("bamboo_rod", 96, 10, Items.BAMBOO);
+    public static final Item SPINNING_ROD = rod("spinning_rod", 320, 14, Items.IRON_INGOT);
+    public static final Item CARP_ROD = rod("carp_rod", 480, 12, Items.IRON_INGOT);
+    public static final Item FLY_ROD = rod("fly_rod", 256, 16, Items.FEATHER);
+    public static final Item BIG_GAME_ROD = rod("big_game_rod", 1400, 10, Items.NETHERITE_SCRAP);
     private static final Map<ReelType, Item> REEL_ITEMS = new EnumMap<>(ReelType.class);
     private static final Map<LineType, Item> LINE_ITEMS = new EnumMap<>(LineType.class);
     private static final Map<BaitType, Item> BAIT_ITEMS = new EnumMap<>(BaitType.class);
+    private static final Map<SpoolType, Item> SPOOL_ITEMS = new EnumMap<>(SpoolType.class);
+    private static final Map<LeaderType, Item> LEADER_ITEMS = new EnumMap<>(LeaderType.class);
+    private static final Map<HookType, Item> HOOK_ITEMS = new EnumMap<>(HookType.class);
     static {
+        for (SpoolType spool : SpoolType.values()) SPOOL_ITEMS.put(spool, gear(spool.id(), false));
+        for (LeaderType leader : LeaderType.values()) LEADER_ITEMS.put(leader, register(leader.id(), Item::new, new Item.Properties().stacksTo(16)));
+        for (HookType hook : HookType.values()) HOOK_ITEMS.put(hook, register(hook.id(), Item::new, new Item.Properties().stacksTo(16)));
         for (ReelType reel : ReelType.values()) REEL_ITEMS.put(reel, gear(reel.id(), reel.ordinal() >= ReelType.ANCIENT.ordinal()));
         for (LineType line : LineType.values()) if (line.id() != null) LINE_ITEMS.put(line, gear(line.id(), false));
         for (BaitType bait : BaitType.values()) {
@@ -59,14 +70,21 @@ public final class AtzenItems {
     public static final List<Item> REELS = List.copyOf(REEL_ITEMS.values());
     public static final List<Item> LINES = List.copyOf(LINE_ITEMS.values());
     public static final List<Item> BAITS = List.copyOf(BAIT_ITEMS.values());
+    public static final List<Item> SPOOLS = List.copyOf(SPOOL_ITEMS.values());
+    public static final List<Item> LEADERS = List.copyOf(LEADER_ITEMS.values());
+    public static final List<Item> HOOKS = List.copyOf(HOOK_ITEMS.values());
     public static final List<Item> ALL = all();
 
     private AtzenItems() { }
 
     private static List<Item> all() {
-        List<Item> items = new ArrayList<>(List.of(RIVER_ROD, IRON_ROD, TIDE_ROD, CARBON_ROD));
+        List<Item> items = new ArrayList<>(List.of(BAMBOO_ROD, RIVER_ROD, SPINNING_ROD, FLY_ROD, IRON_ROD, CARP_ROD, TIDE_ROD,
+                CARBON_ROD, BIG_GAME_ROD));
         items.addAll(REELS);
+        items.addAll(SPOOLS);
         items.addAll(LINES);
+        items.addAll(LEADERS);
+        items.addAll(HOOKS);
         items.addAll(BAITS);
         items.addAll(List.of(CARBON_FIBER, ANCIENT_BARBEL, REED_CROWN, STURGEON_PLATE, WARDEN_HEART,
                 STEADY_LINE_TOME, REEL_POWER_TOME, CALM_WATERS_TOME));
@@ -86,6 +104,21 @@ public final class AtzenItems {
         return null;
     }
 
+    public static SpoolType spool(ItemStack stack) {
+        for (var entry : SPOOL_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
+        return null;
+    }
+
+    public static LeaderType leader(ItemStack stack) {
+        for (var entry : LEADER_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
+        return null;
+    }
+
+    public static HookType hook(ItemStack stack) {
+        for (var entry : HOOK_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
+        return null;
+    }
+
     public static BaitType bait(ItemStack stack) {
         if (stack.isEmpty()) return null;
         for (var entry : BAIT_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
@@ -97,6 +130,11 @@ public final class AtzenItems {
         if (stack.is(IRON_ROD)) return RodType.IRON;
         if (stack.is(TIDE_ROD)) return RodType.TIDE;
         if (stack.is(CARBON_ROD)) return RodType.CARBON;
+        if (stack.is(BAMBOO_ROD)) return RodType.BAMBOO;
+        if (stack.is(SPINNING_ROD)) return RodType.SPINNING;
+        if (stack.is(CARP_ROD)) return RodType.CARP;
+        if (stack.is(FLY_ROD)) return RodType.FLY;
+        if (stack.is(BIG_GAME_ROD)) return RodType.BIG_GAME;
         return RodType.VANILLA;
     }
 

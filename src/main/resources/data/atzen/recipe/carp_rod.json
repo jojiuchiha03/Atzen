@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:iron_rod",
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "minecraft:leather",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "atzen:carp_rod",
+    "count": 1
+  }
+}

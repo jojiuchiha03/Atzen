@@ -545,6 +545,11 @@ RODS = {
     "iron_rod":  dict(shaft="#4a4f57", wrap="#b8bec6", grip="#a3322c", reel="#c7ccd2", tip="#e2e6ea"),
     "tide_rod":  dict(shaft="#234a9a", wrap="#e3b53c", grip="#6b3aa0", reel="#e3b53c", tip="#5ff2f0", crystal=True),
     "carbon_rod": dict(shaft="#26282c", wrap="#d8302c", grip="#3a3c42", reel="#b8bec6", tip="#e8e8ea", weave=True),
+    "bamboo_rod": dict(shaft="#c8b060", wrap="#6a8a3a", grip="#8a6a3a", reel="#9a7a4a", tip="#e8dca0"),
+    "spinning_rod": dict(shaft="#3a4a5a", wrap="#e0e0e0", grip="#c89a60", reel="#b8bec6", tip="#f0f0f0"),
+    "carp_rod": dict(shaft="#2a3a2a", wrap="#c8a040", grip="#202020", reel="#3a3a3a", tip="#e8e0c0"),
+    "fly_rod": dict(shaft="#7a4a2a", wrap="#e0c060", grip="#c89a60", reel="#5a7a4a", tip="#f0e8d0"),
+    "big_game_rod": dict(shaft="#d8d0c0", wrap="#c83a2a", grip="#1a1a1a", reel="#d0a83a", tip="#ffffff"),
 }
 
 
@@ -998,6 +1003,85 @@ BAITS = {
     "ancient_bait": lambda: boss_bait("ancient_bait"), "current_bait": lambda: boss_bait("current_bait"),
     "deep_light_bait": lambda: boss_bait("deep_light_bait"),
 }
+SPOOLS = {"shallow_spool": "#9aa4ae", "deep_spool": "#5a6470", "light_spool": "#c9783a", "reinforced_spool": "#3a3c42",
+          "fast_gear_spool": "#c83a3a", "power_gear_spool": "#d0a83a"}
+
+
+def spare_spool(name):
+    """A spare spool seen from the front: the rim, the wound line and the colour of its kind."""
+    px = canvas()
+    rim = ramp(SPOOLS[name])
+    disc(px, 32, 32, 22, rim, ring=0.75)
+    deep = 0.55 if name == "deep_spool" else 0.3 if name == "shallow_spool" else 0.42
+    disc(px, 32, 32, 22 * (1 - deep * 0.6), ramp("#e8e2d0"))
+    disc(px, 32, 32, 6, rim)
+    if name in ("fast_gear_spool", "power_gear_spool"):
+        teeth = 12 if name == "fast_gear_spool" else 8
+        for k in range(teeth):
+            a = k * 2 * math.pi / teeth
+            disc(px, 32 + 24 * math.cos(a), 32 + 24 * math.sin(a), 2.6, rim)
+    outline(px)
+    return px
+
+
+def leader(name):
+    """A coiled leader with a swivel: clear blue fluorocarbon or grey steel."""
+    px = canvas()
+    colour = ramp("#9ad8f0" if name == "fluoro_leader" else "#9aa0a8")
+    for k in range(3):
+        r = 18 - k * 4
+        for i in range(120):
+            a = i / 120 * 2 * math.pi
+            for d in (-1, 0, 1, 2):
+                put(px, 30 + r * math.cos(a), 30 + d + r * 0.8 * math.sin(a), colour[3 - k % 2] if d < 1 else colour[1])
+    disc(px, 50, 50, 4, ramp("#c0c4cc"))
+    line(px, 46, 46, 40, 40, ramp("#c0c4cc")[2], 2)
+    outline(px, 0.6, 0.1)
+    return px
+
+
+HOOKS = {"small_single_hook": 0.6, "single_hook": 0.8, "large_single_hook": 1.0, "treble_hook": 0.75, "barbless_hook": 0.8,
+         "carp_hook": 0.85, "offset_hook": 0.85, "circle_hook": 1.0}
+
+
+def hook_item(name):
+    """A fishing hook in its shape: single, treble, barbless, carp (curved), offset (kinked shank), circle."""
+    px = canvas()
+    scale = HOOKS[name]
+    metal = ramp("#3a3e46" if name in ("carp_hook", "circle_hook") else "#8a929c")
+
+    def one(angle, mirror=1):
+        cx, cy = 32, 30
+        ca, sa = math.cos(angle), math.sin(angle)
+
+        def p(x, y):
+            x, y = x * scale * mirror, y * scale
+            return cx + x * ca - y * sa, cy + x * sa + y * ca
+        # shank, bend, point
+        top = -24 if name != "offset_hook" else -18
+        line(px, *p(0, top), *p(0, 6), metal[3], 5)
+        if name == "offset_hook":
+            line(px, *p(0, -18), *p(-5, -22), metal[3], 5)
+            line(px, *p(-5, -22), *p(-5, -26), metal[3], 5)
+        disc(px, *p(0, top - 3), 3.2 * scale, metal)
+        bend = 11 if name != "circle_hook" else 13
+        for i in range(30):
+            t = i / 29 * math.pi
+            line(px, *p(bend - bend * math.cos(t), 6 + bend * math.sin(t)), *p(bend - bend * math.cos(t), 6 + bend * math.sin(t)), metal[3], 5)
+        tip_y = -6 if name != "circle_hook" else 2
+        tip_x = 2 * bend if name != "circle_hook" else 2 * bend - 6
+        line(px, *p(2 * bend, 6), *p(tip_x, tip_y), metal[3], 5)
+        if name != "barbless_hook":
+            line(px, *p(tip_x, tip_y + 4), *p(tip_x - 4, tip_y + 8), metal[2], 4)
+    if name == "treble_hook":
+        one(0, 1)
+        one(0, -1)
+    else:
+        one(0.25)
+    outline(px, 0.35, 0.1)
+    return px
+
+
 TROPHIES = ["ancient_barbel", "reed_crown", "sturgeon_plate", "warden_heart"]
 
 
@@ -1174,6 +1258,12 @@ def main():
         save(os.path.join(item, name + ".png"), draw())
     for name in TROPHIES:
         save(os.path.join(item, name + ".png"), trophy_item(name))
+    for name in SPOOLS:
+        save(os.path.join(item, name + ".png"), spare_spool(name))
+    for name in ("fluoro_leader", "steel_leader"):
+        save(os.path.join(item, name + ".png"), leader(name))
+    for name in HOOKS:
+        save(os.path.join(item, name + ".png"), hook_item(name))
     print("textures written to", os.path.normpath(ROOT))
 
 
