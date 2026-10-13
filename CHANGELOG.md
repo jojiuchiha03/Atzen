@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.14.3] - 2026-10-13
+
+### Behoben
+- Sichtsprünge der Angelkamera: Die Kamera wechselt nicht mehr selbst zwischen erster und dritter Person, sondern gleitet aus deiner eigenen Sicht heraus und genau dorthin zurück. Kein Zurückspringen hinter den Spieler nach der Szene, kein Flackern beim Wechsel der Einstellung. Hand und Fadenkreuz sind während der Szene ausgeblendet, der Angler bleibt sichtbar.
+- Die Kamera gleitet auch beim Ein- und Ausblenden nicht mehr durch Blöcke.
+
 ## [0.14.2] - 2026-10-12
 
 ### Behoben

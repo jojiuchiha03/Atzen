@@ -6,7 +6,6 @@ import io.github.jojiuchiha03.atzen.fish.AtzenFishEntity;
 import io.github.jojiuchiha03.atzen.fish.BiteTarget;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import java.util.Comparator;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -45,8 +44,9 @@ public final class CameraController {
     private static float lastYaw, lastPitch;
     private static int trophyTicks;
     private static Vec3 smoothPosition, smoothFocus;
+    /** Whether the current shot is seen from the angler's side (clipped from the eye) rather than from the water. */
+    private static boolean fromEye = true;
     private static long lastFrame;
-    private static CameraType previousType;
     private static AtzenFishEntity watched;
     /** The fight shot on screen; it only changes after it has been held a while, so the camera does not jump around. */
     private static FishAction shotAction = FishAction.CALM;
@@ -58,12 +58,12 @@ public final class CameraController {
     private static FishingHook castHook;
     private static Vec3 castEye, castDir;
     private static int landedAt = -1;
-    /** Ticks the cinematic view has been fully off; the camera type only goes back after a short pause. */
-    private static int idleTicks;
 
     private CameraController() { }
 
     static State state() { return state; }
+    /** True while the cinematic camera is on screen, even partly; the first-person hand and crosshair are hidden. */
+    public static boolean active() { return blend > 0 || previousBlend > 0; }
     static boolean enabled() { return enabled; }
 
     static void toggle(Minecraft client) {
@@ -123,18 +123,9 @@ public final class CameraController {
         }
         previousBlend = blend;
         blend = state == State.IDLE ? Math.max(0, blend - 1 / 14f) : Math.min(1, blend + 1 / 12f);
-        if (blend > 0 && previousType == null) {
-            idleTicks = 0;
-            // Third person while the cinematic camera runs, so the angler and the rod are drawn and no hand floats.
-            previousType = client.options.getCameraType();
-            client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-            idleTicks = 0;
-        } else if (blend == 0 && previousBlend == 0) {
-            // Only back to the player's camera type after a short pause, so a quick change of shot does not flicker.
-            if (++idleTicks >= 20) restore(client);
-        } else {
-            idleTicks = 0;
-        }
+        // The player's camera type is never touched: the shot blends out of their own view and back into it, so there
+        // is no jump between first and third person. The angler's body is drawn because the camera is detached.
+        if (blend == 0 && previousBlend == 0) restore(client);
     }
 
     private static State choose(Minecraft client) {
@@ -187,10 +178,6 @@ public final class CameraController {
     }
 
     private static void restore(Minecraft client) {
-        if (previousType != null && client != null) {
-            client.options.setCameraType(previousType);
-            previousType = null;
-        }
         smoothPosition = null;
         smoothFocus = null;
     }
@@ -212,13 +199,13 @@ public final class CameraController {
         frameSeconds = seconds;
         float time = player.tickCount + partial;
         Vec3 eye = player.getEyePosition(partial);
-        // Blend from the player's own eyes when they play in first person (vanilla is third person meanwhile).
-        Vec3 base = previousType != null && previousType.isFirstPerson() ? eye : vanilla;
-        float baseYaw = player.getViewYRot(partial), basePitch = player.getViewXRot(partial);
-        if (previousType == null || !previousType.isFirstPerson()) { baseYaw = vanillaYaw; basePitch = vanillaPitch; }
+        // The player's own view (first or third person, as they play) is where the shot starts and ends.
+        Vec3 base = vanilla;
+        float baseYaw = vanillaYaw, basePitch = vanillaPitch;
 
         Vec3[] shot = shot(client, player, eye, partial, time);
         if (shot != null) {
+            fromEye = shot[2] == null || state == State.CASTING;
             Vec3 position = clip(client, shot[2] == null ? eye : shot[2], shot[0], player);
             double follow = 1 - Math.exp(-seconds * (state == State.HOOKED || shotAction == FishAction.JUMP ? 6 : 2.5));
             smoothPosition = smoothPosition == null ? position : smoothPosition.lerp(position, follow);
@@ -239,7 +226,9 @@ public final class CameraController {
         }
         float b = Mth.lerp(partial, previousBlend, blend);
         b = b * b * (3 - 2 * b);
+        // The glide itself must not pass through blocks either: clip the blended position from the eye.
         Vec3 position = base.lerp(smoothPosition, b);
+        if (fromEye) position = clip(client, eye, position, player);
         return new double[] {position.x, position.y, position.z,
                 baseYaw + Mth.wrapDegrees(yaw - baseYaw) * b, Mth.lerp(b, basePitch, pitch)};
     }

@@ -9,6 +9,8 @@
     "defaultRequire": 1
   },
   "client": [
-    "client.CameraMixin"
+    "client.CameraMixin",
+    "client.GameRendererMixin",
+    "client.HudMixin"
   ]
 }
