@@ -96,6 +96,16 @@ public final class BattleManager {
         Random random = new Random(player.getRandom().nextLong());
 
         Boss boss = liveFish == null ? bosses.check(level, hook.blockPosition(), baitType, player.getUUID(), random) : null;
+        if (liveFish == null && boss == null && random.nextDouble() < io.github.jojiuchiha03.atzen.item.FishingCrate.CHANCE
+                * (1 + 0.5 * BattleEquipment.luck(player, rod))) {
+            // Not a fish but a crate: it comes up without a fight.
+            player.spawnAtLocation(level, io.github.jojiuchiha03.atzen.item.FishingCrate.create(Habitat.at(level, hook.blockPosition())));
+            level.playSound(null, hook.blockPosition(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.PLAYERS, 1.0f, 0.8f);
+            player.sendSystemMessage(Component.translatable("crate.atzen.hooked").withStyle(ChatFormatting.GOLD), true);
+            rod.hurtAndBreak(1, player, hand);
+            hook.discard();
+            return true;
+        }
         FishSpecimen specimen = liveFish != null ? liveFish.specimen()
                 : boss != null ? FishSpecies.of(boss).roll(random) : choose(player, level, hook.blockPosition(), rod, bait, random);
         Fighter fighter = specimen.fighter();
@@ -455,7 +465,9 @@ public final class BattleManager {
                 if (session.hook != null) completing.put(session.hook.getUUID(), session);
                 try {
                     int damage;
-                    if (session.hook == null || session.liveFish != null || boss != null) {
+                    // Caves, lava and the End have no vanilla loot: the fish comes straight to the angler.
+                    boolean underworld = Habitat.at((ServerLevel) player.level(), BlockPos.containing(session.anchor)).underworld();
+                    if (session.hook == null || session.liveFish != null || boss != null || underworld) {
                         player.spawnAtLocation(player.level(), caughtItem(session));
                         player.awardStat(Stats.FISH_CAUGHT, 1);
                         player.giveExperiencePoints(boss != null ? 60 : 1 + player.getRandom().nextInt(6));

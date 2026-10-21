@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "atzen:carbon_rod",
+    "minecraft:netherite_ingot",
+    "minecraft:blaze_rod"
+  ],
+  "result": {
+    "id": "atzen:netherite_rod",
+    "count": 1
+  }
+}

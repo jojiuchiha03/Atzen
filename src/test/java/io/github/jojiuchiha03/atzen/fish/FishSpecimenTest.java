@@ -81,4 +81,21 @@ class FishSpecimenTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Rig.of(5, 0.1, 1, 1, 0.5, 5, Double.POSITIVE_INFINITY, 1, 10, ReelAbility.NONE));
     }
+
+    @Test
+    void cavesLavaAndTheEndHaveTheirOwnFish() {
+        Random random = new Random(11);
+        for (int i = 0; i < 2000; i++) {
+            assertTrue(FishSpecies.choose(Habitat.CAVE, random).weight(Habitat.CAVE) > 0);
+            FishSpecies lava = FishSpecies.choose(Habitat.LAVA, random);
+            assertTrue(lava.lava(), lava.name());
+            assertTrue(FishSpecies.choose(Habitat.END, random).weight(Habitat.END) > 0);
+        }
+        for (FishSpecies species : FishSpecies.values()) {
+            // Lava fish live nowhere else, and no surface fish is caught in lava.
+            if (species.lava()) assertEquals(1, species.habitats().size(), species.name());
+            if (species.lava() || species.weight(Habitat.CAVE) > 0 || species.weight(Habitat.END) > 0) assertFalse(species.salt());
+            assertNotNull(species.feedingTime());
+        }
+    }
 }

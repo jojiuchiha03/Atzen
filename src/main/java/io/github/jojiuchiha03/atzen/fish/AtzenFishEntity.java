@@ -54,6 +54,10 @@ public final class AtzenFishEntity extends Cod {
         shyness = random.nextFloat() * 0.3f;
     }
 
+    /** Lava fish do not burn, on the line or in the bucket's water. */
+    @Override
+    public boolean fireImmune() { return (species != null && species.lava()) || super.fireImmune(); }
+
     public FishSpecimen specimen() { return specimen; }
     public FishSpecies species() { return species; }
     public UUID identity() { return identity; }

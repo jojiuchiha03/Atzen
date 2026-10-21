@@ -31,6 +31,8 @@ public final class AtzenItems {
     public static final Item CARP_ROD = rod("carp_rod", 480, 12, Items.IRON_INGOT);
     public static final Item FLY_ROD = rod("fly_rod", 256, 16, Items.FEATHER);
     public static final Item BIG_GAME_ROD = rod("big_game_rod", 1400, 10, Items.NETHERITE_SCRAP);
+    /** Fishes in lava (see FishingHookMixin). */
+    public static final Item NETHERITE_ROD = rod("netherite_rod", 2031, 15, Items.NETHERITE_INGOT);
     private static final Map<ReelType, Item> REEL_ITEMS = new EnumMap<>(ReelType.class);
     private static final Map<LineType, Item> LINE_ITEMS = new EnumMap<>(LineType.class);
     private static final Map<BaitType, Item> BAIT_ITEMS = new EnumMap<>(BaitType.class);
@@ -80,6 +82,8 @@ public final class AtzenItems {
     public static final Item BAIT_BOX = register("bait_box", FishingTools.BaitBox::new, new Item.Properties().stacksTo(1));
     public static final Item ANGLER_TOOL = register("angler_tool", FishingTools.AnglerTool::new, new Item.Properties().durability(250));
     public static final Item FISH_LEXICON = register("fish_lexicon", FishingTools.Lexicon::new, new Item.Properties().stacksTo(1));
+    public static final Item FISHING_CRATE = register("fishing_crate", FishingCrate::new, new Item.Properties().stacksTo(16));
+    public static final Item FISHY_NOTE = register("fishy_note", FishingCrate.FishyNote::new, new Item.Properties().stacksTo(1));
     private static final Map<ModuleType, Item> MODULE_ITEMS = new EnumMap<>(ModuleType.class);
     static {
         for (ModuleType module : ModuleType.values()) {
@@ -100,7 +104,7 @@ public final class AtzenItems {
 
     private static List<Item> all() {
         List<Item> items = new ArrayList<>(List.of(BAMBOO_ROD, RIVER_ROD, SPINNING_ROD, FLY_ROD, IRON_ROD, CARP_ROD, TIDE_ROD,
-                CARBON_ROD, BIG_GAME_ROD));
+                CARBON_ROD, BIG_GAME_ROD, NETHERITE_ROD));
         items.addAll(REELS);
         items.addAll(SPOOLS);
         items.addAll(LINES);
@@ -110,7 +114,7 @@ public final class AtzenItems {
         items.addAll(List.of(CARBON_FIBER, ANCIENT_BARBEL, REED_CROWN, STURGEON_PLATE, WARDEN_HEART,
                 STEADY_LINE_TOME, REEL_POWER_TOME, CALM_WATERS_TOME, CALM_MIND_TOME, PRECISION_CAST_TOME, FIGHT_CONTROL_TOME,
                 SMALL_LANDING_NET, CARP_LANDING_NET, BIG_GAME_LANDING_NET, MOTHER_OF_PEARL, GROUNDBAIT, ECHO_SOUNDER, BAIT_BOX,
-                ANGLER_TOOL, FISH_LEXICON));
+                ANGLER_TOOL, FISH_LEXICON, FISHING_CRATE, FISHY_NOTE));
         items.addAll(MODULES);
         return List.copyOf(items);
     }
@@ -169,6 +173,7 @@ public final class AtzenItems {
         if (stack.is(CARP_ROD)) return RodType.CARP;
         if (stack.is(FLY_ROD)) return RodType.FLY;
         if (stack.is(BIG_GAME_ROD)) return RodType.BIG_GAME;
+        if (stack.is(NETHERITE_ROD)) return RodType.NETHERITE;
         return RodType.VANILLA;
     }
 

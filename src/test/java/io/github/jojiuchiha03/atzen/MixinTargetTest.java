@@ -23,6 +23,12 @@ class MixinTargetTest {
                     && call.owner.equals("net/minecraft/world/level/storage/loot/LootTable") && call.name.equals("getRandomItems")
                     && call.desc.equals("(Lnet/minecraft/world/level/storage/loot/LootParams;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;")) lootCalls++;
             assertEquals(1, lootCalls, "The catch replacement must target exactly one vanilla loot call");
+            var tick = node.methods.stream().filter(m -> m.name.equals("tick") && m.desc.equals("()V")).findFirst().orElseThrow();
+            int fluidChecks = 0;
+            for (var instruction : tick.instructions) if (instruction instanceof MethodInsnNode call
+                    && call.owner.equals("net/minecraft/world/level/material/FluidState") && call.name.equals("is")
+                    && call.desc.equals("(Lnet/minecraft/tags/TagKey;)Z")) fluidChecks++;
+            assertTrue(fluidChecks >= 1, "Lava fishing wraps the float's water checks in tick");
         }
     }
 }

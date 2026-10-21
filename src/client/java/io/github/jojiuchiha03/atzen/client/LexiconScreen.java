@@ -61,6 +61,18 @@ final class LexiconScreen extends Screen {
         Line(Component text, int colour) { this(ItemStack.EMPTY, text, colour); }
     }
 
+    /** Where the fish lives, as in Tide's journal: shown for unknown fish too, as a hint where to look. */
+    private static Component where(FishSpecies fish) {
+        var text = Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY);
+        boolean first = true;
+        for (var habitat : fish.habitats()) {
+            if (!first) text.append(", ");
+            text.append(Component.translatable(habitat.translationKey()));
+            first = false;
+        }
+        return text;
+    }
+
     private List<Line> lines() {
         List<Line> lines = new ArrayList<>();
         CompoundTag player = player();
@@ -73,13 +85,14 @@ final class LexiconScreen extends Screen {
                 for (FishSpecies fish : FishSpecies.values()) {
                     CompoundTag entry = species.getCompoundOrEmpty(fish.id());
                     if (entry.isEmpty()) {
-                        lines.add(new Line(Component.literal("??? ").append(Component.translatable(fish.rarityKey())), 0xFF707070));
+                        lines.add(new Line(Component.literal("??? ").append(Component.translatable(fish.rarityKey()))
+                                .append(where(fish)), 0xFF707070));
                         continue;
                     }
                     Component text = Component.translatable(fish.translationKey()).withStyle(FishCatch.colour(fish.rarity()))
                             .append(Component.translatable("lexicon.atzen.species_line", entry.getIntOr("count", 0),
                                     kg(entry.getDoubleOr("kg", 0)), String.format(Locale.GERMAN, "%.0f", entry.getDoubleOr("cm", 0)))
-                                    .withStyle(ChatFormatting.GRAY));
+                                    .withStyle(ChatFormatting.GRAY)).append(where(fish));
                     lines.add(new Line(new ItemStack(AtzenFishRegistry.fishItem(fish)), text, 0xFFFFFFFF));
                 }
             }

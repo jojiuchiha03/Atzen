@@ -216,6 +216,23 @@ FISH = {
     "wolffish": F(46, 11, "#4a525a", "#7a828a", "#c4c8cc", "#5a6068", "bars", "round", eel=True),
     # the special one
     "golden_koi": F(36, 15, "#f2f0ea", "#fbf8f2", "#ffffff", "#f5c24a", "koi", "veil"),
+    # cave water: pale, blind or glowing
+    "cave_tetra": F(30, 12, "#c8a8a8", "#e8d0d0", "#f6ecec", "#d89a9a"),
+    "olm": F(50, 6, "#e0c0b0", "#f0d8d0", "#faf0ea", "#e8b0a0", "none", "round", eel=True),
+    "amethyst_perch": F(36, 16, "#4a2a7a", "#9a6ad0", "#e0c8f4", "#c890f0", "bars", spiny=True),
+    "dripstone_eel": F(52, 6, "#5a4a3a", "#8a6a50", "#d0b898", "#6a5440", "speckle", "round", eel=True),
+    "glow_carp": F(36, 19, "#1a6a5a", "#3ab8a0", "#a8f0e0", "#5ae0c0", "glow"),
+    # lava
+    "ember_carp": F(36, 19, "#7a2a10", "#e8682a", "#ffc070", "#ff9a30", "scales"),
+    "magma_eel": F(52, 6, "#3a1a10", "#8a2a1a", "#ff7a2a", "#c84a1a", "glow", "round", eel=True),
+    "blaze_pike": F(48, 10, "#8a4a10", "#f0a030", "#fff0a0", "#ffd040", "spots", snout=1.6),
+    "basalt_catfish": F(44, 13, "#2a2a30", "#4a4a50", "#8a8a90", "#3a3a40", "speckle", "round", barbels=True, flathead=True),
+    "obsidian_sturgeon": F(52, 9, "#120a20", "#2a1a40", "#6a4a8a", "#1e1230", "plates", snout=1.8, barbels=True),
+    # the End
+    "chorus_fish": F(30, 13, "#6a3a6a", "#a878a8", "#e8d0e8", "#c898c8", "scales"),
+    "ender_eel": F(52, 6, "#0a1a18", "#1a3a34", "#3ac8a8", "#14302a", "glow", "round", eel=True),
+    "void_ray": F(34, 28, "#140e24", "#2a2040", "#2a2040", "#0e0a1a", "speckle", flat=True),
+    "shulker_puffer": F(32, 22, "#6a3e6a", "#a87aa8", "#e8d0a8", "#8a5a8a", "spots", "round"),
     # the bosses
     "ancient_catfish": F(48, 14, "#2a2620", "#4e4636", "#a89c84", "#3a3428", "scars", "round", barbels=True, flathead=True),
     "reed_king": F(50, 10, "#26381a", "#5a6e2a", "#d8d4a0", "#8a6a2a", "spots", snout=1.7),
@@ -550,6 +567,7 @@ RODS = {
     "carp_rod": dict(shaft="#2a3a2a", wrap="#c8a040", grip="#202020", reel="#3a3a3a", tip="#e8e0c0"),
     "fly_rod": dict(shaft="#7a4a2a", wrap="#e0c060", grip="#c89a60", reel="#5a7a4a", tip="#f0e8d0"),
     "big_game_rod": dict(shaft="#d8d0c0", wrap="#c83a2a", grip="#1a1a1a", reel="#d0a83a", tip="#ffffff"),
+    "netherite_rod": dict(shaft="#3a3436", wrap="#e8682a", grip="#2a2224", reel="#6a5e60", tip="#ffb070"),
 }
 
 
@@ -1386,6 +1404,37 @@ def lexicon():
     return px
 
 
+def fishing_crate():
+    px = canvas()
+    wood, dark, iron = ramp("#9a6a35"), ramp("#5b3a1e"), ramp("#8a8e96")
+    polygon(px, [(8, 16), (56, 16), (56, 54), (8, 54)], lambda x, y: wood[2 + ((y - 16) // 9 + (x // 13)) % 2])
+    for y in (16, 25, 34, 43, 53):
+        line(px, 8, y, 55, y, dark[1], 1.2)
+    line(px, 10, 52, 54, 18, dark[2], 2.5)
+    for cx, cy in ((10, 18), (54, 18), (10, 52), (54, 52)):
+        polygon(px, [(cx - 3, cy - 3), (cx + 3, cy - 3), (cx + 3, cy + 3), (cx - 3, cy + 3)], iron[3])
+    # wet weed hanging off the lid
+    for x0 in (18, 40):
+        line(px, x0, 16, x0 + 2, 26, ramp("#4a7a3a")[3], 2)
+    outline(px)
+    return px
+
+
+def fishy_note():
+    px = canvas()
+    paper, ink = ramp("#e8dcb8"), ramp("#3a4a6a")
+    polygon(px, [(12, 10), (50, 8), (54, 54), (14, 56)], lambda x, y: shade(paper, 0.9 - ((x + y) % 17) / 60))
+    for y in (18, 25, 32):
+        line(px, 18, y, 44, y - 1, ink[2], 1)
+    # a fish sketch and a cross where it bites
+    polygon(px, [(20, 44), (28, 39), (36, 41), (38, 44), (36, 47), (28, 48)], ink[1])
+    polygon(px, [(38, 44), (43, 40), (43, 48)], ink[1])
+    line(px, 42, 30, 48, 36, ramp("#c83a3a")[3], 2)
+    line(px, 48, 30, 42, 36, ramp("#c83a3a")[3], 2)
+    outline(px)
+    return px
+
+
 MODULES = {
     "fine_drag": ("#4fd8d0", "dial"), "reinforced_blank": ("#8a5a2a", "bar"), "bite_sensor": ("#e84a4a", "bell"),
     "light_bearing": ("#e8d070", "ring"), "ceramic_guides": ("#f0f0f0", "ring"), "improved_bearings": ("#b8bec6", "balls"),
@@ -1532,6 +1581,8 @@ def extras():
     save(os.path.join(item, "bait_box.png"), bait_box())
     save(os.path.join(item, "angler_tool.png"), angler_tool())
     save(os.path.join(item, "fish_lexicon.png"), lexicon())
+    save(os.path.join(item, "fishing_crate.png"), fishing_crate())
+    save(os.path.join(item, "fishy_note.png"), fishy_note())
     for name in MODULES:
         save(os.path.join(item, name + "_module.png"), module_item(name))
     save(os.path.join(block, "net.png"), net_texture())

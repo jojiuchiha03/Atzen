@@ -3,6 +3,13 @@ package io.github.jojiuchiha03.atzen.mixin;
 import io.github.jojiuchiha03.atzen.AtzenSounds;
 import io.github.jojiuchiha03.atzen.Atzen;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.jojiuchiha03.atzen.item.AtzenItems;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -89,4 +96,21 @@ public abstract class FishingHookMixin implements BiteTarget {
             cir.setReturnValue(false);
         }
     }
+
+    /** With a netherite rod the float bobs on lava as on water, and the fish bite there. */
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
+    private boolean atzen$lavaAsWater(FluidState state, TagKey<Fluid> tag, Operation<Boolean> original) {
+        if (original.call(state, tag)) return true;
+        return tag == FluidTags.WATER && state.is(FluidTags.LAVA) && atzen$lavaRod();
+    }
+
+    @Unique
+    private boolean atzen$lavaRod() {
+        Player owner = ((FishingHook) (Object) this).getPlayerOwner();
+        return owner != null && (owner.getMainHandItem().is(AtzenItems.NETHERITE_ROD) || owner.getOffhandItem().is(AtzenItems.NETHERITE_ROD));
+    }
+
+    /** A float does not burn up in lava. */
+    public boolean fireImmune() { return true; }
 }

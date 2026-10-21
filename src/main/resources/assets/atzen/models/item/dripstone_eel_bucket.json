@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "atzen:item/dripstone_eel_bucket"
+  }
+}

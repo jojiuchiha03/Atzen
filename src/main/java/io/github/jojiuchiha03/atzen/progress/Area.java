@@ -8,7 +8,7 @@ import java.util.Locale;
  * gives bites, but only common and uncommon fish until the angler has the level for it.
  */
 public enum Area {
-    HOME_LAKE(0), FOREST_RIVER(3), MIST_MOOR(5), COAST(7), DEEP_RESERVE(10);
+    HOME_LAKE(0), FOREST_RIVER(3), CAVERNS(4), MIST_MOOR(5), COAST(7), LAVA_LAKES(8), DEEP_RESERVE(10), END_WATERS(12);
 
     private final int level;
 
@@ -25,6 +25,9 @@ public enum Area {
             case SWAMP -> MIST_MOOR;
             case OCEAN, WARM_OCEAN -> COAST;
             case COLD_OCEAN, DEEP_OCEAN -> DEEP_RESERVE;
+            case CAVE -> CAVERNS;
+            case LAVA -> LAVA_LAKES;
+            case END -> END_WATERS;
         };
     }
 

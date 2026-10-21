@@ -19,6 +19,7 @@ const items = {
   carp_rod: ['Karpfenrute', 'Carp Rod', 'Für Grundmontagen und lange Fluchten: wirft 15–120 g am weitesten, hält 17 kg, wenig Gefühl.', 'For bottom rigs and long runs: casts 15–120 g furthest, bears 17 kg, little feel.'],
   fly_rod: ['Fliegenrute', 'Fly Rod', 'Mit Fliegenrolle und Fliege weite Würfe, feinfühligste Rute, für Forelle und Äsche.', 'With fly reel and fly long casts, the most sensitive rod, for trout and grayling.'],
   big_game_rod: ['Big-Game-Rute', 'Big Game Rod', 'Für Welse, Störe und Bosse: hält 42 kg und pumpt mit 14 kg, ist aber schwer, steif und spürt kleine Fische kaum.', 'For wels, sturgeon and bosses: bears 42 kg and pumps with 14 kg, but heavy, stiff and hardly feels small fish.'],
+  netherite_rod: ['Netheritrute', 'Netherite Rod', 'Die einzige Rute, die in Lava angelt (Nether und Oberwelt). Hält 28 kg, pumpt mit 10 kg, wirft 10–100 g.', 'The only rod that fishes in lava (Nether and overworld). Bears 28 kg, pumps with 10 kg, casts 10–100 g.'],
   copper_reel: ['Kupfer-Stationärrolle', 'Copper Spinning Reel', 'Einsteiger: 120 m, 5 kg. Verzeihend: schlaffe Schnur kostet weniger Hakenhalt.', 'Beginner: 120 m, 5 kg. Forgiving: slack costs less hook hold.'],
   iron_reel: ['Eisen-Stationärrolle', 'Iron Spinning Reel', '160 m, 7 kg. Verzeihend bei schlaffer Schnur.', '160 m, 7 kg. Forgiving on slack.'],
   diamond_reel: ['Diamant-Stationärrolle', 'Diamond Spinning Reel', '200 m, 9 kg. Feinbremse: Rucke bei Kopfstößen und Sprüngen kommen viel schwächer an.', '200 m, 9 kg. Fine drag: jolts from head shakes and jumps arrive much weaker.'],
@@ -93,7 +94,7 @@ for (const id of Object.keys(items)) {
   json(`assets/atzen/items/${id}.json`, { model: { type: 'minecraft:model', model: `atzen:item/${id}` } });
 }
 
-const rods = ['river_rod', 'iron_rod', 'tide_rod', 'carbon_rod', 'bamboo_rod', 'spinning_rod', 'carp_rod', 'fly_rod', 'big_game_rod'].map(id => `atzen:${id}`);
+const rods = ['river_rod', 'iron_rod', 'tide_rod', 'carbon_rod', 'bamboo_rod', 'spinning_rod', 'carp_rod', 'fly_rod', 'big_game_rod', 'netherite_rod'].map(id => `atzen:${id}`);
 json('data/atzen/tags/item/rods.json', { values: ['minecraft:fishing_rod', ...rods] });
 for (const tag of ['fishing', 'durability', 'vanishing']) {
   json(`data/minecraft/tags/item/enchantable/${tag}.json`, { replace: false, values: rods });
@@ -118,6 +119,7 @@ const recipes = {
   carp_rod: ['atzen:iron_rod', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:leather', 'minecraft:slime_ball'],
   fly_rod: ['atzen:bamboo_rod', 'minecraft:feather', 'minecraft:feather', 'minecraft:string', 'minecraft:copper_ingot'],
   big_game_rod: ['atzen:carbon_rod', 'minecraft:netherite_scrap', 'minecraft:iron_block', 'minecraft:leather'],
+  netherite_rod: ['atzen:carbon_rod', 'minecraft:netherite_ingot', 'minecraft:blaze_rod'],
   river_rod: ['minecraft:fishing_rod', 'minecraft:copper_ingot', 'minecraft:copper_ingot', 'minecraft:string'],
   iron_rod: ['atzen:river_rod', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:leather'],
   tide_rod: ['atzen:iron_rod', 'minecraft:prismarine_shard', 'minecraft:prismarine_shard', 'minecraft:prismarine_shard', 'minecraft:heart_of_the_sea', 'minecraft:diamond'],
@@ -385,6 +387,20 @@ const fish = {
   gurnard: ['Knurrhahn', 'Gurnard', 0xC8604A],
   wolffish: ['Seewolf', 'Atlantic Wolffish', 0x6A7078],
   golden_koi: ['Goldkoi', 'Golden Koi', 0xFFD95B],
+  cave_tetra: ['Höhlensalmler', 'Cave Tetra', 0xE8D0D0],
+  olm: ['Grottenolm', 'Olm', 0xF0D8D0],
+  amethyst_perch: ['Amethystbarsch', 'Amethyst Perch', 0x9A6AD0],
+  dripstone_eel: ['Tropfsteinaal', 'Dripstone Eel', 0x8A6A50],
+  glow_carp: ['Leuchtkarpfen', 'Glow Carp', 0x5AE0C0],
+  ember_carp: ['Glutkarpfen', 'Ember Carp', 0xE8682A],
+  magma_eel: ['Magmaaal', 'Magma Eel', 0x8A2A1A],
+  blaze_pike: ['Lohenhecht', 'Blaze Pike', 0xF0A030],
+  basalt_catfish: ['Basaltwels', 'Basalt Catfish', 0x4A4A50],
+  obsidian_sturgeon: ['Obsidianstör', 'Obsidian Sturgeon', 0x2A1A40],
+  chorus_fish: ['Chorusfisch', 'Chorus Fish', 0xA878A8],
+  ender_eel: ['Enderaal', 'Ender Eel', 0x1A3A34],
+  void_ray: ['Leererochen', 'Void Ray', 0x2A2040],
+  shulker_puffer: ['Shulker-Kugelfisch', 'Shulker Puffer', 0xA87AA8],
   ancient_catfish: ['Der Alte vom Grund', 'The Old One of the Deep', 0x3A3428],
   reed_king: ['Der Schilfkönig', 'The Reed King', 0x3E5A20],
   black_sturgeon: ['Der Schwarze Stör', 'The Black Sturgeon', 0x1A1C22],
@@ -438,6 +454,9 @@ const fishTranslations = {
   'habitat.atzen.warm_ocean': ['Warmes Meer', 'Warm sea'],
   'habitat.atzen.cold_ocean': ['Nordmeer', 'Northern sea'],
   'habitat.atzen.deep_ocean': ['Tiefsee', 'Deep sea'],
+  'habitat.atzen.cave': ['Höhlenwasser', 'Cave water'],
+  'habitat.atzen.lava': ['Lava', 'Lava'],
+  'habitat.atzen.end': ['Wasser im End', 'End water'],
 };
 for (const [key, [german, english]] of Object.entries(fishTranslations)) { de[key] = german; en[key] = english; }
 json('assets/atzen/lang/de_de.json', de);
@@ -459,6 +478,8 @@ const extraItems = {
   bait_box: ['Köderbox', 'Bait Box', 'Rechtsklick packt alle Köder ein (9 Stapel), Schleichen leert sie. Füllt den Köderplatz der Rute automatisch nach.', 'Use packs all bait (9 stacks), sneak empties it. Refills the rod\'s bait slot automatically.'],
   angler_tool: ['Angelwerkzeug', 'Angler\'s Tool', 'Mit Rute in der anderen Hand: nimmt die ganze Montage auf einmal ab.', 'With a rod in the other hand: takes the whole rig off at once.'],
   fish_lexicon: ['Fischlexikon', 'Fish Lexicon', 'Arten, Aufträge, Angelgebiete, Rekorde, Rangliste und Statistik.', 'Species, orders, fishing grounds, records, ranking and statistics.'],
+  fishing_crate: ['Angelkiste', 'Fishing Crate', 'Statt eines Fisches an den Haken gegangen. Rechtsklick öffnet sie: Fundstücke aus dem Gewässer, Köder oder Haken, oft ein Fundzettel.', 'Hooked instead of a fish. Use to open: finds from the water, bait or hooks, often a fishy note.'],
+  fishy_note: ['Fundzettel', 'Fishy Note', 'Ein nasser Zettel aus einer Angelkiste. Er verrät, wo, wann und womit ein Fisch beißt.', 'A soggy note from a fishing crate. It tells where, when and with what a fish bites.'],
 };
 const modules = {
   fine_drag: ['Feinbremsmodul', 'Fine Drag Module', 'Schluckt Rucke wie dehnbare Schnur (+12 % Dehnung).', 'Soaks up jolts like stretchy line (+12% stretch).', '#4fd8d0'],
@@ -685,6 +706,20 @@ const progressTranslations = {
   'area.atzen.mist_moor': ['Nebelmoor (Sümpfe)', 'Mist Moor (swamps)'],
   'area.atzen.coast': ['Küste (Meer, warmes Meer)', 'Coast (sea, warm sea)'],
   'area.atzen.deep_reserve': ['Tiefenreservat (Nordmeer, Tiefsee)', 'Deep Reserve (northern sea, deep sea)'],
+  'area.atzen.caverns': ['Höhlensystem (Wasser unter y 50 ohne Himmel)', 'Caverns (water below y 50 without sky)'],
+  'area.atzen.lava_lakes': ['Lavaseen (Lava, nur mit Netheritrute)', 'Lava Lakes (lava, netherite rod only)'],
+  'area.atzen.end_waters': ['Endgewässer (Wasser im End)', 'End Waters (water in the End)'],
+  'crate.atzen.hooked': ['Eine Angelkiste hängt am Haken!', 'A fishing crate is on the hook!'],
+  'crate.atzen.opened': ['Angelkiste geöffnet.', 'Fishing crate opened.'],
+  'crate.atzen.from': ['Fundort: %s', 'Found in: %s'],
+  'note.atzen.fish': ['Über den %s:', 'About the %s:'],
+  'note.atzen.where': ['Lebt in: %s', 'Lives in: %s'],
+  'note.atzen.when.twilight': ['Beißt am liebsten in der Dämmerung.', 'Bites best at dusk and dawn.'],
+  'note.atzen.when.night': ['Beißt am liebsten nachts.', 'Bites best at night.'],
+  'note.atzen.when.day': ['Beißt am liebsten tagsüber.', 'Bites best by day.'],
+  'note.atzen.when.always': ['Beißt zu jeder Tageszeit.', 'Bites at any time of day.'],
+  'note.atzen.bait': ['Lieblingsköder: %s', 'Favourite bait: %s'],
+  'note.atzen.lava': ['Nur mit einer Netheritrute zu fangen.', 'Only to be caught with a netherite rod.'],
   'lexicon.atzen.title': ['Fischlexikon', 'Fish Lexicon'],
   'lexicon.atzen.tab.species': ['Arten', 'Species'],
   'lexicon.atzen.tab.quests': ['Aufträge', 'Orders'],

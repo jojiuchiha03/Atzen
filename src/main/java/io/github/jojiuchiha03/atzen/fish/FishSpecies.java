@@ -125,6 +125,37 @@ public enum FishSpecies {
     // the special one
     GOLDEN_KOI(15, 75, 0.000019, FishStyle.DARTER, Rarity.LEGENDARY, 2.0f, 3.5f, 6.5f, 1f, 5f,
             new int[] {1, 1, 1, 0, 0, 0, 0, 0}),
+    // under the ground: water deep in caves, out of sight of the sky (weights: cave, lava, End at the end)
+    CAVE_TETRA(6, 16, 0.000012, FishStyle.DARTER, Rarity.COMMON, 1.4f, 2.6f, 5.5f, 1f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0}),
+    OLM(18, 32, 0.0000045, FishStyle.DARTER, Rarity.UNCOMMON, 1.0f, 1.4f, 11f, 1.4f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0}),
+    AMETHYST_PERCH(15, 45, 0.000017, FishStyle.FIGHTER, Rarity.RARE, 2.0f, 4.4f, 6.5f, 1f, 4f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0}),
+    DRIPSTONE_EEL(40, 95, 0.0000016, FishStyle.DARTER, Rarity.RARE, 1.2f, 1.6f, 13f, 1f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0}),
+    GLOW_CARP(30, 85, 0.000024, FishStyle.BRUISER, Rarity.EPIC, 3.0f, 4.6f, 6.5f, 1f, 4f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0}),
+    // in lava: only with a netherite rod
+    EMBER_CARP(25, 75, 0.000024, FishStyle.BRUISER, Rarity.COMMON, 3.0f, 4.6f, 6.5f, 1f, 4f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0}),
+    MAGMA_EEL(40, 110, 0.0000016, FishStyle.DARTER, Rarity.COMMON, 1.2f, 1.6f, 13f, 1f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0}),
+    BLAZE_PIKE(35, 120, 0.000008, FishStyle.FIGHTER, Rarity.UNCOMMON, 1.6f, 2.8f, 10f, 2.5f, 4f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0}),
+    BASALT_CATFISH(60, 190, 0.000009, FishStyle.BRUISER, Rarity.RARE, 3.0f, 2.8f, 9f, 1f, 4f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0}),
+    OBSIDIAN_STURGEON(90, 220, 0.0000045, FishStyle.FIGHTER, Rarity.EPIC, 2.4f, 2.4f, 13f, 3f, 5f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}),
+    // the water of the End
+    CHORUS_FISH(15, 40, 0.000016, FishStyle.DARTER, Rarity.COMMON, 1.6f, 3.6f, 6f, 1f, 3.5f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12}),
+    ENDER_EEL(40, 110, 0.0000016, FishStyle.DARTER, Rarity.UNCOMMON, 1.2f, 1.6f, 13f, 1f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7}),
+    VOID_RAY(50, 160, 0.000012, FishStyle.BRUISER, Rarity.RARE, 6.5f, 1.2f, 7f, 0.5f, 3f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4}),
+    SHULKER_PUFFER(20, 50, 0.00003, FishStyle.BRUISER, Rarity.EPIC, 3.6f, 4.0f, 5f, 0.8f, 2.5f,
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}),
     // the bosses: they never spawn on their own, they only take their own bait (see BossEncounters)
     ANCIENT_CATFISH(240, 320, 0.0000075, FishStyle.BRUISER, Rarity.LEGENDARY, 3.4f, 3.0f, 10f, 1f, 4.5f,
             new int[] {0, 0, 0, 0, 0, 0, 0, 0}),
@@ -182,8 +213,9 @@ public enum FishSpecies {
         this.body = body;
         this.nose = nose;
         this.tail = tail;
-        if (habitatWeights.length != Habitat.values().length) throw new IllegalArgumentException(name());
-        this.habitatWeights = habitatWeights;
+        // Shorter lists leave the habitats at the end (cave, lava, End) empty.
+        if (habitatWeights.length > Habitat.values().length) throw new IllegalArgumentException(name());
+        this.habitatWeights = java.util.Arrays.copyOf(habitatWeights, Habitat.values().length);
     }
 
     public String id() { return name().toLowerCase(Locale.ROOT); }
@@ -200,7 +232,8 @@ public enum FishSpecies {
     /** Barbels on the snout: the catfish, the barbel and the cod family's chin barbel. */
     public boolean hasBarbels() {
         return switch (this) {
-            case CATFISH, BARBEL, ATLANTIC_COD, HADDOCK, STURGEON, ANCIENT_CATFISH, BLACK_STURGEON -> true;
+            case CATFISH, BARBEL, ATLANTIC_COD, HADDOCK, STURGEON, ANCIENT_CATFISH, BLACK_STURGEON, BASALT_CATFISH,
+                 OBSIDIAN_STURGEON -> true;
             default -> false;
         };
     }
@@ -233,10 +266,12 @@ public enum FishSpecies {
 
     public Diet diet() {
         return switch (this) {
-            case CARP, CRUCIAN_CARP, BARBEL, ROACH, RUDD, BREAM, TENCH, CHUB, GOLDEN_KOI, STURGEON, BLACK_STURGEON -> Diet.COARSE;
-            case PIKE, ZANDER, PERCH, CATFISH, EEL, ASP, ANCIENT_CATFISH, REED_KING -> Diet.PREDATOR;
+            case CARP, CRUCIAN_CARP, BARBEL, ROACH, RUDD, BREAM, TENCH, CHUB, GOLDEN_KOI, STURGEON, BLACK_STURGEON,
+                 CAVE_TETRA, OLM, GLOW_CARP, EMBER_CARP, OBSIDIAN_STURGEON, CHORUS_FISH, SHULKER_PUFFER -> Diet.COARSE;
+            case PIKE, ZANDER, PERCH, CATFISH, EEL, ASP, ANCIENT_CATFISH, REED_KING, AMETHYST_PERCH, DRIPSTONE_EEL,
+                 MAGMA_EEL, BLAZE_PIKE, BASALT_CATFISH, ENDER_EEL -> Diet.PREDATOR;
             case RIVER_TROUT, RAINBOW_TROUT, GRAYLING, SALMON, SEA_TROUT -> Diet.SALMONID;
-            case HADDOCK, GILTHEAD_BREAM, RED_MULLET, PLAICE, FLOUNDER, SOLE, TURBOT, HALIBUT, MONKFISH, GURNARD -> Diet.SEA_BOTTOM;
+            case HADDOCK, GILTHEAD_BREAM, RED_MULLET, PLAICE, FLOUNDER, SOLE, TURBOT, HALIBUT, MONKFISH, GURNARD, VOID_RAY -> Diet.SEA_BOTTOM;
             case HERRING, SARDINE, ANCHOVY, SPRAT -> Diet.SHOAL;
             default -> Diet.SEA_PREDATOR;
         };
@@ -261,8 +296,31 @@ public enum FishSpecies {
     /** Lives only in the sea. */
     public boolean salt() {
         for (int i = 0; i < Habitat.OCEAN.ordinal(); i++) if (habitatWeights[i] > 0) return false;
-        return boss() == null;
+        boolean sea = false;
+        for (int i = Habitat.OCEAN.ordinal(); i <= Habitat.DEEP_OCEAN.ordinal(); i++) sea |= habitatWeights[i] > 0;
+        return sea && boss() == null;
     }
+
+    /** Every habitat this fish lives in. */
+    public java.util.List<Habitat> habitats() {
+        java.util.List<Habitat> habitats = new java.util.ArrayList<>();
+        for (Habitat habitat : Habitat.values()) if (weight(habitat) > 0) habitats.add(habitat);
+        return habitats;
+    }
+
+    /** When it feeds best, for notes and the lexicon: twilight, night, day or any time (see {@link #activity}). */
+    public String feedingTime() {
+        if (weight(Habitat.CAVE) > 0 || lava() || weight(Habitat.END) > 0) return "always";
+        if (this == CATFISH || this == EEL || this == ZANDER) return "night";
+        return switch (diet()) {
+            case PREDATOR, SALMONID -> "twilight";
+            case COARSE -> "day";
+            default -> "always";
+        };
+    }
+
+    /** Lives in lava and nowhere else. */
+    public boolean lava() { return habitatWeights[Habitat.LAVA.ordinal()] > 0; }
 
     /** Where in the water column the fish likes to be: -1 at the bottom, 0 in the middle, 1 just under the surface. */
     public int preferredDepth() {
@@ -277,7 +335,7 @@ public enum FishSpecies {
     /** Sharp teeth: without a steel leader they can bite through the line. */
     public boolean teeth() {
         return switch (this) {
-            case PIKE, ZANDER, BARRACUDA, WOLFFISH, MONKFISH, REED_KING, DEEP_WARDEN -> true;
+            case PIKE, ZANDER, BARRACUDA, WOLFFISH, MONKFISH, REED_KING, DEEP_WARDEN, BLAZE_PIKE -> true;
             default -> false;
         };
     }
@@ -290,7 +348,7 @@ public enum FishSpecies {
     private boolean jumper() {
         return switch (this) {
             case RIVER_TROUT, RAINBOW_TROUT, GRAYLING, SALMON, SEA_TROUT, PIKE, ASP, BARRACUDA, SWORDFISH, SEA_BASS,
-                 MACKEREL, SKIPJACK -> true;
+                 MACKEREL, SKIPJACK, BLAZE_PIKE, CHORUS_FISH -> true;
             default -> false;
         };
     }
@@ -298,14 +356,16 @@ public enum FishSpecies {
     private boolean diver() {
         return switch (this) {
             case CARP, CRUCIAN_CARP, TENCH, CATFISH, BARBEL, BREAM, ATLANTIC_COD, SAITHE, HADDOCK, GROUPER, HALIBUT,
-                 PLAICE, FLOUNDER, SOLE, TURBOT, MONKFISH, WOLFFISH, REDFISH, STURGEON, TUNA -> true;
+                 PLAICE, FLOUNDER, SOLE, TURBOT, MONKFISH, WOLFFISH, REDFISH, STURGEON, TUNA, BASALT_CATFISH,
+                 OBSIDIAN_STURGEON, VOID_RAY, GLOW_CARP -> true;
             default -> false;
         };
     }
 
     private boolean snagger() {
         return switch (this) {
-            case PIKE, ZANDER, EEL, TENCH, CARP, CATFISH, GROUPER, WOLFFISH, CHUB, PERCH, BARBEL -> true;
+            case PIKE, ZANDER, EEL, TENCH, CARP, CATFISH, GROUPER, WOLFFISH, CHUB, PERCH, BARBEL, DRIPSTONE_EEL,
+                 AMETHYST_PERCH, MAGMA_EEL, ENDER_EEL -> true;
             default -> false;
         };
     }
@@ -338,6 +398,8 @@ public enum FishSpecies {
             default -> 1.0;
         };
         if (night && (this == CATFISH || this == EEL || this == ZANDER)) activity = 1.8;
+        // No day and no rain reach caves, lava or the End.
+        if (weight(Habitat.CAVE) > 0 || lava() || weight(Habitat.END) > 0) return 1.0;
         if (raining && !salt()) activity *= 1.2;
         return activity;
     }

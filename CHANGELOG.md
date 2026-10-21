@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.0] - 2026-10-21
+
+### Neu (Richtung Tide)
+- Drei neue Gewässer abseits der Oberfläche: **Höhlenwasser** (unter y 50 ohne Himmel), **Lava** (Nether und Oberwelt) und **Wasser im End**, jedes mit eigenem Angelgebiet (Höhlensystem ab Stufe 4, Lavaseen ab 8, Endgewässer ab 12).
+- 14 neue Fischarten: Höhlensalmler, Grottenolm, Amethystbarsch, Tropfsteinaal, Leuchtkarpfen; Glutkarpfen, Magmaaal, Lohenhecht, Basaltwels, Obsidianstör; Chorusfisch, Enderaal, Leererochen, Shulker-Kugelfisch. Sie beißen nur an der Pose und spawnen nicht frei.
+- **Netheritrute** (Carbonrute + Netheritbarren + Lohenrute): die einzige Rute, die in Lava angelt. Die Pose schwimmt auf Lava und verbrennt nicht; Lavafische sind feuerfest.
+- **Angelkisten**: etwa jeder sechzehnte Biss bringt statt eines Fisches eine Kiste mit Fundstücken aus dem Gewässer, Ködern oder Haken; Glück des Meeres macht sie häufiger.
+- **Fundzettel** in Kisten: verraten Lebensraum, Beißzeit und Lieblingsköder einer Fischart.
+- Das Fischlexikon zeigt bei jeder Art die Gewässer, auch bei noch unbekannten.
+
+### Geändert
+- In Höhlen, Lava und End kommt der Fang direkt zum Angler, ohne Vanilla-Müll. Tageszeit und Regen wirken dort nicht.
+- Tagesaufträge „Fange Fische in …“ nennen weiterhin nur Oberflächengewässer.
+
 ## [0.14.3] - 2026-10-13
 
 ### Behoben

@@ -1,15 +1,15 @@
 # Atzen – Fishing Battles
 
-Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 50 Fischarten mit eigenen Lebensräumen, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
+Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 64 Fischarten mit eigenen Lebensräumen (auch in Höhlen, in Lava und im End), Angelkisten, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
 
-**Stand: 0.14.3.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
+**Stand: 0.15.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
 ## Installation
 
 Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder neuer** und Fabric API **0.161.0+26.2**.
 
 1. Fabric für Minecraft 26.2 installieren.
-2. `atzen-0.14.3.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
+2. `atzen-0.15.0.jar` und die Fabric-API-JAR in den `mods`-Ordner legen.
 3. Im Mehrspielerbetrieb Atzen und Fabric API auf **Server und allen Clients** installieren.
 
 ## Der Angelvorgang
@@ -71,6 +71,7 @@ Jede Atzen-Rute hat sechs Slots: **Rolle, Spule, Schnur, Vorfach, Haken, Köder*
 | Karpfenrute | 17 kg | 8 kg | 50 % | 50 % | 15–120 g | 2–30 kg | ×1,5 |
 | **Carbonrute** | 24 kg | **9 kg** | 60 % | 80 % | 10–80 g | bis 60 kg | ×1,35 – die beste Allround-Rute |
 | Big-Game-Rute | 42 kg | 14 kg | 30 % | 25 % | 40–300 g | 10–400 kg | ×1,1, schwer |
+| **Netheritrute** | 28 kg | 10 kg | 45 % | 60 % | 10–100 g | bis 80 kg | ×1,25 – die einzige, die in Lava angelt |
 
 Eine steife Rute (wenig Flex) pumpt hart, gibt aber jeden Ruck weiter; eine weiche federt Fluchten ab. Über der Belastbarkeit ist die Rute überlastet (Anzeige „Rute … %“ wird rot, mehr Verschleiß), beim 1,3-Fachen knackt sie. Sensibilität vergrößert das Zeitfenster für einen guten Anschlag; Fische unter dem Größenbereich spürt die Rute kaum. Ein Köder außerhalb des Wurfgewichts fliegt kürzer.
 
@@ -161,6 +162,25 @@ Die Tageszeit zählt: Raubfische beißen in der Dämmerung, Wels, Aal und Zander
 | Warmer Ozean | Sardine, Sardelle, Dorade, Roter Schnapper, Rotbarbe, Zackenbarsch, Barrakuda, Thunfisch, Bonito, Schwertfisch |
 | Kalter Ozean | Alaska-Seelachs, Heilbutt, Rotbarsch, Seewolf, Lachs |
 | Tiefer Ozean | Seeteufel, Heilbutt, Thunfisch, Schwertfisch, Rotbarsch |
+| Höhlenwasser | Höhlensalmler, Grottenolm, Amethystbarsch, Tropfsteinaal, Leuchtkarpfen |
+| Lava | Glutkarpfen, Magmaaal, Lohenhecht, Basaltwels, Obsidianstör |
+| Wasser im End | Chorusfisch, Enderaal, Leererochen, Shulker-Kugelfisch |
+
+### Höhlen, Lava und End
+
+Wie in Tide gibt es Fische abseits der Oberfläche. Sie schwimmen nicht frei herum, sie beißen nur an der Pose; Tageszeit und Regen spielen dort keine Rolle, und es kommt kein Vanilla-Müll mit hoch.
+
+- **Höhlenwasser:** jedes Wasser unter y 50, über dem kein Himmel zu sehen ist.
+- **Lava:** in jeder Lava, im Nether und in der Oberwelt – aber nur mit der **Netheritrute**. Mit ihr schwimmt die Pose auf Lava wie auf Wasser und verbrennt nicht. Lavafische brennen auch selbst nicht.
+- **End:** jedes Wasser im End (dort muss man es selbst hinbringen).
+
+Der Tiefenwächter bleibt ein Boss des verborgenen Wassers unter y 0.
+
+### Angelkisten und Fundzettel
+
+Etwa jeder sechzehnte Biss ist kein Fisch, sondern eine **Angelkiste** (Glück des Meeres macht sie häufiger); sie kommt ohne Drill hoch. Rechtsklick öffnet sie: zwei bis vier Fundstücke aus genau diesem Gewässer (Amethyst und Leuchtbeeren aus Höhlen, Magmacreme und Quarz aus Lava, Chorusfrüchte und Enderperlen aus dem End, Prismarin und Nautilusschalen aus dem Meer, Ton und Seerosen aus Süßwasser), dazu Köder oder Haken, manchmal Smaragde, Perlmutt, Netheritschrott oder eine Shulkerschale.
+
+Oft liegt ein **Fundzettel** darin. Er verrät über eine Fischart – seltene häufiger –, wo sie lebt, wann sie beißt, welchen Köder sie am liebsten nimmt und ob sie eine Netheritrute braucht. Das **Fischlexikon** zeigt außerdem bei jeder Art, auch bei noch unbekannten, in welchen Gewässern sie lebt.
 
 Größere Exemplare ziehen stärker und halten länger durch (ein 1-kg-Barsch zieht etwa 1,5 kg, ein 12-kg-Karpfen etwa 7 kg, ein 50-kg-Wels etwa 15 kg). Fänge speichern Art, Länge, Gewicht, Größenklasse, Fangort, Welt-Tag, Angler und die Kontrolle im Drill; individuelle Fänge sind nicht stapelbar. Lebende Fische lassen sich im Eimer tragen.
 
@@ -219,7 +239,10 @@ Jeder Fang bringt **Angler-Erfahrung** nach Seltenheit, Größe und Kontrolle im
 | Waldfluss | Flüsse, kalte Gewässer | 3 |
 | Nebelmoor | Sümpfe | 5 |
 | Küste | Meer, warmes Meer | 7 |
+| Höhlensystem | Höhlenwasser | 4 |
+| Lavaseen | Lava (Netheritrute) | 8 |
 | Tiefenreservat | Nordmeer, Tiefsee | 10 |
+| Endgewässer | Wasser im End | 12 |
 
 Vor der Stufe beißen dort nur gewöhnliche und ungewöhnliche Fische. Täglich gibt es drei, wöchentlich zwei **Aufträge** (Art, Gewicht, Gewässer, Seltenheit, Zurücksetzen) – für alle Spieler gleich, Belohnung Smaragde und Erfahrung. Das **Fischlexikon** zeigt entdeckte Arten mit Anzahl und größtem Fang, Aufträge, Gebiete, die Serverrekorde je Art, die Rangliste der zehn schwersten Fänge und die eigene Statistik. Epische und bessere Fänge bringen manchmal **Perlmutt**.
 
@@ -266,6 +289,7 @@ Alle Werkbankrezepte sind formlos.
 | Karpfenrute | Eisenrute, 2 Eisenbarren, Leder, Schleimball |
 | Fliegenrute | Bambusrute, 2 Federn, Faden, Kupferbarren |
 | Big-Game-Rute | Carbonrute, Netheritplatten, Eisenblock, Leder |
+| Netheritrute | Carbonrute, Netheritbarren, Lohenrute |
 | Kohlefaser | Kohleblock im Hochofen |
 | Spulen | Flach: Eisen + Kupfer · Tief: 2 Eisen + Kupfer · Leicht: Kupfer + Feder · Verstärkt: 2 Eisen + Obsidian · Schnell: Eisen + Redstone + Gold · Kraft: Eisen + Kolben + Kupfer |
 | 4 Fluorocarbon-Vorfach | Monofile Schnur, Glasscheibe |

@@ -27,7 +27,9 @@ public enum RodType {
     SPINNING(5, 0.45, 1.05, 10, 0.8, 0.25, 5, 40, 1.3, 0.2, 10),
     CARP(8, 0.5, 1.0, 17, 0.5, 0.45, 15, 120, 1.5, 2, 30),
     FLY(4, 0.75, 1.0, 8, 0.95, 0.15, 1, 10, 1.0, 0.1, 6),
-    BIG_GAME(14, 0.3, 0.95, 42, 0.25, 0.9, 40, 300, 1.1, 10, 400);
+    BIG_GAME(14, 0.3, 0.95, 42, 0.25, 0.9, 40, 300, 1.1, 10, 400),
+    /** The only rod that fishes in lava; otherwise a heavy, strong all-rounder. */
+    NETHERITE(10, 0.45, 1.05, 28, 0.6, 0.5, 10, 100, 1.25, 0.5, 80);
 
     private final double power, flex, speed, load, sensitivity, weight, castMin, castMax, cast, fishMin, fishMax;
 

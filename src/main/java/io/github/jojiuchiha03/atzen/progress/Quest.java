@@ -43,7 +43,7 @@ public record Quest(String id, Kind kind, String target, double amount, int coun
         List<Quest> quests = new ArrayList<>();
         FishSpecies species = EVERYDAY[random.nextInt(EVERYDAY.length)];
         quests.add(new Quest("d" + day + "a", Kind.SPECIES, species.id(), 0, 1 + random.nextInt(3), 2, 30, false));
-        Habitat habitat = Habitat.values()[random.nextInt(Habitat.values().length)];
+        Habitat habitat = Habitat.SURFACE.get(random.nextInt(Habitat.SURFACE.size()));
         quests.add(new Quest("d" + day + "b", Kind.HABITAT, habitat.name(), 0, 3 + random.nextInt(3), 3, 40, false));
         quests.add(random.nextBoolean()
                 ? new Quest("d" + day + "c", Kind.WEIGHT, "", 2 + random.nextInt(5), 1, 4, 50, false)
