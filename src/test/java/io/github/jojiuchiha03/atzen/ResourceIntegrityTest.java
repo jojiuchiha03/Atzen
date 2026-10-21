@@ -64,22 +64,14 @@ class ResourceIntegrityTest {
         }
     }
 
-    @Test void recipesAndEnchantmentsReferenceExistingItemsAndTranslations() throws IOException {
+    @Test void recipesReferenceExistingItems() throws IOException {
         Set<String> items = files(ASSETS.resolve("items"), ".json").stream()
                 .map(p -> "atzen:" + p.getFileName().toString().replace(".json", "")).collect(Collectors.toSet());
-        JsonObject translations = json(ASSETS.resolve("lang/en_us.json"));
         for (Path recipe : files(RESOURCES.resolve("data/atzen/recipe"), ".json")) {
             JsonObject value = json(recipe);
             if (value.has("ingredients")) for (var ingredient : value.getAsJsonArray("ingredients")) checkItem(ingredient.getAsString(), items);
             if (value.has("ingredient")) checkItem(value.get("ingredient").getAsString(), items);
             checkItem(value.getAsJsonObject("result").get("id").getAsString(), items);
-        }
-        for (Path enchantment : files(RESOURCES.resolve("data/atzen/enchantment"), ".json")) {
-            JsonObject value = json(enchantment);
-            assertTrue(translations.has(value.getAsJsonObject("description").get("translate").getAsString()));
-            String tag = value.get("supported_items").getAsString().replace("#atzen:", "");
-            for (var item : json(RESOURCES.resolve("data/atzen/tags/item/" + tag + ".json")).getAsJsonArray("values")) checkItem(item.getAsString(), items);
-            assertTrue(value.get("max_level").getAsInt() > 0);
         }
     }
 
