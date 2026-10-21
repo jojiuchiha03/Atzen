@@ -4,125 +4,141 @@ import io.github.jojiuchiha03.atzen.battle.Boss;
 import io.github.jojiuchiha03.atzen.battle.FishAction;
 import io.github.jojiuchiha03.atzen.battle.FishingBattle;
 import io.github.jojiuchiha03.atzen.battle.Landing;
+import io.github.jojiuchiha03.atzen.fish.AtzenFishRegistry;
 import io.github.jojiuchiha03.atzen.fish.FishSpecies;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import java.util.Locale;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * The fight display above the hotbar. One bar for the line: how much of its breaking load the tension uses,
- * with a cyan mark where the drag slips; under it the fish's strength and the hook hold. One line of text says
- * what to do now. A boss shows its name and phase at the top, a landed fish a trophy card.
+ * The fight panel above the hotbar, as wide as the hotbar: the fish with its name and distance, the line's tension
+ * (green up to where the drag slips, red beyond) and the fish's strength. Above it one prompt says which key to
+ * press now – R to reel, F to give line, right-click to land. A boss shows its name and phase at the top, a landed
+ * fish a catch card.
  */
 final class FightHud {
-    private static final int WIDTH = 160;
+    private static final int WIDTH = 182;
+    private static final int HEIGHT = 36;
+    private static final int PANEL = 0xC0121820;
+    private static final int TRACK = 0xFF26303A;
+    private static final int GREEN = 0xFF4FD08A;
+    private static final int ORANGE = 0xFFFFA040;
+    private static final int RED = 0xFFFF5B6E;
 
     private FightHud() { }
 
-    enum Advice {
-        LAND(0xFF5BE38A), NET(0xFF5BE38A), RELEASE(0xFFFF5B6E), TANGLED(0xFFFF5B6E), WARN_RUN(0xFFFF9A3C), WARN_DIVE(0xFFFF9A3C),
-        WARN_SIDE(0xFFFF9A3C), WARN_SHAKE(0xFFFF9A3C), WARN_JUMP(0xFFFF9A3C), SLACK(0xFFFFD45B), JUMP(0xFFFFD45B),
-        STEER_LEFT(0xFFFFD45B), STEER_RIGHT(0xFFFFD45B), SPOOL(0xFFFF5B6E), TAKING(0xFFFFD45B), TWIST(0xFFFFD45B),
-        SHAKE(0xFFFFD45B), PUMP(0xFF5BE38A), REEL(0xFF5BE38A);
+    /** What to do now: one key, one word. */
+    enum Prompt {
+        LAND(GREEN), NET(GREEN), WARN(ORANGE), WAIT(ORANGE), GIVE(ORANGE), GIVE_NOW(RED), REEL(GREEN), TIGHTEN(0xFFFFD45B);
 
         final int colour;
 
-        Advice(int colour) { this.colour = colour; }
+        Prompt(int colour) { this.colour = colour; }
 
-        String key() { return "hud.atzen.advice." + name().toLowerCase(Locale.ROOT); }
+        String key() { return "hud.atzen.prompt." + name().toLowerCase(Locale.ROOT); }
 
-        boolean urgent() { return colour == 0xFFFF5B6E; }
+        boolean blinks() { return this == GIVE_NOW || this == WARN || this == LAND || this == NET; }
     }
 
-    static Advice advice(BattlePayload state) {
-        float tension = AtzenClient.displayedTension;
-        if (state.has(BattlePayload.TANGLED)) return Advice.TANGLED;
-        if (state.has(BattlePayload.LANDABLE)) return state.netWindow() >= 0 ? Advice.NET : Advice.LAND;
-        if (tension >= 0.9f) return Advice.RELEASE;
-        if (state.pending() != null) return switch (state.pending()) {
-            case DIVE -> Advice.WARN_DIVE;
-            case SIDE -> Advice.WARN_SIDE;
-            case SHAKE -> Advice.WARN_SHAKE;
-            case JUMP -> Advice.WARN_JUMP;
-            default -> Advice.WARN_RUN;
+    /** The same rules the fight runs on (see FishingBattle): reel while it rests, stop when it pulls, give in jumps. */
+    static Prompt prompt(BattlePayload state) {
+        if (state.has(BattlePayload.LANDABLE)) return state.netWindow() >= 0 ? Prompt.NET : Prompt.LAND;
+        boolean giving = state.has(BattlePayload.GIVING);
+        boolean away = state.pending() == null && (state.action() == FishAction.RUN || state.action() == FishAction.DIVE
+                || state.action() == FishAction.SIDE);
+        if (state.has(BattlePayload.TWIST) || away && !giving && AtzenClient.displayedTension >= state.drag() * 0.95f) return Prompt.GIVE_NOW;
+        if (state.pending() != null) return Prompt.WARN;
+        return switch (state.action()) {
+            case JUMP, SHAKE -> Prompt.GIVE;
+            case RUN, DIVE, SIDE -> Prompt.WAIT;
+            default -> state.has(BattlePayload.SLACK) ? Prompt.TIGHTEN : Prompt.REEL;
         };
-        if (state.lineOut() > state.capacity() * 0.8f) return Advice.SPOOL;
-        if (state.has(BattlePayload.SLACK)) return Advice.SLACK;
-        if (state.action() == FishAction.JUMP) return Advice.JUMP;
-        if (state.action() == FishAction.SIDE) return state.sideDir() > 0 ? Advice.STEER_LEFT : Advice.STEER_RIGHT;
-        if (state.has(BattlePayload.TWIST)) return Advice.TWIST;
-        if ((state.action() == FishAction.RUN || state.action() == FishAction.DIVE) && tension >= state.drag() * 0.95f) return Advice.TAKING;
-        if (state.action() == FishAction.SHAKE) return Advice.SHAKE;
-        return state.distance() > 8 ? Advice.PUMP : Advice.REEL;
+    }
+
+    private static KeyMapping keyOf(Prompt prompt) {
+        return switch (prompt) {
+            case GIVE, GIVE_NOW -> AtzenClient.giveKey;
+            case REEL, TIGHTEN -> AtzenClient.reelKey;
+            default -> null;
+        };
     }
 
     static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft client = Minecraft.getInstance();
         Font font = client.font;
-        if (CameraController.state() == CameraController.State.TROPHY && AtzenClient.trophy != null) {
-            trophy(graphics, font, AtzenClient.trophy);
-            return;
-        }
+        if (AtzenClient.trophyTicks > 0 && AtzenClient.trophy != null) catchCard(graphics, font, AtzenClient.trophy);
         var state = AtzenClient.state;
         if (state == null || state.result() != FishingBattle.Result.ACTIVE) return;
         int x = (graphics.guiWidth() - WIDTH) / 2;
-        int y = graphics.guiHeight() - 72;
+        int y = graphics.guiHeight() - 59 - HEIGHT;
+        FishSpecies species = state.species();
+        int rarity = rarityColour(species);
 
-        // the line: tension against breaking load, zones, drag mark, tension mark
+        // the panel: a thin line in the fish's rarity colour on top
+        graphics.fill(x, y, x + WIDTH, y + HEIGHT, PANEL);
+        graphics.fill(x, y, x + WIDTH, y + 1, rarity);
+        graphics.item(new ItemStack(AtzenFishRegistry.fishItem(species)), x + 3, y + 3);
+        graphics.text(font, Component.translatable(species.translationKey()), x + 22, y + 4, rarity, true);
+        Component right = state.hookHold() < 35 ? Component.translatable("hud.atzen.hook_loose")
+                : Component.translatable("hud.atzen.distance", Math.round(state.distance()));
+        graphics.text(font, right, x + WIDTH - 4 - font.width(right), y + 4, state.hookHold() < 35 ? RED : 0xFF9AA8B4, true);
+
+        // the line: green up to the drag, red beyond; the white mark is the tension
+        int barX = x + 22, barW = WIDTH - 26, barY = y + 15;
         float tension = Math.clamp(AtzenClient.displayedTension, 0, 1);
-        graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 7, 0xC0101820);
-        graphics.fill(x, y, x + WIDTH, y + 6, 0xFF2A3540);
-        int fill = Math.round(WIDTH * tension);
-        int colour = tension < 0.6f ? 0xFF2F8A5A : tension < 0.85f ? 0xFFB8962F : 0xFFB83A4E;
-        graphics.fill(x, y + 1, x + fill, y + 5, colour);
-        graphics.fill(x + (int) (WIDTH * 0.85f), y, x + WIDTH, y + 1, 0xFF9A2F42);
-        int drag = x + Math.clamp(Math.round(WIDTH * state.drag()), 1, WIDTH - 1);
-        graphics.fill(drag - 1, y - 2, drag + 1, y + 8, 0xFF4CD6E8);
-        int mark = x + Math.clamp(fill, 1, WIDTH - 1);
-        graphics.fill(mark - 1, y - 1, mark + 1, y + 7, 0xFFFFFFFF);
+        int drag = Math.clamp(Math.round(barW * state.drag()), 1, barW - 1);
+        graphics.fill(barX, barY, barX + barW, barY + 6, TRACK);
+        graphics.fill(barX + drag, barY, barX + barW, barY + 6, 0xFF4A2630);
+        int fill = Math.round(barW * tension);
+        float share = state.drag() <= 0 ? 1 : tension / state.drag();
+        int colour = share < 0.75f ? GREEN : share < 0.97f ? 0xFFE8C04A : RED;
+        graphics.fill(barX, barY + 1, barX + Math.min(fill, barW), barY + 5, colour);
+        graphics.fill(barX + drag, barY - 1, barX + drag + 1, barY + 7, 0xFF8AE8F0);
+        int mark = barX + Math.clamp(fill, 1, barW - 1);
+        graphics.fill(mark - 1, barY - 1, mark + 1, barY + 7, 0xFFFFFFFF);
 
-        // the fish's strength and the hook hold
-        int stamina = Math.round(WIDTH * Math.clamp(AtzenClient.displayedStamina, 0, 1));
-        graphics.fill(x, y + 8, x + WIDTH, y + 10, 0x80303A44);
-        graphics.fill(x, y + 8, x + stamina, y + 10, 0xFF4CDED0);
-        int hook = Math.round(WIDTH * Math.clamp(state.hookHold() / 100f, 0, 1));
-        graphics.fill(x, y + 11, x + WIDTH, y + 12, 0x80303A44);
-        graphics.fill(x, y + 11, x + hook, y + 12, state.hookHold() < 30 ? 0xFFFF5B6E : 0xFFE8A040);
+        // the fish's strength
+        int stamina = Math.round(barW * Math.clamp(AtzenClient.displayedStamina, 0, 1));
+        graphics.fill(barX, y + 25, barX + barW, y + 28, TRACK);
+        graphics.fill(barX, y + 25, barX + stamina, y + 28, 0xFF4CC8E0);
+        graphics.text(font, Component.translatable("hud.atzen.strength"), x + 3, y + 23, 0xFF6A7A88, false);
 
-        // snags: how close a sideways run is to cover
-        if (state.danger() > 1) {
-            int danger = Math.round(WIDTH * Math.clamp(state.danger() / 100f, 0, 1));
-            graphics.fill(x, y - 4, x + danger, y - 3, 0xFFFF7A3C);
-        }
+        // the prompt: a key cap and one word; it blinks when it is urgent
+        Prompt prompt = prompt(state);
+        boolean hidden = prompt.blinks() && (AtzenClient.fightTicks / 5) % 2 == 1;
+        if (!hidden) prompt(graphics, font, prompt, graphics.guiWidth() / 2, y - 14);
 
-        // what to do now; it blinks when it is urgent
-        Advice advice = advice(state);
-        boolean blink = (advice.urgent() || advice == Advice.LAND || advice == Advice.NET) && (AtzenClient.cameraTicks / 4) % 2 == 1;
-        if (!blink) {
-            Component text = Component.translatable(advice.key(), AtzenClient.reelKey.getTranslatedKeyMessage(),
-                    AtzenClient.liftKey.getTranslatedKeyMessage(), AtzenClient.dragDownKey.getTranslatedKeyMessage(),
-                    AtzenClient.dragUpKey.getTranslatedKeyMessage(),
-                    (state.sideDir() > 0 ? AtzenClient.steerLeftKey : AtzenClient.steerRightKey).getTranslatedKeyMessage());
-            graphics.text(font, text, (graphics.guiWidth() - font.width(text)) / 2, y - 14, advice.colour, true);
-        }
-        // the numbers: line out, drag step, hook hold
-        Component info = Component.translatable("hud.atzen.info", Math.round(state.lineOut()), Math.round(state.capacity()),
-                state.dragStep(), FishingBattle.DRAG_STEPS, Math.round(state.hookHold()), Math.round(state.rodStrain() * 100));
-        graphics.text(font, info, (graphics.guiWidth() - font.width(info)) / 2, y + 14,
-                state.rodStrain() > 1 ? 0xFFFF7A5C : 0xFFB8C4CC, true);
-
-        if (AtzenClient.cameraTicks < 50 && state.strike() > 0) {
+        if (AtzenClient.fightTicks < 50 && state.strike() > 0) {
             String quality = state.strike() >= 90 ? "perfect" : state.strike() >= 72 ? "good" : "late";
-            Component strike = Component.translatable("hud.atzen.strike." + quality, state.strike());
-            graphics.text(font, strike, (graphics.guiWidth() - font.width(strike)) / 2, y - 26, 0xFFFFFFFF, true);
+            Component strike = Component.translatable("hud.atzen.strike." + quality);
+            graphics.centeredText(font, strike, graphics.guiWidth() / 2, y - 27, 0xFFE0E6EA);
         }
-        if (state.has(BattlePayload.LANDABLE) && state.netWindow() >= 0) netGauge(graphics, x, y - 40, state);
-        Boss boss = state.species().boss();
+        if (state.has(BattlePayload.LANDABLE) && state.netWindow() >= 0) netGauge(graphics, x, y - 28, state);
+        Boss boss = species.boss();
         if (boss != null) bossBar(graphics, font, state, boss);
+    }
+
+    /** [R] Reel in – a key cap like on the keyboard, then the word. */
+    private static void prompt(GuiGraphicsExtractor graphics, Font font, Prompt prompt, int centre, int y) {
+        KeyMapping key = keyOf(prompt);
+        Component word = Component.translatable(prompt.key());
+        Component cap = key == null ? null : key.getTranslatedKeyMessage();
+        int capWidth = cap == null ? 0 : Math.max(11, font.width(cap) + 6);
+        int total = capWidth + (cap == null ? 0 : 4) + font.width(word);
+        int x = centre - total / 2;
+        if (cap != null) {
+            graphics.fill(x, y - 2, x + capWidth, y + 10, 0xFF0C1014);
+            graphics.outline(x, y - 2, capWidth, 12, prompt.colour);
+            graphics.centeredText(font, cap, x + capWidth / 2, y, 0xFFFFFFFF);
+            x += capWidth + 4;
+        }
+        graphics.text(font, word, x, y, prompt.colour, true);
     }
 
     /**
@@ -132,7 +148,6 @@ final class FightHud {
     private static void netGauge(GuiGraphicsExtractor graphics, int x, int y, BattlePayload state) {
         int half = WIDTH / 2, centre = x + half;
         int window = Math.round(half * state.netWindow());
-        graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 7, 0xC0101820);
         graphics.fill(x, y, x + WIDTH, y + 6, 0xFF3A2A2A);
         graphics.fill(centre - window, y, centre + window, y + 6, 0xFF2F8A5A);
         double ticks = state.landTicks() + AtzenClient.packetAge;
@@ -144,10 +159,10 @@ final class FightHud {
     private static void bossBar(GuiGraphicsExtractor graphics, Font font, BattlePayload state, Boss boss) {
         int width = 182;
         int x = (graphics.guiWidth() - width) / 2;
-        int y = 14;
+        int y = 16;
         Component name = Component.translatable(boss.translationKey()).append(" – ")
                 .append(Component.translatable(boss.phase(state.bossPhase()).translationKey(boss)));
-        graphics.text(font, name, (graphics.guiWidth() - font.width(name)) / 2, y - 10, 0xFFFFC94A, true);
+        graphics.centeredText(font, name, graphics.guiWidth() / 2, y - 11, 0xFFFFC94A);
         graphics.fill(x - 1, y - 1, x + width + 1, y + 5, 0xC0101820);
         graphics.fill(x, y, x + Math.round(width * Math.clamp(AtzenClient.displayedStamina, 0, 1)), y + 4, 0xFFC0392B);
         for (int phase = 0; phase < boss.phases(); phase++) {
@@ -156,27 +171,32 @@ final class FightHud {
         }
     }
 
-    private static void trophy(GuiGraphicsExtractor graphics, Font font, BattlePayload state) {
+    /** The catch: a card at the top with the fish, its rarity, its size and how cleanly it was fought. */
+    private static void catchCard(GuiGraphicsExtractor graphics, Font font, BattlePayload state) {
         FishSpecies species = state.species();
-        int colour = switch (species.rarity()) {
-            case COMMON -> 0xFFFFFFFF;
-            case UNCOMMON -> 0xFF55FF55;
-            case RARE -> 0xFF55D8FF;
-            case EPIC -> 0xFFD070FF;
-            case LEGENDARY -> 0xFFFFC94A;
-            case MYTHIC -> 0xFFFF5555;
-        };
-        int width = 200, x = (graphics.guiWidth() - width) / 2, y = 24;
-        graphics.fill(x, y, x + width, y + 46, 0xB0101820);
-        graphics.fill(x, y, x + width, y + 1, colour);
-        Component name = Component.translatable(species.translationKey());
-        graphics.text(font, name, (graphics.guiWidth() - font.width(name)) / 2, y + 6, colour, true);
+        int colour = rarityColour(species);
+        int width = 210, x = (graphics.guiWidth() - width) / 2, y = 30;
+        graphics.fill(x, y, x + width, y + 44, 0xD0101418);
+        graphics.outline(x, y, width, 44, colour);
+        graphics.fill(x + 6, y + 8, x + 34, y + 36, 0xFF1C242C);
+        graphics.item(new ItemStack(AtzenFishRegistry.fishItem(species)), x + 12, y + 14);
+        int text = x + 42;
+        graphics.text(font, Component.translatable(species.translationKey()), text, y + 6, colour, true);
         Component rarity = Component.translatable(species.rarityKey());
-        graphics.text(font, rarity, (graphics.guiWidth() - font.width(rarity)) / 2, y + 17, 0xFFB8C4CC, true);
-        Component size = Component.translatable("catch.atzen.measurements", String.format(Locale.GERMAN, "%.1f", state.lengthCm()),
-                String.format(Locale.GERMAN, "%.2f", state.weightKg()));
-        graphics.text(font, size, (graphics.guiWidth() - font.width(size)) / 2, y + 28, 0xFFFFFFFF, true);
-        Component quality = Component.translatable("hud.atzen.trophy_quality", state.quality());
-        graphics.text(font, quality, (graphics.guiWidth() - font.width(quality)) / 2, y + 38, 0xFF7FD8C8, false);
+        graphics.text(font, rarity, x + width - 6 - font.width(rarity), y + 6, 0xFF8A98A4, false);
+        graphics.text(font, Component.translatable("catch.atzen.measurements", String.format(Locale.GERMAN, "%.1f", state.lengthCm()),
+                String.format(Locale.GERMAN, "%.2f", state.weightKg())), text, y + 18, 0xFFFFFFFF, true);
+        graphics.text(font, Component.translatable("hud.atzen.trophy_quality", state.quality()), text, y + 30, 0xFF7FD8C8, false);
+    }
+
+    static int rarityColour(FishSpecies species) {
+        return switch (species.rarity()) {
+            case COMMON -> 0xFFE8ECEF;
+            case UNCOMMON -> 0xFF6CE07A;
+            case RARE -> 0xFF5BC8FF;
+            case EPIC -> 0xFFC880FF;
+            case LEGENDARY -> 0xFFFFC94A;
+            case MYTHIC -> 0xFFFF6060;
+        };
     }
 }

@@ -8,8 +8,6 @@ import io.github.jojiuchiha03.atzen.fish.Habitat;
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.item.BattleEquipment;
 import io.github.jojiuchiha03.atzen.item.GearSlot;
-import io.github.jojiuchiha03.atzen.item.ModuleType;
-import io.github.jojiuchiha03.atzen.item.RodMods;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
@@ -77,7 +75,7 @@ public final class RodHolderBlockEntity extends BlockEntity {
             return;
         }
         ItemStack rod = player.getItemInHand(hand);
-        BlockPos water = findWater(level, slot, 6 + 6 * BattleEquipment.castFactor(player, rod));
+        BlockPos water = findWater(level, slot, 6 + 6 * BattleEquipment.castFactor(rod));
         if (water == null) {
             player.sendSystemMessage(Component.translatable("holder.atzen.no_water"), true);
             return;
@@ -100,9 +98,8 @@ public final class RodHolderBlockEntity extends BlockEntity {
         boolean bait = !AtzenRodItem.bait(rod).isEmpty();
         if (!bait) ticks *= 3;
         ticks /= Ecology.factor(level, water);
-        if (Ecology.nearChum(level, water) || RodMods.has(rod, ModuleType.FEEDER)) ticks *= 0.6;
+        if (Ecology.nearChum(level, water)) ticks *= 0.6;
         if (player != null) ticks -= 100 * BattleEquipment.lure(player, rod);
-        if (RodMods.has(rod, ModuleType.FLOAT)) ticks *= 0.9;
         return (int) Math.max(200, ticks);
     }
 
@@ -125,7 +122,7 @@ public final class RodHolderBlockEntity extends BlockEntity {
             clear(i);
             update();
             if (!Atzen.BATTLES.startFromHolder(player, rod, Vec3.atCenterOf(target).add(0, 0.4, 0),
-                    RodMods.has(rod, ModuleType.BITE_SENSOR))) {
+                    false)) {
                 player.sendSystemMessage(Component.translatable("holder.atzen.missed"), true);
             }
             return;
@@ -159,7 +156,7 @@ public final class RodHolderBlockEntity extends BlockEntity {
             if (holder.biting[i] >= 0) {
                 holder.biting[i] += step;
                 holder.alarm(server, i);
-                int window = RodMods.has(holder.rods[i], ModuleType.BITE_SENSOR) ? BITE_WINDOW * 3 / 2 : BITE_WINDOW;
+                int window = BITE_WINDOW;
                 if (holder.biting[i] > window) {
                     holder.unattended(server, i);
                     changed = true;

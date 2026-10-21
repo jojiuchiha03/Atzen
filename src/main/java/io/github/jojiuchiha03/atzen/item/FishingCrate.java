@@ -85,7 +85,7 @@ public final class FishingCrate extends Item {
             BaitType bait = BaitType.values()[random.nextInt(BaitType.values().length)];
             if (bait.boss() == null) loot.add(new ItemStack(AtzenItems.item(bait), bait.lure() ? 1 : 2 + random.nextInt(5)));
         } else {
-            loot.add(new ItemStack(AtzenItems.HOOKS.get(random.nextInt(AtzenItems.HOOKS.size())), 1 + random.nextInt(3)));
+            loot.add(new ItemStack(random.nextBoolean() ? AtzenItems.FISHING_LINE : AtzenItems.CARBON_FIBER));
         }
         if (random.nextDouble() < 0.12) loot.add(new ItemStack(Items.EMERALD, 1 + random.nextInt(3)));
         if (random.nextDouble() < 0.05) loot.add(new ItemStack(AtzenItems.MOTHER_OF_PEARL));

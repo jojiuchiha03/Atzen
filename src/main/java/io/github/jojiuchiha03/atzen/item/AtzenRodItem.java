@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
- * A fishing rod with six slots — reel, spool, line, leader, hook and bait — filled in the inventory like a bundle:
+ * A fishing rod with three slots — reel, line and bait — filled in the inventory like a bundle:
  * click a part onto the rod to fit it (whatever was in that slot comes back onto the cursor), right-click the rod
  * with an empty cursor to take the parts out again, from the bait back to the reel. Holding the rod on the cursor and
  * right-clicking gear in a slot fits it as well. Each bite uses one bait.
@@ -101,7 +101,7 @@ public final class AtzenRodItem extends FishingRodItem {
 
     /** The slot that comes out first when the rod is emptied: from the bait back to the reel. */
     private static GearSlot outermost(ItemStack rod) {
-        for (GearSlot slot : new GearSlot[] {GearSlot.BAIT, GearSlot.HOOK, GearSlot.LEADER, GearSlot.LINE, GearSlot.SPOOL, GearSlot.REEL}) {
+        for (GearSlot slot : new GearSlot[] {GearSlot.BAIT, GearSlot.LINE, GearSlot.REEL}) {
             if (!get(rod, slot).isEmpty()) return slot;
         }
         return null;
@@ -164,11 +164,10 @@ public final class AtzenRodItem extends FishingRodItem {
     public Optional<TooltipComponent> getTooltipImage(ItemStack rod) {
         ItemStack[] slots = new ItemStack[GearSlot.values().length];
         for (GearSlot slot : GearSlot.values()) slots[slot.ordinal()] = get(rod, slot);
-        return Optional.of(new GearTooltip(slots, BattleEquipment.preview(rod), AtzenItems.rod(rod), BattleEquipment.castFactor(rod),
-                RodMods.modules(rod), RodMods.upgrades(rod)));
+        return Optional.of(new GearTooltip(slots, BattleEquipment.preview(rod), AtzenItems.rod(rod), RodMods.upgrades(rod)));
     }
 
-    /** Casting: how far the float flies depends on rod, spool and bait (see {@link BattleEquipment#castFactor}). */
+    /** Casting: how far the float flies depends on the rod (see {@link BattleEquipment#castFactor}). */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         // During a fight from a rod holder there is no float: the click lands the fish.
@@ -179,12 +178,11 @@ public final class AtzenRodItem extends FishingRodItem {
         InteractionResult result = super.use(level, player, hand);
         if (casting && !level.isClientSide() && player.fishing != null) {
             player.fishing.setDeltaMovement(player.fishing.getDeltaMovement().scale(
-                    BattleEquipment.castFactor((net.minecraft.server.level.ServerPlayer) player, player.getItemInHand(hand))));
+                    BattleEquipment.castFactor(player.getItemInHand(hand))));
         }
         return result;
     }
 
-    /** What the tooltip shows: the slots, the rod's attributes and what the whole set does. */
-    public record GearTooltip(ItemStack[] slots, Rig rig, RodType rod, double cast, java.util.List<ModuleType> modules,
-                              int upgrades) implements TooltipComponent { }
+    /** What the tooltip shows: the slots, the rod and what the whole set does. */
+    public record GearTooltip(ItemStack[] slots, Rig rig, RodType rod, int upgrades) implements TooltipComponent { }
 }

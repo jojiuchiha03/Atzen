@@ -2,9 +2,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "equipment",
   "ingredients": [
+    "atzen:copper_reel",
     "minecraft:iron_ingot",
     "minecraft:iron_ingot",
-    "minecraft:iron_nugget",
     "minecraft:redstone"
   ],
   "result": {

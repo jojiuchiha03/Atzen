@@ -10,27 +10,12 @@ import io.github.jojiuchiha03.atzen.fish.FishSpecies;
  */
 public enum BaitType {
     // natural baits; appeal for: coarse, predator, salmonid, sea predator, sea bottom, shoal
-    WORM("worm_bait", 0, new double[] {1.2, 0.6, 1.0, 0.3, 0.8, 0.2}, 0, 1, 1, 1),
-    MAGGOT("maggot_bait", 0, new double[] {1.4, 0.3, 0.8, 0, 0.3, 0.5}, 0, 1, 1, 1),
-    CORN("corn_bait", 0, new double[] {1.5, 0, 0, 0, 0, 0}, 0.2, 1, 1, 1),
-    BREAD("bread_bait", 0, new double[] {1.2, 0, 0.2, 0, 0, 0.4}, 0, 1, 1, 1),
-    BOILIE("boilie_bait", 0, new double[] {1.0, 0, 0, 0, 0, 0}, 0.7, 1, 1, 1),
-    BAITFISH("baitfish_bait", 0, new double[] {0, 1.6, 0.6, 1.3, 0.6, 0}, 0.5, 1, 1, 1),
-    FISH_STRIP("fish_strip_bait", 0, new double[] {0.2, 1.0, 0.4, 1.2, 1.3, 0.2}, 0.2, 1, 1, 1),
-    LARVA("larva_bait", 0, new double[] {0.8, 0.3, 1.4, 0, 0, 0.3}, 0, 1, 1, 1),
-    SHRIMP("shrimp_bait", 0, new double[] {0, 0.2, 0.2, 1.0, 1.4, 0.8}, 0.1, 1, 1, 1),
+    /** For the peaceful fish: coarse fish, trout, bottom fish, shoals. */
+    WORM("worm_bait", 0, new double[] {1.3, 0.4, 1.2, 0.3, 1.1, 1.0}, 0, 1, 1, 1),
+    /** For the predators, fresh water and sea. */
+    BAITFISH("baitfish_bait", 0, new double[] {0, 1.5, 0.6, 1.4, 0.6, 0}, 0.5, 1, 1, 1),
+    /** Draws every fish, at night most of all; runs pull weaker. */
     GLOW("glow_bait", 0, new double[] {0.8, 0.8, 0.8, 0.8, 0.8, 0.8}, 0, 1, 0.8, 1),
-    HEARTY("hearty_bait", 0, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 0.5}, 0, 1.25, 1, 1.12),
-    // lures
-    SPINNER("spinner", 40, new double[] {0.2, 1.2, 1.2, 0.6, 0.2, 0.3}, 0.1, 1, 1, 1),
-    SPOON("spoon", 50, new double[] {0, 1.2, 0.8, 1.2, 0.3, 0.3}, 0.2, 1, 1, 1),
-    WOBBLER("wobbler", 40, new double[] {0, 1.5, 0.6, 1.0, 0, 0}, 0.5, 1, 1, 1),
-    SOFT_LURE("soft_lure", 20, new double[] {0, 1.3, 0.3, 1.0, 0.6, 0}, 0.3, 1, 1, 1),
-    POPPER("popper", 40, new double[] {0, 0.6, 0.2, 1.4, 0, 0}, 0.3, 1, 1, 1),
-    JIG("jig", 45, new double[] {0, 0.8, 0.3, 1.0, 1.2, 0}, 0.2, 1, 1, 1),
-    STREAMER("streamer", 30, new double[] {0, 0.7, 1.3, 0.6, 0, 0}, 0.2, 1, 1, 1),
-    DRY_FLY("dry_fly", 25, new double[] {0.3, 0, 1.6, 0, 0, 0}, 0, 1, 1, 1),
-    NYMPH("nymph", 25, new double[] {0.5, 0, 1.4, 0, 0.2, 0}, 0, 1, 1, 1),
     // boss baits: on their own a strong bait, in the right place the call of a boss
     ANCIENT("ancient_bait", 0, new double[] {0, 1.4, 0, 0, 0, 0}, 0.8, 1, 1, 1),
     REED_KING("reed_king_lure", 60, new double[] {0, 1.6, 0.4, 0, 0, 0}, 0.8, 1, 1, 1),
@@ -73,59 +58,12 @@ public enum BaitType {
         };
     }
 
-    /** How keen this species is on this bait; below 0.5 it ignores the bait. Favourites get a bonus. */
-    public double appeal(FishSpecies species) {
-        double value = appeal[species.diet().ordinal()];
-        boolean favourite = switch (this) {
-            case SOFT_LURE -> species == FishSpecies.ZANDER;
-            case BOILIE, CORN -> species == FishSpecies.CARP || species == FishSpecies.CRUCIAN_CARP;
-            case BAITFISH, FISH_STRIP -> species == FishSpecies.CATFISH || species == FishSpecies.PIKE;
-            case SPINNER -> species == FishSpecies.PERCH || species == FishSpecies.ASP;
-            case BREAD -> species == FishSpecies.CHUB || species == FishSpecies.RUDD;
-            case WORM -> species == FishSpecies.EEL || species == FishSpecies.TENCH;
-            case DRY_FLY, NYMPH -> species == FishSpecies.GRAYLING || species == FishSpecies.RIVER_TROUT;
-            case POPPER -> species == FishSpecies.SEA_BASS || species == FishSpecies.BARRACUDA;
-            case JIG -> species == FishSpecies.ATLANTIC_COD || species == FishSpecies.SAITHE;
-            default -> false;
-        };
-        return favourite ? value * 1.4 : value;
-    }
+    /** How keen this species is on this bait; below 0.5 it ignores the bait. */
+    public double appeal(FishSpecies species) { return appeal[species.diet().ordinal()]; }
 
     /** Without bait the hook only now and then catches something. */
     public static final double BARE_HOOK = 0.4;
 
     public String translationKey() { return "item.atzen." + id; }
 
-    /** Weight in grams: what the rod has to cast. */
-    public double grams() {
-        return switch (this) {
-            case WORM -> 3;
-            case MAGGOT -> 1;
-            case CORN -> 2;
-            case BREAD -> 2;
-            case BOILIE -> 15;
-            case BAITFISH -> 40;
-            case FISH_STRIP -> 20;
-            case LARVA -> 1;
-            case SHRIMP -> 8;
-            case GLOW -> 5;
-            case HEARTY -> 10;
-            case SPINNER -> 8;
-            case SPOON -> 15;
-            case WOBBLER -> 18;
-            case SOFT_LURE -> 20;
-            case POPPER -> 25;
-            case JIG -> 30;
-            case STREAMER -> 4;
-            case DRY_FLY -> 1;
-            case NYMPH -> 3;
-            case ANCIENT -> 60;
-            case REED_KING -> 25;
-            case CURRENT -> 50;
-            case DEEP_LIGHT -> 30;
-        };
-    }
-
-    /** Flies are cast with the fly line, not by their own weight. */
-    public boolean fly() { return this == STREAMER || this == DRY_FLY || this == NYMPH; }
 }

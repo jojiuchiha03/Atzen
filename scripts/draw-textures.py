@@ -417,12 +417,13 @@ def draw_fish(px, ox, oy, scale=1.0, angle=0.0, name="carp", seed=1):
     polygon(px, pts, fins[3])
     # eye
     ex, ey = at(0.11 if not spec.get("snout") else 0.13, -H * 0.12)
-    r = max(1.6, H * 0.12)
+    # a realistic fish eye: small, a golden iris ring around a large dark pupil
+    r = max(1.4, H * 0.085)
     for y in range(int(ey - r) - 1, int(ey + r) + 2):
         for x in range(int(ex - r) - 1, int(ex + r) + 2):
             d = math.hypot(x + 0.5 - ex, y + 0.5 - ey)
             if d <= r:
-                put(px, x, y, (235, 226, 196, 255) if d > r * 0.55 else (20, 18, 24, 255))
+                put(px, x, y, (196, 170, 96, 255) if d > r * 0.62 else (14, 12, 18, 255))
     put(px, ex - r * 0.35, ey - r * 0.35, (255, 255, 255, 255))
     # mouth
     mx, my = at(0.01, H * 0.1)
@@ -558,27 +559,32 @@ def bucket(name):
 # ---------------------------------------------------------------- rods
 
 RODS = {
-    "river_rod": dict(shaft="#9a6a35", wrap="#2f9c8f", grip="#5b3a1e", reel="#c9783a", tip="#e8d6a8"),
-    "iron_rod":  dict(shaft="#4a4f57", wrap="#b8bec6", grip="#a3322c", reel="#c7ccd2", tip="#e2e6ea"),
-    "tide_rod":  dict(shaft="#234a9a", wrap="#e3b53c", grip="#6b3aa0", reel="#e3b53c", tip="#5ff2f0", crystal=True),
     "carbon_rod": dict(shaft="#26282c", wrap="#d8302c", grip="#3a3c42", reel="#b8bec6", tip="#e8e8ea", weave=True),
-    "bamboo_rod": dict(shaft="#c8b060", wrap="#6a8a3a", grip="#8a6a3a", reel="#9a7a4a", tip="#e8dca0"),
-    "spinning_rod": dict(shaft="#3a4a5a", wrap="#e0e0e0", grip="#c89a60", reel="#b8bec6", tip="#f0f0f0"),
-    "carp_rod": dict(shaft="#2a3a2a", wrap="#c8a040", grip="#202020", reel="#3a3a3a", tip="#e8e0c0"),
-    "fly_rod": dict(shaft="#7a4a2a", wrap="#e0c060", grip="#c89a60", reel="#5a7a4a", tip="#f0e8d0"),
-    "big_game_rod": dict(shaft="#d8d0c0", wrap="#c83a2a", grip="#1a1a1a", reel="#d0a83a", tip="#ffffff"),
-    "netherite_rod": dict(shaft="#3a3436", wrap="#e8682a", grip="#2a2224", reel="#6a5e60", tip="#ffb070"),
+    "bamboo_rod": dict(shaft="#c8b060", wrap="#6a8a3a", grip="#8a6a3a", reel="#9a7a4a", tip="#e8dca0", nodes=True,
+                       cork="#a8844e"),
+    "netherite_rod": dict(shaft="#3a3436", wrap="#e8682a", grip="#2a2224", reel="#6a5e60", tip="#ffb070", ember=True,
+                          solid_grip=True),
 }
 
 
 def rod(name):
+    """A rod as it is held: a cork grip and reel seat at the butt, a blank that tapers to the tip, thread-wrapped
+    guides along it, the reel hanging below the seat, and the line running from the reel through the guides to a
+    float and hook."""
     spec = RODS[name]
     px = canvas()
     shaft, wrap, grip, reel, tip = (ramp(spec[k]) for k in ("shaft", "wrap", "grip", "reel", "tip"))
-    x0, y0, x1, y1 = 7, 58, 54, 8
+    cork = ramp(spec.get("cork", "#c8a070"))
+    seat = ramp("#9aa2ac")
+    x0, y0, x1, y1 = 6, 59, 56, 7
     length = math.hypot(x1 - x0, y1 - y0)
     dx, dy = (x1 - x0) / length, (y1 - y0) / length
     nx, ny = -dy, dx
+    rnd = random.Random(hash(name) & 0xFFFF)
+
+    def at(t, off=0.0):
+        return x0 + dx * length * t + nx * off, y0 + dy * length * t + ny * off
+
     for y in range(N):
         for x in range(N):
             px_, py_ = x + 0.5 - x0, y + 0.5 - y0
@@ -587,96 +593,121 @@ def rod(name):
             if not (0 <= along <= length):
                 continue
             t = along / length
-            width = 4.6 - 2.8 * t
-            if t < 0.28:
-                width = 5.6
+            if t < 0.2:
+                width = 5.0                       # rear grip
+            elif t < 0.29:
+                width = 3.8                       # reel seat
+            elif t < 0.36:
+                width = 4.2                       # fore grip
+            else:
+                width = 3.0 - 2.0 * (t - 0.36) / 0.64
             if abs(across) > width / 2:
                 continue
             k = across / (width / 2)
             light = lit(k * 0.9, -k * 0.3)
-            if t < 0.28:
-                c = shade(grip, light)
-                if int(along) % 4 == 0:
-                    c = grip[1]
-            elif 0.42 < t < 0.45 or 0.62 < t < 0.645 or 0.8 < t < 0.82:
-                c = shade(wrap, light + 0.1)
-            elif t > 0.93:
+            if t < 0.2 or 0.29 <= t < 0.36:
+                c = shade(grip if spec.get("solid_grip") else cork, light)
+                if not spec.get("solid_grip") and rnd.random() < 0.18:
+                    c = cork[1]
+            elif t < 0.29:
+                c = shade(seat, light + 0.15)
+                if int(along) % 3 == 0:
+                    c = seat[1]
+            elif t > 0.95:
                 c = shade(tip, light + 0.2)
             else:
                 c = shade(shaft, light)
-                # carbon weave: a fine diagonal checker
                 if spec.get("weave") and (int(along) + int(across * 2)) % 3 == 0:
                     c = shaft[min(4, shaft.index(c) + 1)] if c in shaft else c
+                if spec.get("nodes") and int(along) % 9 == 0:
+                    c = shaft[1]                  # bamboo knots
+                if spec.get("ember") and rnd.random() < 0.05:
+                    c = ramp("#ff8a3a")[3]
             px[y][x] = c
-    # butt cap
-    disc(px, x0 + 1, y0 - 1, 3.2, wrap)
-    # reel
-    rx, ry = x0 + dx * 18 + nx * 6.5, y0 + dy * 18 + ny * 6.5
-    line(px, x0 + dx * 18, y0 + dy * 18, rx, ry, reel[1], 2)
-    disc(px, rx, ry, 5.2, reel, ring=0.55)
-    disc(px, rx, ry, 2.0, reel)
-    line(px, rx, ry, rx + 5, ry + 3, reel[0], 1.5)
-    disc(px, rx + 5.5, ry + 3.3, 1.4, grip)
-    # line from the tip, hook at the end
-    lx, ly = x1 + 1, y1 + 1
+    # butt cap and winding checks at the ends of the grips
+    bx, by = at(0.0)
+    disc(px, bx + dx, by + dy, 2.8, wrap)
+    for t in (0.2, 0.36):
+        cx, cy = at(t)
+        line(px, cx - nx * 2.2, cy - ny * 2.2, cx + nx * 2.2, cy + ny * 2.2, wrap[2], 1.2)
+    # the reel hangs under the seat
+    sx, sy = at(0.245)
+    rx, ry = at(0.245, 7.5)
+    line(px, sx, sy, rx, ry, reel[1], 1.6)
+    disc(px, rx, ry, 4.8, reel, ring=0.5)
+    disc(px, rx, ry, 3.0, ramp("#e8e2d0"))          # line wound on the spool
+    disc(px, rx, ry, 1.2, reel)
+    line(px, rx, ry, rx + dx * 5 + nx * 2, ry + dy * 5 + ny * 2, reel[0], 1.3)
+    put(px, rx + dx * 5.5 + nx * 2, ry + dy * 5.5 + ny * 2, grip[3])
+    # guides: small rings standing off the blank, smaller towards the tip
     line_colour = (236, 240, 246, 255)
-    line(px, lx, ly, lx + 4, ly + 30, line_colour)
-    hx, hy = lx + 4, ly + 30
+    points = [(rx + nx * -1.5, ry + ny * -1.5)]
+    for t, size in ((0.45, 2.2), (0.58, 1.9), (0.7, 1.6), (0.81, 1.4), (0.9, 1.2)):
+        gx, gy = at(t, 2.4)
+        cx, cy = at(t)
+        line(px, cx, cy, gx, gy, wrap[1], 1.0)
+        put(px, cx, cy, wrap[3])
+        for a in range(0, 360, 30):
+            r = math.radians(a)
+            put(px, gx + size * 0.6 * math.cos(r), gy + size * 0.6 * math.sin(r), seat[3])
+        points.append((gx, gy))
+    tx, ty = at(1.0)
+    points.append((tx, ty))
+    for (ax, ay), (bx2, by2) in zip(points, points[1:]):
+        line(px, ax, ay, bx2, by2, line_colour, 0.6)
+    # the line hangs from the tip to a red and white float, the hook below it
+    fx, fy = tx + 2, ty + 18
+    line(px, tx, ty, fx, fy - 3, line_colour, 0.6)
+    disc(px, fx, fy - 1.5, 2.2, ramp("#d8302c"))
+    disc(px, fx, fy + 1.5, 2.2, ramp("#f0f0ec"))
+    line(px, fx, fy - 4.5, fx, fy - 3.5, ramp("#2a2a2a")[2], 0.8)
+    line(px, fx, fy + 3.5, fx, fy + 11, line_colour, 0.6)
     hook = ramp("#b9c0c8")
-    for a in range(0, 200, 10):
+    hx, hy = fx, fy + 11
+    for a in range(0, 200, 12):
         r = math.radians(a)
-        put(px, hx - 2.2 + 2.2 * math.cos(r), hy + 2.2 * math.sin(r) + 1, hook[1])
-    put(px, hx - 4.4, hy, hook[3])
-    if spec.get("crystal"):
-        glow = ramp("#5ff2f0")
-        polygon(px, [(x1 - 3, y1 + 3), (x1 + 2, y1 - 6), (x1 + 6, y1 - 1), (x1 + 2, y1 + 5)],
-                lambda x, y: glow[4] if (x + y) % 4 == 0 else glow[3])
+        put(px, hx - 1.8 + 1.8 * math.cos(r), hy + 1.8 * math.sin(r) + 1, hook[1])
+    put(px, hx - 3.6, hy, hook[3])
     outline(px)
-    if spec.get("crystal"):
-        for sx, sy in ((x1 + 8, y1 - 4), (x1 - 6, y1 - 2), (x1 + 4, y1 + 9)):
-            put(px, sx, sy, (190, 255, 250, 255))
-            put(px, sx + 1, sy, (120, 230, 240, 255))
-            put(px, sx - 1, sy, (120, 230, 240, 255))
-            put(px, sx, sy + 1, (120, 230, 240, 255))
-            put(px, sx, sy - 1, (120, 230, 240, 255))
     return px
 
 
 # ---------------------------------------------------------------- reels, lines, carbon fibre
 
-REELS = {"copper_reel": "#c9783a", "iron_reel": "#b8bec6", "diamond_reel": "#4fd8d0", "baitcaster_reel": "#c83a3a",
-         "multiplier_reel": "#d0a83a", "fly_reel": "#6a8a5a", "echo_reel": "#1e5a6a", "tide_reel": "#3ab8a8",
-         "netherite_reel": "#4a4446", "ancient_reel": "#5a4a2a", "reed_reel": "#5a8a2a", "current_reel": "#2a3a5a",
-         "deep_reel": "#0e3a44"}
-LINES = {"nylon_line": "#e8eef2", "braided_line": "#5fa04a", "carbon_line": "#3a3d44"}
+REELS = {"copper_reel": "#c9783a", "iron_reel": "#b8bec6", "diamond_reel": "#4fd8d0"}
+LINES = {"fishing_line": "#e8eef2"}
 
 
 def reel(name):
-    """A reel seen from the side. Spinning reels: spool, foot, crank. Baitcaster: low and wide. Multiplier: a big
-    drum between two plates. Fly reel: a flat disc with holes. Boss reels get their trophy's glint."""
-    if name == "baitcaster_reel":
-        return baitcaster(name)
-    if name in ("multiplier_reel", "current_reel", "ancient_reel"):
-        return multiplier(name)
-    if name == "fly_reel":
-        return fly_reel(name)
+    """A spinning reel seen from the side, as it hangs under a rod: the foot on top, the stem, the rounded gearbox,
+    the spool with wound line and the bail arm in front, the crank with its knob behind."""
     px = canvas()
     metal = ramp(REELS[name])
-    dark = ramp("#3a3c42")
-    polygon(px, [(26, 8), (38, 8), (35, 22), (29, 22)], lambda x, y: shade(metal, 0.8 - (x - 26) / 30))   # foot
-    disc(px, 32, 36, 19, metal, ring=0.62)
-    disc(px, 32, 36, 11, ramp("#e8e2d0"))                                                                     # wound line
-    for k in range(4):
-        a = k * math.pi / 2 + 0.4
-        line(px, 32 + 12 * math.cos(a), 36 + 12 * math.sin(a), 32 + 17 * math.cos(a), 36 + 17 * math.sin(a), metal[1], 1.5)
-    disc(px, 32, 36, 4.5, metal)
-    line(px, 32, 36, 52, 50, dark[2], 3)                                                                      # crank arm
-    disc(px, 53, 51, 4.2, dark)
+    dark = ramp("#2e3036")
+    wound = ramp("#e8e2d0")
+    # foot and stem
+    polygon(px, [(20, 6), (46, 6), (44, 10), (22, 10)], lambda x, y: shade(metal, 0.9 - (x - 20) / 60))
+    polygon(px, [(31, 10), (37, 10), (36, 22), (32, 22)], lambda x, y: shade(metal, 0.7 - (x - 31) / 20))
+    # gearbox body
+    disc(px, 36, 34, 12, metal)
+    polygon(px, [(36, 22), (48, 30), (46, 44), (36, 46)], lambda x, y: shade(metal, 0.55 - (x - 36) / 40))
+    # spool: a short cylinder on the front, line wound on it, a rim at each end
+    polygon(px, [(10, 26), (24, 26), (24, 42), (10, 42)], lambda x, y: shade(wound, 0.95 - abs(y - 34) / 14))
+    for y in range(27, 42, 2):
+        line(px, 11, y, 23, y, wound[2], 0.5)
+    polygon(px, [(8, 24), (11, 24), (11, 44), (8, 44)], lambda x, y: shade(metal, 0.85))
+    polygon(px, [(23, 23), (26, 23), (26, 45), (23, 45)], lambda x, y: shade(metal, 0.6))
+    # the bail arm over the spool
+    line(px, 25, 23, 14, 18, dark[3], 1.4)
+    line(px, 14, 18, 9, 24, dark[3], 1.4)
+    # crank arm and knob on the far side
+    disc(px, 40, 34, 3, dark)
+    line(px, 40, 34, 52, 48, dark[2], 2.4)
+    disc(px, 53, 50, 3.6, ramp("#c8a070"))
     if name == "diamond_reel":
-        for sx, sy in ((14, 18), (50, 22), (18, 54)):
+        for sx, sy in ((14, 12), (52, 20), (20, 54)):
             put(px, sx, sy, (210, 255, 250, 255))
     outline(px)
-    glints(px, name)
     return px
 
 
@@ -1008,21 +1039,12 @@ def trophy_item(name):
 
 
 BAITS = {
-    "maggot_bait": maggot, "corn_bait": lambda: blob_bait("#f0c83a", 12, 4, (4, 5.5)), "bread_bait": bread,
-    "boilie_bait": lambda: blob_bait("#c87a3a", 4, 7, (8, 10), (20, 40)),
-    "baitfish_bait": lambda: fish_bait("#5a7a8a", "#e8eef2"), "fish_strip_bait": lambda: fish_bait("#5a6a7a", "#f0d8d0", True),
-    "larva_bait": larva, "shrimp_bait": shrimp,
-    "spinner": lambda: lure("spinner", "#d8d8d8", "#e04030"), "spoon": lambda: lure("spoon", "#e8c040", "#d84030"),
-    "wobbler": lambda: lure("wobbler", "#3a8a3a", "#f0e8a0"), "soft_lure": lambda: lure("soft_lure", "#8ad040", "#d8c040"),
-    "popper": lambda: lure("popper", "#f0f0e8", "#e04040"), "jig": lambda: lure("jig", "#e8a030", "#c0c4cc"),
-    "streamer": lambda: lure("streamer", "#4a8a3a", "#e8e0a0"), "dry_fly": lambda: lure("dry_fly", "#a87a4a", "#e8e0d0"),
-    "nymph": lambda: lure("nymph", "#6a5a3a", "#d8b040"),
+    "baitfish_bait": lambda: fish_bait("#5a7a8a", "#e8eef2"),
     "reed_king_lure": lambda: lure("wobbler", "#2a5a1a", "#e8c040"),
     "ancient_bait": lambda: boss_bait("ancient_bait"), "current_bait": lambda: boss_bait("current_bait"),
     "deep_light_bait": lambda: boss_bait("deep_light_bait"),
 }
-SPOOLS = {"shallow_spool": "#9aa4ae", "deep_spool": "#5a6470", "light_spool": "#c9783a", "reinforced_spool": "#3a3c42",
-          "fast_gear_spool": "#c83a3a", "power_gear_spool": "#d0a83a"}
+SPOOLS = {}
 
 
 def spare_spool(name):
@@ -1058,8 +1080,7 @@ def leader(name):
     return px
 
 
-HOOKS = {"small_single_hook": 0.6, "single_hook": 0.8, "large_single_hook": 1.0, "treble_hook": 0.75, "barbless_hook": 0.8,
-         "carp_hook": 0.85, "offset_hook": 0.85, "circle_hook": 1.0}
+HOOKS = {}
 
 
 def hook_item(name):
@@ -1105,14 +1126,7 @@ TROPHIES = ["ancient_barbel", "reed_crown", "sturgeon_plate", "warden_heart"]
 
 # ---------------------------------------------------------------- tomes
 
-TOMES = {
-    "steady_line_tome": dict(cover="#2f7a4a", emblem="knot"),
-    "reel_power_tome":  dict(cover="#a8322a", emblem="spiral"),
-    "calm_waters_tome": dict(cover="#2f55a8", emblem="wave"),
-    "calm_mind_tome": dict(cover="#6a3a8a", emblem="wave"),
-    "precision_cast_tome": dict(cover="#c88a2a", emblem="target"),
-    "fight_control_tome": dict(cover="#3a3d44", emblem="spiral"),
-}
+TOMES = {}
 
 
 def tome(name):
@@ -1191,7 +1205,10 @@ def skin(name):
     def flank(u, v):
         """u 0..1 along the fish, v 0 (back) .. 1 (belly)."""
         base = back if v < 0.3 else side if v < 0.72 else belly
-        c = base[2 if v < 0.15 or v > 0.9 else 3]
+        c = base[1 if v < 0.08 else 2 if v < 0.2 or v > 0.9 else 3]
+        # the lateral line: a thin darker stripe along the flank
+        if 0.44 < v < 0.5 and not spec.get("flat") and int(u * 40) % 2 == 0:
+            c = side[1]
         pat = spec["pattern"]
         if pat == "bars" and v < 0.7 and int(u * 10) % 2 == 0:
             c = back[1]
@@ -1244,7 +1261,23 @@ def skin(name):
                     px[y][x] = c
 
     total = nose + 3 + length
-    box(0, 0, w, h, length, ((nose + 3) / total, 1))
+    # The body: five segments, laid out and shaped exactly as in AtzenFishModel (profile, texture).
+    flat = w > h * 2
+    if flat:
+        fw, fh = (0.8, 1, 1, 0.85, 0.55), (1, 1, 1, 0.9, 0.8)
+    elif length > h * 5:
+        fw = fh = (1, 1, 0.95, 0.85, 0.7)
+    else:
+        fw, fh = (1, 0.95, 0.85, 0.7, 0.5), (1, 1, 0.88, 0.7, 0.5)
+    depth = length / 5
+    column = math.ceil(2 * depth + 2 * w) + 1
+    start = (nose + 3) / total
+    for k in range(5):
+        u0 = (k % 3) * column
+        v0 = 0 if k < 3 else 10
+        a0 = start + (1 - start) * k / 5
+        a1 = start + (1 - start) * (k + 1) / 5
+        box(u0, v0, w * fw[k], h * fh[k], depth, (a0, a1))
     box(0, 20, w, h, 3, (nose / total, (nose + 3) / total))
     box(0, 32, w, h * 0.6, nose, (0, nose / total))
     # gill line on the head sides
@@ -1281,15 +1314,12 @@ def main():
     save(os.path.join(item, "carbon_fiber.png"), carbon_fiber())
     save(os.path.join(item, "worm_bait.png"), worm())
     save(os.path.join(item, "glow_bait.png"), glow())
-    save(os.path.join(item, "hearty_bait.png"), hearty())
     for name, draw in BAITS.items():
         save(os.path.join(item, name + ".png"), draw())
     for name in TROPHIES:
         save(os.path.join(item, name + ".png"), trophy_item(name))
     for name in SPOOLS:
         save(os.path.join(item, name + ".png"), spare_spool(name))
-    for name in ("fluoro_leader", "steel_leader"):
-        save(os.path.join(item, name + ".png"), leader(name))
     for name in HOOKS:
         save(os.path.join(item, name + ".png"), hook_item(name))
     extras()
@@ -1435,13 +1465,7 @@ def fishy_note():
     return px
 
 
-MODULES = {
-    "fine_drag": ("#4fd8d0", "dial"), "reinforced_blank": ("#8a5a2a", "bar"), "bite_sensor": ("#e84a4a", "bell"),
-    "light_bearing": ("#e8d070", "ring"), "ceramic_guides": ("#f0f0f0", "ring"), "improved_bearings": ("#b8bec6", "balls"),
-    "reinforced_hook_mount": ("#6a6e78", "hook"), "leader_system": ("#5fa04a", "wave"), "float": ("#ff8a2a", "float"),
-    "sonar": ("#3a7ad8", "waves"), "line_counter": ("#c8c8a0", "dial"), "boss_rig": ("#c9a03a", "crown"),
-    "feeder": ("#7a5a3a", "cage"),
-}
+MODULES = {}
 
 
 def module_item(name):
@@ -1579,7 +1603,6 @@ def extras():
     save(os.path.join(item, "groundbait.png"), groundbait())
     save(os.path.join(item, "echo_sounder.png"), echo_sounder())
     save(os.path.join(item, "bait_box.png"), bait_box())
-    save(os.path.join(item, "angler_tool.png"), angler_tool())
     save(os.path.join(item, "fish_lexicon.png"), lexicon())
     save(os.path.join(item, "fishing_crate.png"), fishing_crate())
     save(os.path.join(item, "fishy_note.png"), fishy_note())

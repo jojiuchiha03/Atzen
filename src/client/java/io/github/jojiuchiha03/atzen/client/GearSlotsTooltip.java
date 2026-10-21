@@ -2,6 +2,7 @@ package io.github.jojiuchiha03.atzen.client;
 
 import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.item.GearSlot;
+import io.github.jojiuchiha03.atzen.item.RodMods;
 import java.util.Locale;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -10,74 +11,52 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A rod's tooltip: six inventory-style slots (reel, spool, line, leader, hook, bait) with their contents, the rod's
- * attributes and what the whole set does.
+ * A rod's tooltip: three slots side by side (reel, line, bait) with a label under each, then two short lines on what
+ * the rod holds and how fast it reels, and the workshop upgrades as stars.
  */
 final class GearSlotsTooltip implements ClientTooltipComponent {
-    private static final int SLOT = 18;
-    private static final int ROW = 20;
+    private static final int SLOT = 20;
+    private static final int COLUMN = 54;
     private final AtzenRodItem.GearTooltip data;
 
     GearSlotsTooltip(AtzenRodItem.GearTooltip data) { this.data = data; }
 
     private ItemStack stack(GearSlot slot) { return data.slots()[slot.ordinal()]; }
 
-    private Component label(GearSlot slot) {
-        ItemStack stack = stack(slot);
-        Component content = stack.isEmpty() ? Component.translatable("tooltip.atzen.gear.empty")
-                : slot == GearSlot.BAIT && stack.getCount() > 1 ? Component.translatable("tooltip.atzen.gear.count", stack.getHoverName(), stack.getCount())
-                : stack.getHoverName();
-        return Component.translatable(slot.translationKey(), content);
-    }
-
     private static String number(double value) {
         return String.format(Locale.GERMAN, value >= 10 ? "%.0f" : "%.1f", value);
     }
 
-    private Component[] summary() {
+    private Component[] lines() {
         var rig = data.rig();
-        var rod = data.rod();
-        Component modules = Component.empty();
-        for (int i = 0; i < data.modules().size(); i++) {
-            if (i > 0) modules = modules.copy().append(", ");
-            modules = modules.copy().append(Component.translatable(data.modules().get(i).translationKey()));
-        }
-        Component extras = Component.translatable("tooltip.atzen.gear.modules",
-                data.modules().isEmpty() ? Component.translatable("tooltip.atzen.gear.empty") : modules, data.upgrades());
+        String stars = "★".repeat(data.upgrades()) + "☆".repeat(RodMods.MAX_UPGRADES - data.upgrades());
         return new Component[] {
-                Component.translatable("tooltip.atzen.gear.rod", number(rod.load()), number(rod.power()),
-                        Math.round(rod.flex() * 100), Math.round(rod.sensitivity() * 100), number(rod.castMin()),
-                        number(rod.castMax()), number(rod.fishMin()), number(rod.fishMax()), number(data.cast())),
-                Component.translatable("tooltip.atzen.gear.stats", number(rig.lineStrength()), number(rig.capacity()),
-                        number(rig.reelSpeed() * 20), number(rig.reelForce())),
-                Component.translatable("tooltip.atzen.gear.ability", Component.translatable(rig.ability().translationKey())),
-                extras};
+                Component.translatable("tooltip.atzen.gear.holds", number(Math.min(rig.lineStrength(), rig.rodLoad()))),
+                Component.translatable("tooltip.atzen.gear.speed", number(rig.reelSpeed() * 20), number(rig.reelForce()),
+                        number(rig.capacity())),
+                Component.translatable("tooltip.atzen.gear.upgrades", stars)};
     }
 
-    @Override public int getHeight(Font font) { return GearSlot.values().length * ROW + summary().length * 10 + 2; }
+    @Override public int getHeight(Font font) { return SLOT + 12 + lines().length * 10 + 4; }
 
     @Override
     public int getWidth(Font font) {
-        int width = 0;
-        for (Component line : summary()) width = Math.max(width, font.width(line));
-        for (GearSlot slot : GearSlot.values()) width = Math.max(width, SLOT + 6 + font.width(label(slot)));
+        int width = GearSlot.values().length * COLUMN;
+        for (Component line : lines()) width = Math.max(width, font.width(line));
         return width;
     }
 
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         for (GearSlot slot : GearSlot.values()) {
-            int top = y + slot.ordinal() * ROW + 1;
-            // Vanilla slot look: dark top-left edge, light bottom-right edge, grey inside.
-            graphics.fill(x, top, x + SLOT, top + SLOT, 0xFF8B8B8B);
-            graphics.fill(x, top, x + SLOT - 1, top + 1, 0xFF373737);
-            graphics.fill(x, top, x + 1, top + SLOT - 1, 0xFF373737);
-            graphics.fill(x + 1, top + SLOT - 1, x + SLOT, top + SLOT, 0xFFFFFFFF);
-            graphics.fill(x + SLOT - 1, top + 1, x + SLOT, top + SLOT, 0xFFFFFFFF);
+            int left = x + slot.ordinal() * COLUMN + (COLUMN - SLOT) / 2;
+            int top = y + 2;
             ItemStack stack = stack(slot);
+            graphics.fill(left, top, left + SLOT, top + SLOT, stack.isEmpty() ? 0xFF2A2F36 : 0xFF3A4652);
+            graphics.outline(left, top, SLOT, SLOT, stack.isEmpty() ? 0xFF4A525C : 0xFF7FD8C8);
             if (!stack.isEmpty()) {
-                graphics.item(stack, x + 1, top + 1);
-                graphics.itemDecorations(font, stack, x + 1, top + 1);
+                graphics.item(stack, left + 2, top + 2);
+                graphics.itemDecorations(font, stack, left + 2, top + 2);
             }
         }
     }
@@ -85,13 +64,12 @@ final class GearSlotsTooltip implements ClientTooltipComponent {
     @Override
     public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
         for (GearSlot slot : GearSlot.values()) {
-            boolean empty = stack(slot).isEmpty();
-            graphics.text(font, label(slot), x + SLOT + 5, y + slot.ordinal() * ROW + 6, empty ? 0xFF9A9A9A : 0xFFFFFFFF, true);
+            Component label = Component.translatable(slot.translationKey());
+            int centre = x + slot.ordinal() * COLUMN + COLUMN / 2;
+            graphics.text(font, label, centre - font.width(label) / 2, y + SLOT + 4, stack(slot).isEmpty() ? 0xFF7A828C : 0xFFD8E0E6, false);
         }
-        int[] colours = {0xFFB8C4CC, 0xFF7FD8C8, 0xFFE8C860, 0xFFC8A0F0};
-        Component[] lines = summary();
-        for (int i = 0; i < lines.length; i++) {
-            graphics.text(font, lines[i], x, y + GearSlot.values().length * ROW + 2 + i * 10, colours[i], true);
-        }
+        int[] colours = {0xFF7FD8C8, 0xFFB8C4CC, 0xFFFFC94A};
+        Component[] lines = lines();
+        for (int i = 0; i < lines.length; i++) graphics.text(font, lines[i], x, y + SLOT + 16 + i * 10, colours[i], true);
     }
 }

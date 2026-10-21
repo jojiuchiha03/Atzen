@@ -36,7 +36,7 @@ public final class ModItems {
         ResourceKey<CreativeModeTab> tabKey = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Atzen.id("atzen"));
         CreativeModeTab tab = FabricCreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.atzen"))
-                .icon(() -> new ItemStack(AtzenItems.TIDE_ROD))
+                .icon(() -> new ItemStack(AtzenItems.CARBON_ROD))
                 .build();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tabKey, tab);
         // Der Vanilla-Builder hält seine Ausgabe geschützt, daher über Fabrics Event.

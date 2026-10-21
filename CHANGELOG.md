@@ -2,6 +2,17 @@
 
 ## [0.15.0] - 2026-10-21
 
+### Vereinfacht
+- **Drill mit zwei Tasten:** R holt ein, F gibt Schnur. Die Bremse stellt sich selbst ein. Pumpen, Gegensteuern, Bremsstufen und die Taste zum Abbrechen sind weg (`/atzen cancel` bleibt). F tauscht im Drill nicht mehr die Hände.
+- **Weniger Auswahl:** drei Ruten (Bambus, Carbon, Netherit), drei Rollen (Kupfer, Eisen, Diamant), eine Angelschnur (20 kg), drei Köder (Regenwurm, Köderfisch, Leuchtköder) plus die vier Bossköder. Die Rute hat nur noch drei Plätze: Rolle, Schnur, Köder.
+- Entfernt: Spulen, Vorfächer, Haken, Module, Zauberbücher und die sechs Atzen-Verzauberungen, Bossrollen, Angelwerkzeug, Sonar, Durchbeißen und Rutenbruch. Bosstrophäen bleiben als Trophäen.
+- Kürzere Drills: Fische ermüden schneller, kleine Fische landet man schon mit R allein.
+
+### Ansichten
+- Keine automatischen Kamerafahrten mehr: Die Sicht bleibt die ganze Zeit deine eigene, kein Ruckeln oder Springen.
+- Neue Drill-Anzeige über der Hotbar: Fisch mit Symbol, Name und Entfernung, Spannungsleiste (grün bis zur Bremse), Kraft des Fisches und genau eine Anweisung mit Tastensymbol.
+- Neue Fangkarte, neuer Ruten-Tooltip (drei Plätze nebeneinander, Haltekraft, Einzug, Verstärkung als Sterne) und ein aufgeräumtes Fischlexikon mit Fortschrittsleiste.
+
 ### Neu (Richtung Tide)
 - Drei neue Gewässer abseits der Oberfläche: **Höhlenwasser** (unter y 50 ohne Himmel), **Lava** (Nether und Oberwelt) und **Wasser im End**, jedes mit eigenem Angelgebiet (Höhlensystem ab Stufe 4, Lavaseen ab 8, Endgewässer ab 12).
 - 14 neue Fischarten: Höhlensalmler, Grottenolm, Amethystbarsch, Tropfsteinaal, Leuchtkarpfen; Glutkarpfen, Magmaaal, Lohenhecht, Basaltwels, Obsidianstör; Chorusfisch, Enderaal, Leererochen, Shulker-Kugelfisch. Sie beißen nur an der Pose und spawnen nicht frei.

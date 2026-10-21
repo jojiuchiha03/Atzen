@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "atzen:fishing_line",
+    "count": 1
+  }
+}

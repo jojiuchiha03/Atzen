@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "atzen:wobbler",
+    "atzen:baitfish_bait",
     "minecraft:emerald",
     "minecraft:gold_ingot",
     "minecraft:feather"

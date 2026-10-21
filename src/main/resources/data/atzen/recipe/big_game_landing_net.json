@@ -4,7 +4,7 @@
   "ingredients": [
     "atzen:carp_landing_net",
     "minecraft:iron_block",
-    "atzen:braided_line",
+    "atzen:fishing_line",
     "minecraft:leather"
   ],
   "result": {

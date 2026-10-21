@@ -2,7 +2,6 @@ package io.github.jojiuchiha03.atzen.fish;
 
 import io.github.jojiuchiha03.atzen.battle.Fighter;
 import io.github.jojiuchiha03.atzen.battle.Rig;
-import io.github.jojiuchiha03.atzen.battle.ReelAbility;
 import io.github.jojiuchiha03.atzen.item.BaitType;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
@@ -48,13 +47,13 @@ class FishSpecimenTest {
         Random random = new Random(8);
         int carp = 0, predators = 0;
         for (int i = 0; i < 4000; i++) {
-            FishSpecies withCorn = FishSpecies.choose(Habitat.LAKE, random, s -> BaitType.CORN.appeal(s) < 0.5 ? 0 : BaitType.CORN.appeal(s));
-            assertEquals(FishSpecies.Diet.COARSE, withCorn.diet(), withCorn.name());
-            if (withCorn == FishSpecies.CARP || withCorn == FishSpecies.CRUCIAN_CARP) carp++;
+            FishSpecies withWorm = FishSpecies.choose(Habitat.LAKE, random, s -> BaitType.WORM.appeal(s) < 0.5 ? 0 : BaitType.WORM.appeal(s));
+            assertNotEquals(FishSpecies.Diet.PREDATOR, withWorm.diet(), withWorm.name());
+            if (withWorm == FishSpecies.CARP || withWorm == FishSpecies.CRUCIAN_CARP) carp++;
             FishSpecies withBaitfish = FishSpecies.choose(Habitat.LAKE, random, s -> BaitType.BAITFISH.appeal(s) < 0.5 ? 0 : BaitType.BAITFISH.appeal(s));
             if (withBaitfish.diet() == FishSpecies.Diet.PREDATOR) predators++;
         }
-        assertTrue(carp > 1200, "carp " + carp);
+        assertTrue(carp > 800, "carp " + carp);
         assertTrue(predators > 3000, "predators " + predators);
     }
 
@@ -77,9 +76,8 @@ class FishSpecimenTest {
     void malformedFishAndTackleCannotPoisonTheSimulation() {
         assertThrows(IllegalArgumentException.class, () -> new FishSpecimen(FishSpecies.PIKE, Double.NaN, 1));
         assertThrows(IllegalArgumentException.class, () -> new FishSpecimen(FishSpecies.PIKE, 100, -1));
-        assertThrows(IllegalArgumentException.class, () -> Rig.of(0, 0.1, 1, 1, 0.5, 5, 0.1, 1, 10, ReelAbility.NONE));
-        assertThrows(IllegalArgumentException.class,
-                () -> Rig.of(5, 0.1, 1, 1, 0.5, 5, Double.POSITIVE_INFINITY, 1, 10, ReelAbility.NONE));
+        assertThrows(IllegalArgumentException.class, () -> new Rig(0, 0.1, 0.5, 5, 0.1, 1, 10, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> new Rig(5, 0.1, 0.5, 5, Double.POSITIVE_INFINITY, 1, 10, 1, 1));
     }
 
     @Test

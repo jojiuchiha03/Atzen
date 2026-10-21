@@ -2,7 +2,6 @@ package io.github.jojiuchiha03.atzen.block;
 
 import com.mojang.serialization.MapCodec;
 import io.github.jojiuchiha03.atzen.item.AtzenItems;
-import io.github.jojiuchiha03.atzen.item.ModuleType;
 import io.github.jojiuchiha03.atzen.item.RodMods;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -23,8 +22,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Workshop (Anforderung 20): rod in the main hand, material in the other. Emeralds repair (a quarter of the
- * durability each), mother-of-pearl upgrades the blank (up to three times), a module is fitted (two at most).
- * Sneak-click with the rod takes the modules off again.
+ * durability each), mother-of-pearl upgrades the blank (up to three times).
  */
 public final class WorkshopBlock extends Block {
     public static final MapCodec<WorkshopBlock> CODEC = simpleCodec(WorkshopBlock::new);
@@ -39,11 +37,7 @@ public final class WorkshopBlock extends Block {
         if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.SUCCESS;
         ItemStack material = player.getOffhandItem();
         String message;
-        if (player.isShiftKeyDown()) {
-            var modules = RodMods.clear(rod);
-            modules.forEach(module -> player.getInventory().placeItemBackInInventory(new ItemStack(AtzenItems.item(module))));
-            message = modules.isEmpty() ? "workshop.atzen.no_modules" : "workshop.atzen.modules_removed";
-        } else if (material.is(Items.EMERALD)) {
+        if (material.is(Items.EMERALD)) {
             if (!rod.isDamaged()) message = "workshop.atzen.not_damaged";
             else {
                 rod.setDamageValue(Math.max(0, rod.getDamageValue() - Math.max(1, rod.getMaxDamage() / 4)));
@@ -56,17 +50,10 @@ public final class WorkshopBlock extends Block {
                 material.consume(1, player);
                 message = "workshop.atzen.upgraded";
             }
-        } else if (AtzenItems.module(material) != null) {
-            ModuleType module = AtzenItems.module(material);
-            if (!RodMods.add(rod, module)) message = "workshop.atzen.no_slot";
-            else {
-                material.consume(1, player);
-                message = "workshop.atzen.module_fitted";
-            }
         } else {
             message = "workshop.atzen.help";
         }
-        boolean worked = message.endsWith("repaired") || message.endsWith("upgraded") || message.endsWith("fitted") || message.endsWith("removed");
+        boolean worked = message.endsWith("repaired") || message.endsWith("upgraded");
         if (worked) level.playSound(null, pos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 0.8f, 1.0f);
         serverPlayer.sendSystemMessage(Component.translatable(message, RodMods.upgrades(rod), RodMods.MAX_UPGRADES)
                 .withStyle(worked ? ChatFormatting.GREEN : ChatFormatting.GRAY), !message.endsWith("help"));

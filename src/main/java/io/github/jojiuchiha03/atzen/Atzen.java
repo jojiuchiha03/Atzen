@@ -44,7 +44,6 @@ public final class Atzen implements ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(ReelPayload.TYPE,
                 (payload, context) -> BATTLES.input(context.player(), payload));
         ServerTickEvents.END_SERVER_TICK.register(BATTLES::tick);
-        ServerTickEvents.END_SERVER_TICK.register(BATTLES::sonar);
         ServerTickEvents.END_SERVER_TICK.register(server -> Progression.tick(server, false));
         ServerLifecycleEvents.SERVER_STARTED.register(Progression::load);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BATTLES.disconnect(handler.getPlayer()));

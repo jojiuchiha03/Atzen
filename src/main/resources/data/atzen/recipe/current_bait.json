@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "atzen:boilie_bait",
+    "atzen:worm_bait",
     "minecraft:prismarine_crystals",
     "minecraft:clay_ball",
     "minecraft:bone_meal"

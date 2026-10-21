@@ -22,28 +22,15 @@ import java.util.function.Function;
 public final class AtzenItems {
     /** Burnt from a coal block in the blast furnace; the material of the best rod and the best line. */
     public static final Item CARBON_FIBER = register("carbon_fiber", Item::new, new Item.Properties());
-    public static final Item RIVER_ROD = rod("river_rod", 128, 8, Items.COPPER_INGOT);
-    public static final Item IRON_ROD = rod("iron_rod", 384, 12, Items.IRON_INGOT);
-    public static final Item TIDE_ROD = rod("tide_rod", 512, 18, Items.PRISMARINE_SHARD);
+    public static final Item BAMBOO_ROD = rod("bamboo_rod", 128, 10, Items.BAMBOO);
     public static final Item CARBON_ROD = rod("carbon_rod", 1024, 22, CARBON_FIBER);
-    public static final Item BAMBOO_ROD = rod("bamboo_rod", 96, 10, Items.BAMBOO);
-    public static final Item SPINNING_ROD = rod("spinning_rod", 320, 14, Items.IRON_INGOT);
-    public static final Item CARP_ROD = rod("carp_rod", 480, 12, Items.IRON_INGOT);
-    public static final Item FLY_ROD = rod("fly_rod", 256, 16, Items.FEATHER);
-    public static final Item BIG_GAME_ROD = rod("big_game_rod", 1400, 10, Items.NETHERITE_SCRAP);
     /** Fishes in lava (see FishingHookMixin). */
     public static final Item NETHERITE_ROD = rod("netherite_rod", 2031, 15, Items.NETHERITE_INGOT);
     private static final Map<ReelType, Item> REEL_ITEMS = new EnumMap<>(ReelType.class);
     private static final Map<LineType, Item> LINE_ITEMS = new EnumMap<>(LineType.class);
     private static final Map<BaitType, Item> BAIT_ITEMS = new EnumMap<>(BaitType.class);
-    private static final Map<SpoolType, Item> SPOOL_ITEMS = new EnumMap<>(SpoolType.class);
-    private static final Map<LeaderType, Item> LEADER_ITEMS = new EnumMap<>(LeaderType.class);
-    private static final Map<HookType, Item> HOOK_ITEMS = new EnumMap<>(HookType.class);
     static {
-        for (SpoolType spool : SpoolType.values()) SPOOL_ITEMS.put(spool, gear(spool.id(), false));
-        for (LeaderType leader : LeaderType.values()) LEADER_ITEMS.put(leader, register(leader.id(), Item::new, new Item.Properties().stacksTo(16)));
-        for (HookType hook : HookType.values()) HOOK_ITEMS.put(hook, register(hook.id(), Item::new, new Item.Properties().stacksTo(16)));
-        for (ReelType reel : ReelType.values()) REEL_ITEMS.put(reel, gear(reel.id(), reel.ordinal() >= ReelType.ANCIENT.ordinal()));
+        for (ReelType reel : ReelType.values()) REEL_ITEMS.put(reel, gear(reel.id(), false));
         for (LineType line : LineType.values()) if (line.id() != null) LINE_ITEMS.put(line, gear(line.id(), false));
         for (BaitType bait : BaitType.values()) {
             Item.Properties properties = new Item.Properties();
@@ -55,23 +42,14 @@ public final class AtzenItems {
     public static final Item COPPER_REEL = REEL_ITEMS.get(ReelType.COPPER);
     public static final Item IRON_REEL = REEL_ITEMS.get(ReelType.IRON);
     public static final Item DIAMOND_REEL = REEL_ITEMS.get(ReelType.DIAMOND);
-    public static final Item NYLON_LINE = LINE_ITEMS.get(LineType.NYLON);
-    public static final Item BRAIDED_LINE = LINE_ITEMS.get(LineType.BRAIDED);
-    public static final Item CARBON_LINE = LINE_ITEMS.get(LineType.CARBON);
+    public static final Item FISHING_LINE = LINE_ITEMS.get(LineType.LINE);
     public static final Item WORM_BAIT = BAIT_ITEMS.get(BaitType.WORM);
     public static final Item GLOW_BAIT = BAIT_ITEMS.get(BaitType.GLOW);
-    public static final Item HEARTY_BAIT = BAIT_ITEMS.get(BaitType.HEARTY);
-    /** Boss trophies: the material of the boss reels. */
+    /** Boss trophies: proof of the catch, worth a lot at the fish market. */
     public static final Item ANCIENT_BARBEL = trophy("ancient_barbel");
     public static final Item REED_CROWN = trophy("reed_crown");
     public static final Item STURGEON_PLATE = trophy("sturgeon_plate");
     public static final Item WARDEN_HEART = trophy("warden_heart");
-    public static final Item STEADY_LINE_TOME = tome("steady_line", 3);
-    public static final Item REEL_POWER_TOME = tome("reel_power", 3);
-    public static final Item CALM_WATERS_TOME = tome("calm_waters", 2);
-    public static final Item CALM_MIND_TOME = tome("calm_mind", 2);
-    public static final Item PRECISION_CAST_TOME = tome("precision_cast", 3);
-    public static final Item FIGHT_CONTROL_TOME = tome("fight_control", 3);
     public static final Item SMALL_LANDING_NET = net(LandingNetItem.NetType.SMALL, 96);
     public static final Item CARP_LANDING_NET = net(LandingNetItem.NetType.CARP, 256);
     public static final Item BIG_GAME_LANDING_NET = net(LandingNetItem.NetType.BIG_GAME, 512);
@@ -80,53 +58,29 @@ public final class AtzenItems {
     public static final Item GROUNDBAIT = register("groundbait", FishingTools.Groundbait::new, new Item.Properties());
     public static final Item ECHO_SOUNDER = register("echo_sounder", FishingTools.EchoSounder::new, new Item.Properties().stacksTo(1));
     public static final Item BAIT_BOX = register("bait_box", FishingTools.BaitBox::new, new Item.Properties().stacksTo(1));
-    public static final Item ANGLER_TOOL = register("angler_tool", FishingTools.AnglerTool::new, new Item.Properties().durability(250));
     public static final Item FISH_LEXICON = register("fish_lexicon", FishingTools.Lexicon::new, new Item.Properties().stacksTo(1));
     public static final Item FISHING_CRATE = register("fishing_crate", FishingCrate::new, new Item.Properties().stacksTo(16));
     public static final Item FISHY_NOTE = register("fishy_note", FishingCrate.FishyNote::new, new Item.Properties().stacksTo(1));
-    private static final Map<ModuleType, Item> MODULE_ITEMS = new EnumMap<>(ModuleType.class);
-    static {
-        for (ModuleType module : ModuleType.values()) {
-            MODULE_ITEMS.put(module, register(module.id(), Item::new, new Item.Properties().stacksTo(16)
-                    .rarity(module == ModuleType.BOSS_RIG ? Rarity.EPIC : Rarity.UNCOMMON)));
-        }
-    }
-    public static final List<Item> MODULES = List.copyOf(MODULE_ITEMS.values());
     public static final List<Item> REELS = List.copyOf(REEL_ITEMS.values());
     public static final List<Item> LINES = List.copyOf(LINE_ITEMS.values());
     public static final List<Item> BAITS = List.copyOf(BAIT_ITEMS.values());
-    public static final List<Item> SPOOLS = List.copyOf(SPOOL_ITEMS.values());
-    public static final List<Item> LEADERS = List.copyOf(LEADER_ITEMS.values());
-    public static final List<Item> HOOKS = List.copyOf(HOOK_ITEMS.values());
     public static final List<Item> ALL = all();
 
     private AtzenItems() { }
 
     private static List<Item> all() {
-        List<Item> items = new ArrayList<>(List.of(BAMBOO_ROD, RIVER_ROD, SPINNING_ROD, FLY_ROD, IRON_ROD, CARP_ROD, TIDE_ROD,
-                CARBON_ROD, BIG_GAME_ROD, NETHERITE_ROD));
+        List<Item> items = new ArrayList<>(List.of(BAMBOO_ROD, CARBON_ROD, NETHERITE_ROD));
         items.addAll(REELS);
-        items.addAll(SPOOLS);
         items.addAll(LINES);
-        items.addAll(LEADERS);
-        items.addAll(HOOKS);
         items.addAll(BAITS);
         items.addAll(List.of(CARBON_FIBER, ANCIENT_BARBEL, REED_CROWN, STURGEON_PLATE, WARDEN_HEART,
-                STEADY_LINE_TOME, REEL_POWER_TOME, CALM_WATERS_TOME, CALM_MIND_TOME, PRECISION_CAST_TOME, FIGHT_CONTROL_TOME,
                 SMALL_LANDING_NET, CARP_LANDING_NET, BIG_GAME_LANDING_NET, MOTHER_OF_PEARL, GROUNDBAIT, ECHO_SOUNDER, BAIT_BOX,
-                ANGLER_TOOL, FISH_LEXICON, FISHING_CRATE, FISHY_NOTE));
-        items.addAll(MODULES);
+                FISH_LEXICON, FISHING_CRATE, FISHY_NOTE));
         return List.copyOf(items);
     }
 
     public static Item item(BaitType bait) { return BAIT_ITEMS.get(bait); }
     public static Item item(ReelType reel) { return REEL_ITEMS.get(reel); }
-    public static Item item(ModuleType module) { return MODULE_ITEMS.get(module); }
-
-    public static ModuleType module(ItemStack stack) {
-        for (var entry : MODULE_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
-        return null;
-    }
 
     private static Item net(LandingNetItem.NetType type, int durability) {
         return register(type.id(), properties -> new LandingNetItem(properties, type), new Item.Properties().durability(durability));
@@ -142,21 +96,6 @@ public final class AtzenItems {
         return null;
     }
 
-    public static SpoolType spool(ItemStack stack) {
-        for (var entry : SPOOL_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
-        return null;
-    }
-
-    public static LeaderType leader(ItemStack stack) {
-        for (var entry : LEADER_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
-        return null;
-    }
-
-    public static HookType hook(ItemStack stack) {
-        for (var entry : HOOK_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
-        return null;
-    }
-
     public static BaitType bait(ItemStack stack) {
         if (stack.isEmpty()) return null;
         for (var entry : BAIT_ITEMS.entrySet()) if (stack.is(entry.getValue())) return entry.getKey();
@@ -164,15 +103,8 @@ public final class AtzenItems {
     }
 
     public static RodType rod(ItemStack stack) {
-        if (stack.is(RIVER_ROD)) return RodType.RIVER;
-        if (stack.is(IRON_ROD)) return RodType.IRON;
-        if (stack.is(TIDE_ROD)) return RodType.TIDE;
-        if (stack.is(CARBON_ROD)) return RodType.CARBON;
         if (stack.is(BAMBOO_ROD)) return RodType.BAMBOO;
-        if (stack.is(SPINNING_ROD)) return RodType.SPINNING;
-        if (stack.is(CARP_ROD)) return RodType.CARP;
-        if (stack.is(FLY_ROD)) return RodType.FLY;
-        if (stack.is(BIG_GAME_ROD)) return RodType.BIG_GAME;
+        if (stack.is(CARBON_ROD)) return RodType.CARBON;
         if (stack.is(NETHERITE_ROD)) return RodType.NETHERITE;
         return RodType.VANILLA;
     }
@@ -193,12 +125,6 @@ public final class AtzenItems {
 
     private static Item trophy(String name) {
         return register(name, Item::new, new Item.Properties().stacksTo(16).rarity(Rarity.EPIC));
-    }
-
-    private static Item tome(String enchantment, int maxLevel) {
-        return register(enchantment + "_tome", properties -> new EnchantmentTomeItem(properties,
-                ResourceKey.create(Registries.ENCHANTMENT, Atzen.id(enchantment)), maxLevel),
-                new Item.Properties().stacksTo(16).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
     }
 
     private static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {

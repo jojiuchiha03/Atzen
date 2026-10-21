@@ -31,7 +31,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-/** The aids from Anforderung 11: groundbait, echo sounder, bait box, angler's tool and the fish lexicon. */
+/** The aids from Anforderung 11: groundbait, echo sounder, bait box and the fish lexicon. */
 public final class FishingTools {
     private FishingTools() { }
 
@@ -158,31 +158,6 @@ public final class FishingTools {
                     return;
                 }
             }
-        }
-    }
-
-    /** Angler's tool: with a rod in the other hand, takes all its gear off at once into the inventory. */
-    public static final class AnglerTool extends Item {
-        public AnglerTool(Properties properties) { super(properties); }
-
-        @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {
-            ItemStack rod = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
-            if (!(rod.getItem() instanceof AtzenRodItem) || player.fishing != null) {
-                if (!level.isClientSide()) player.sendSystemMessage(Component.translatable("message.atzen.tool_instruction"));
-                return InteractionResult.FAIL;
-            }
-            if (level.isClientSide()) return InteractionResult.SUCCESS;
-            int parts = 0;
-            for (GearSlot slot : GearSlot.values()) {
-                ItemStack part = AtzenRodItem.get(rod, slot);
-                if (part.isEmpty()) continue;
-                AtzenRodItem.set(rod, slot, ItemStack.EMPTY);
-                player.getInventory().placeItemBackInInventory(part);
-                parts++;
-            }
-            player.getItemInHand(hand).hurtAndBreak(1, player, hand);
-            player.sendOverlayMessage(Component.translatable("message.atzen.tool_stripped", parts));
-            return InteractionResult.SUCCESS;
         }
     }
 

@@ -1,6 +1,6 @@
 # Atzen – Fishing Battles
 
-Fabric-Mod für **Minecraft Java 26.2**: eine Angelsimulation mit echtem Drill – Schnurspannung, Bremse, Pumpen, Gegensteuern, Hakenhalt und Landung –, 64 Fischarten mit eigenen Lebensräumen (auch in Höhlen, in Lava und im End), Angelkisten, wechselbarer Ausrüstung, vier Bossfischen und einer Kinokamera.
+Fabric-Mod für **Minecraft Java 26.2**: ein Angelspiel mit echtem Drill, aber einfacher Bedienung – **R** holt ein, **F** gibt Schnur –, 64 Fischarten mit eigenen Lebensräumen (auch in Höhlen, in Lava und im End), Angelkisten, drei Ruten, drei Rollen, einer Schnur, drei Ködern und vier Bossfischen.
 
 **Stand: 0.15.0.** Die vollständige Anforderungsliste steht in [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md), der Umsetzungsplan in [docs/ROADMAP.md](docs/ROADMAP.md). Deutsch und Englisch sind enthalten.
 
@@ -15,138 +15,59 @@ Benötigt werden Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5 oder ne
 ## Der Angelvorgang
 
 1. **Ausrüsten:** Rolle, Schnur und Köder im Inventar auf die Rute ziehen (siehe unten).
-2. **Auswerfen:** Die Kamera geht kurz über die Schulter und folgt der Pose.
-3. **Warten:** Bleibst du ruhig stehen, zeigt die Kamera die Pose vom Ufer aus. Bewegst du dich oder schaust dich um, hast du sofort wieder die normale Sicht.
-4. **Biss:** Atzen-Fische in bis zu 12 Blöcken bemerken die Pose, schwimmen hin und sehen sich den Köder an – die Kamera taucht dafür unter Wasser. Mag der Fisch den Köder nicht, ignoriert er ihn; ist er nur halb interessiert, dreht er manchmal wieder ab.
-5. **Anschlag:** Rechtsklick, wenn die Pose abtaucht. Der richtige Moment setzt den Haken fester: Raubfische erst etwas drehen lassen, Forellen sofort anschlagen. Die Anzeige meldet „perfekt“, „gut“ oder „ungünstig“.
-6. **Drill:** siehe unten.
-7. **Landen:** Ist der Fisch nah (unter 4 m) und erschöpft, wird er landbar. Fische bis 2 kg hebst du mit Rechtsklick per Hand heraus. Größere brauchen einen **Kescher in der anderen Hand**: über der Hotbar erscheint eine Zielleiste, der Fisch pendelt vor dem Netz, das grüne Feld ist die Öffnung – Rechtsklick, solange die Marke im Feld ist, landet fast sicher; daneben schlägt der Fisch oft aus und flüchtet noch einmal. Bosse brauchen den Großfischkescher.
-8. **Trophäe:** Nach dem Fang dreht sich die Kamera um dich, eine Karte zeigt Art, Seltenheit, Länge, Gewicht und deine Kontrolle im Drill.
+2. **Auswerfen** und **warten**. Die Sicht bleibt die ganze Zeit deine eigene.
+3. **Biss:** Atzen-Fische in bis zu 12 Blöcken bemerken die Pose, schwimmen hin und sehen sich den Köder an. Mag der Fisch den Köder nicht, ignoriert er ihn.
+4. **Anschlag:** Rechtsklick, wenn die Pose abtaucht. Der richtige Moment setzt den Haken fester; die Anzeige meldet „perfekt“, „gut“ oder „zu spät“.
+5. **Drill:** siehe unten.
+6. **Landen:** Ist der Fisch nah (unter 4 m) und müde, Rechtsklick. Fische bis 2 kg hebst du per Hand heraus, größere brauchen einen **Kescher in der anderen Hand** (Rechtsklick, solange die Marke im grünen Feld ist). Bosse brauchen den Großfischkescher.
+7. **Fangkarte:** Oben erscheint eine Karte mit Art, Seltenheit, Länge, Gewicht und deiner Kontrolle im Drill.
 
 ## Der Drill
 
-Der Server simuliert die Schnur: Der Fisch zieht mit einer Kraft, die von Größe, Ausdauer und seiner aktuellen Aktion abhängt. Die Spannung auf der Schnur kann diese Kraft nie dauerhaft über die **Bremse** hinaus heben – dort rutscht die Rolle und der Fisch nimmt Schnur. Die Schnur **reißt**, wenn die Spannung ihre Tragkraft übersteigt: durch eine Bremse, die fester als die Schnur eingestellt ist, durch Rucke bei steifer Ausrüstung oder durch eine an Hindernissen aufgescheuerte Schnur. Geht die Schnur auf der Spule aus, ist der Fisch weg.
+Zwei Tasten, beide einstellbar:
 
-| Taste (einstellbar) | Wirkung |
+| Taste | Wirkung |
 | --- | --- |
-| **R** halten | Einholen – nur gegen einen Fisch, der schwächer zieht als die Rolle. Gegen eine rutschende Bremse zu kurbeln verdrallt die Schnur. |
-| **G** halten | Rute heben (Pumpen): zieht den Fisch heran. Danach loslassen und **beim Absenken R** – so kommt die gewonnene Schnur doppelt so schnell herein. Absenken ohne Kurbeln lässt die Schnur durchhängen. |
-| **Pfeil links/rechts** | Gegensteuern, wenn der Fisch seitwärts zu Hindernissen zieht. |
-| **Pfeil hoch/runter** | Bremse fester/lockerer (10 Stufen). |
-| **Rechtsklick** | Fisch landen, wenn er nah und erschöpft ist (mit Kescher: im grünen Feld). |
-| **X** | Drill abbrechen bzw. Kameraszene überspringen. |
-| **C** | Kinokamera an/aus. |
+| **R** halten | Einholen |
+| **F** halten | Schnur geben (öffnet die Bremse). Während eines Drills tauscht F nicht die Hände. |
 
-Der Fisch wechselt zwischen **Dagegenhalten**, **Flucht**, **Abtauchen**, **Seitwärts zu Hindernissen**, **Kopfstößen**, **Sprüngen** und **Erschöpfung**. Jede Aktion außer Dagegenhalten und Erschöpfung kündigt er vorher an: er schlägt an der Oberfläche, die Anzeige warnt, ein Brodeln ist zu hören.
+Die Bremse stellt sich selbst ein. Die Regeln sind einfach:
 
-- **Flucht/Abtauchen:** nicht kurbeln, die Bremse arbeiten lassen; eine haltende Bremse ermüdet den Fisch schneller, ist aber riskanter.
-- **Seitwärts:** in die Gegenrichtung steuern, sonst scheuert die Schnur an Hindernissen (geflochtene Schnur besonders).
-- **Kopfstöße:** Spannung mittel halten – zu straff oder zu locker reißt den Haken aus.
-- **Sprung:** Rute unten lassen und leicht kurbeln. Gehobene Rute oder harte Spannung schütteln den Haken ab.
-- **Schlaffe Schnur** kostet Hakenhalt. Fällt der Hakenhalt auf 0, ist der Fisch weg.
+- **Der Fisch hält still oder ist müde:** R halten. Ohne Einholen hängt die Schnur durch, und der Haken fällt heraus.
+- **Er kündigt etwas an** (er schlägt an der Oberfläche, ein Brodeln ist zu hören, die Anzeige blinkt „Achtung“) **oder zieht ab:** loslassen, nicht kurbeln. Wer gegen eine rutschende Bremse kurbelt, verdrallt die Schnur, bis sie reißt.
+- **Er springt oder schüttelt den Kopf:** F halten. Eine straffe Schnur reißt beim Sprung den Haken heraus.
+- **Die Schnur ist kurz vorm Reißen** (Leiste rot): F.
 
-**Anzeige über der Hotbar:** Die Leiste zeigt die Spannung als Anteil der Tragkraft (rot ab 85 %), der türkise Strich die Bremse, darunter die Kraft des Fisches und den Hakenhalt. Eine Zeile sagt, was gerade zu tun ist; darunter Schnur draußen/Spulenkapazität, Bremsstufe und Hakenhalt. Bei Seitwärtsfluchten zeigt ein oranger Strich, wie nah das Hindernis ist. Bosse zeigen oben Namen, Phase und Kraft.
+**Anzeige über der Hotbar:** der Fisch mit Name und Entfernung, die Schnurspannung (grün bis zur Bremse, rot darüber) und die Kraft des Fisches. Darüber steht immer genau eine Anweisung mit der passenden Taste. Bosse zeigen oben Namen, Phase und Kraft.
 
-Typische Drilldauer mit passender Ausrüstung: Rotauge ~15 s, Barsch ~20 s, Hecht 45–60 s, Karpfen 60–90 s, Wels 2–3 min, Bosse 4–7 min. Wer nur R gedrückt hält, fängt kleine Fische, verliert große aber meist.
-
-Der Server berechnet alles; häufigeres Senden von Eingaben beschleunigt nichts. Tod, Verbindungsabbruch, Rutenwechsel oder zu großer Abstand beenden den Versuch. Bei Vanilla-Bissen bleiben Schätze, Müll und Glück erhalten.
-
-## Kamera
-
-Eine Zustandsmaschine für den ganzen Wurf: **Wurf** (Schulter, folgt der Pose), **Warten** (vom Ufer auf die Pose, nur solange du still stehst), **Biss** (unter Wasser neben der Pose), **Anschlag**, **Drill** (über die Schulter, wenn der Fisch hält; beim Fisch, wenn er flüchtet oder abtaucht; weit und hoch bei Seitwärtsfluchten; dicht hinter dir bei Sprüngen; wackelt kurz vorm Reißen), **Landung** (tief am Wasser) und **Trophäe**. Die Kamera trifft keine Entscheidungen; **C** schaltet sie ab, **X** überspringt Szenen.
+Kleine Fische landest du schon mit R allein, große nur, wenn du im richtigen Moment loslässt und F drückst. Typische Drilldauer: Rotauge ~15 s, Barsch ~25 s, Hecht ~1 min, Karpfen 1–1,5 min, Wels ~2 min, Bosse 3–7 min. `/atzen cancel` bricht ab.
 
 ## Ausrüstung
 
-Jede Atzen-Rute hat sechs Slots: **Rolle, Spule, Schnur, Vorfach, Haken, Köder**. Teil im Inventar auf die Rute ziehen – ein vorhandenes Teil wird getauscht. Rechtsklick auf die Rute mit leerem Mauszeiger nimmt die Teile wieder heraus, vom Köder bis zur Rolle. Der Tooltip zeigt die Slots, die Werte der Rute, Tragkraft, Schnurmenge, Einzug, Kraft und die Fähigkeit der Rolle. Ohne Schnur angelt die Rute mit einfachem Faden (3,5 kg), ohne Haken mit einem normalen Einzelhaken.
+Jede Atzen-Rute hat drei Plätze: **Rolle, Schnur, Köder**. Teil im Inventar auf die Rute ziehen – ein vorhandenes wird getauscht; Rechtsklick auf die Rute mit leerem Mauszeiger nimmt die Teile wieder heraus. Der Tooltip zeigt die drei Plätze nebeneinander, was die Rute hält, wie schnell sie einholt und wie oft sie verstärkt ist. Ohne Schnur angelt die Rute mit Faden (3,5 kg).
 
-| Rute | Belastbar | Hub | Flex | Gefühl | Wurfgewicht | Fische | Wurfweite |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Angel (Vanilla) | 5 kg | 3 kg | 50 % | 60 % | 5–30 g | bis 5 kg | ×1,0 |
-| Bambusrute | 5 kg | 2,5 kg | 80 % | 90 % | 1–15 g | bis 3 kg | ×0,8 |
-| Flussrute | 7 kg | 4 kg | 65 % | 70 % | 5–30 g | bis 6 kg | ×1,05 |
-| Spinnrute | 10 kg | 5 kg | 45 % | 80 % | 5–40 g | 0,2–10 kg | ×1,3 |
-| Fliegenrute | 8 kg | 4 kg | 75 % | 95 % | Fliegen | 0,1–6 kg | ×1,25 mit Fliege + Fliegenrolle |
-| Eisenrute | 13 kg | 7 kg | 35 % | 55 % | 10–60 g | bis 15 kg | ×1,1 |
-| Gezeitenrute | 15 kg | 6 kg | 50 % | 60 % | 15–80 g | bis 25 kg | ×1,2 (+15 % Einzug) |
-| Karpfenrute | 17 kg | 8 kg | 50 % | 50 % | 15–120 g | 2–30 kg | ×1,5 |
-| **Carbonrute** | 24 kg | **9 kg** | 60 % | 80 % | 10–80 g | bis 60 kg | ×1,35 – die beste Allround-Rute |
-| Big-Game-Rute | 42 kg | 14 kg | 30 % | 25 % | 40–300 g | 10–400 kg | ×1,1, schwer |
-| **Netheritrute** | 28 kg | 10 kg | 45 % | 60 % | 10–100 g | bis 80 kg | ×1,25 – die einzige, die in Lava angelt |
+| Rute | Hält | Besonderheit |
+| --- | --- | --- |
+| Angel (Vanilla) | 5 kg | – |
+| **Bambusrute** | 7 kg | leicht und feinfühlig, für den Anfang |
+| **Carbonrute** | 24 kg | wirft am weitesten, stark genug für die Bosse |
+| **Netheritrute** | 30 kg | die stärkste und die einzige, die in Lava angelt |
 
-Eine steife Rute (wenig Flex) pumpt hart, gibt aber jeden Ruck weiter; eine weiche federt Fluchten ab. Über der Belastbarkeit ist die Rute überlastet (Anzeige „Rute … %“ wird rot, mehr Verschleiß), beim 1,3-Fachen knackt sie. Sensibilität vergrößert das Zeitfenster für einen guten Anschlag; Fische unter dem Größenbereich spürt die Rute kaum. Ein Köder außerhalb des Wurfgewichts fliegt kürzer.
-
-| Spule | Wirkung |
-| --- | --- |
-| Flachspule | Würfe +15 %, Schnur −30 % |
-| Tiefspule | Schnur +60 %, Würfe −5 % |
-| Leichtspule | Würfe +20 % (unter 10 g noch mehr), Kraft −15 % |
-| Verstärkte Spule | Kraft +20 %, keine Perücke am Baitcaster |
-| Schnellübersetzung | Einzug +35 %, Kraft −20 % |
-| Kraftübersetzung | Kraft +40 %, Einzug −25 % |
-
-| Vorfach | Wirkung |
-| --- | --- |
-| Fluorocarbon | fast unsichtbar: scheue Fische (Forellen, Karpfen, Schleie, Wolfsbarsch) beißen 25 % lieber; Hindernisse schaden weniger |
-| Stahl | Zähne beißen nicht durch; scheue Fische meiden es (−30 %) |
-
-Ohne Stahlvorfach können Hecht, Zander, Barrakuda, Seewolf, Seeteufel, Schilfkönig und Tiefenwächter bei Kopfstößen die Schnur durchbeißen.
-
-| Haken | Größe | Hält | Besonderheit |
+| Rolle | Einzug | Kraft | Schnur |
 | --- | --- | --- | --- |
-| Einzelhaken, klein | klein | 4 kg | für kleine, vorsichtige Fische |
-| Einzelhaken | mittel | 9 kg | Standard |
-| Einzelhaken, groß | groß | 18 kg | für Großfische, schreckt kleine ab |
-| Drilling | mittel | 8 kg | mit Kunstködern +15 Hakenhalt, mit Naturködern −10 |
-| Schonhaken | mittel | 7 kg | ohne Widerhaken: fällt bei schlaffer Schnur leichter heraus |
-| Karpfenhaken | mittel | 14 kg | mit Boilie, Mais, Strömungsköder +20 |
-| Offsethaken | mittel | 10 kg | mit Gummifisch +20, hängt halb so oft an Hindernissen |
-| Circle Hook | groß | 16 kg | hakt sich selbst, Anschlag-Zeitpunkt egal |
+| **Kupferrolle** | 2,2 m/s | 5 kg | 120 m |
+| **Eisenrolle** | 2,6 m/s | 8 kg | 180 m |
+| **Diamantrolle** | 3,2 m/s | 12 kg | 300 m |
 
-Ist ein Haken zu schwach für die Last, biegt er auf und verliert Halt; ist er viel größer als das Maul des Fisches, beißt der seltener.
-
-| Schnur | Tragkraft | Dehnung | Abrieb |
-| --- | --- | --- | --- |
-| Faden (ohne Schnur) | 3,5 kg | mittel | schwach |
-| Monofile Schnur | 7 kg | hoch – schluckt Rucke | normal |
-| Geflochtene Schnur | 14 kg | kaum – direkt | scheuert schnell |
-| **Carbonschnur** | **20 kg** | etwas | sehr fest – die beste |
-
-| Rolle | Einzug | Kraft | Schnur | Fähigkeit |
-| --- | --- | --- | --- | --- |
-| Kupfer-Stationärrolle | 2,2 m/s | 5 kg | 120 m | Verzeihend: schlaffe Schnur kostet weniger Hakenhalt |
-| Eisen-Stationärrolle | 2,6 m/s | 7 kg | 160 m | Verzeihend |
-| Diamant-Stationärrolle | 3,0 m/s | 9 kg | 200 m | Feinbremse: Rucke kommen viel schwächer an |
-| Baitcaster | 4,0 m/s | 8 kg | 110 m | sehr schnell; Flucht gegen lockere Bremse (≤ 3) gibt eine Perücke |
-| Multirolle | 2,0 m/s | 15 kg | 350 m | Kraftübersetzung für Großfische |
-| Fliegenrolle | 1,6 m/s | 4 kg | 90 m | Pumpen +60 %, Fische unter 3 kg schwächer; für Fliegen nötig |
-| Echorolle | 2,6 m/s | 8 kg | 180 m | kündigt jede Aktion eine Sekunde früher an |
-| Gezeitenrolle | 2,8 m/s | 9 kg | 220 m | Meeresfische erholen sich nicht |
-| Netheritrolle | 2,4 m/s | 14 kg | 300 m | Bremse hält nie mehr als 90 % der Tragkraft |
-| Rolle des Alten | 2,4 m/s | 13 kg | 320 m | Bossbeute: Fluchten nehmen 35 % weniger Schnur |
-| Schilfkrone | 3,4 m/s | 9 kg | 180 m | Bossbeute: Sprünge reißen nie aus, solange die Rute unten ist |
-| Strömungsrolle | 2,6 m/s | 12 kg | 280 m | Bossbeute: holt in Ruhephasen selbst Schnur ein |
-| Tiefenherz | 3,2 m/s | 12 kg | 300 m | Bossbeute: Fisch ermüdet 25 % schneller, warnt früher |
-
-### Köder
-
-Jede Art hat eine Ernährungsweise (Friedfisch, Raubfisch, Salmonide, Meeresräuber, Meeresgrund, Schwarmfisch); der Köder entscheidet, wer sich nähert und wer anbeißt. Ein unpassender Köder wird ignoriert. Große Köder (Boilie, Köderfisch, Wobbler) bringen größere Fische. **Naturköder** werden pro Drill verbraucht, **Kunstköder** nutzen sich ab (ein abgenutzter läuft schlechter) und gehen bei Schnurbruch verloren.
+**Angelschnur:** trägt 20 kg.
 
 | Köder | Für |
 | --- | --- |
-| Regenwurm, Made | fast alle Friedfische, Forellen, Aal, Grundfische |
-| Mais, Brotflocke, Boilie | Friedfische (Karpfen/Karausche, Döbel/Rotfeder); Boilie selektiv auf große |
-| Köderfisch, Fischfetzen | Raubfische und Meeresräuber; Wels und Hecht besonders |
-| Insektenlarve | Forellen, Äschen, Friedfische |
-| Garnele | Meeresgrund- und Raubfische |
-| Leuchtköder | alle, nachts besonders; Fluchten 20 % schwächer |
-| Kraftköder | fast alle; Fisch ermüdet schneller, aber mehr Spannung |
-| Spinner, Blinker, Wobbler | Raubfische (Barsch und Rapfen lieben Spinner) |
-| Gummifisch | Raubfische, Zander besonders; verschleißt schnell |
-| Popper | Meeresräuber an der Oberfläche; gehakte Fische springen mehr |
-| Jig | Meeresgrund, Kabeljau und Seelachs |
-| Streamer, Trockenfliege, Nymphe | Forellen und Äschen – mit Fliegenrolle |
+| **Regenwurm** | alle friedlichen Fische: Karpfen, Forellen, Grundfische, Schwärme |
+| **Köderfisch** | Raubfische in Süß- und Salzwasser, eher große |
+| **Leuchtköder** | alle Fische, nachts besonders; Fluchten ziehen schwächer |
 
-Die Tageszeit zählt: Raubfische beißen in der Dämmerung, Wels, Aal und Zander nachts, Friedfische tagsüber, Forellen in der Dämmerung. Regen belebt Süßwasser.
+Jeder Biss verbraucht einen Köder. Dazu kommen vier Bossköder (siehe unten). Die Tageszeit zählt: Raubfische beißen in der Dämmerung, Wels, Aal und Zander nachts, Friedfische tagsüber. Regen belebt Süßwasser.
 
 ## Fische
 
@@ -186,16 +107,16 @@ Größere Exemplare ziehen stärker und halten länger durch (ein 1-kg-Barsch zi
 
 ## Bossfische
 
-Jeder Boss braucht seinen eigenen Bossköder, sein Gewässer und seine Zeit. Auch dann ist nur etwa jeder dritte Biss der Boss, und jeder Angler trifft jeden Boss einmal pro Tag. Bosse haben drei Phasen mit eigenem Verhalten und eine Eigenheit; ihr Fang bringt eine Trophäe, aus der die Bossrolle gebaut wird.
+Jeder Boss braucht seinen eigenen Bossköder, sein Gewässer und seine Zeit. Auch dann ist nur etwa jeder dritte Biss der Boss, und jeder Angler trifft jeden Boss einmal pro Tag. Bosse haben drei Phasen mit eigenem Verhalten und eine Eigenheit; ihr Fang bringt eine Trophäe.
 
 | Boss | Wo und wann | Köder | Eigenheit | Beute |
 | --- | --- | --- | --- | --- |
-| **Der Alte vom Grund** (Wels) | nachts, See oder Sumpf, ≥ 5 Blöcke tief | Uralter Grundköder | flüchtet ins Totholz, täuscht kurz vor der Landung Erschöpfung vor und explodiert | Uralte Welsbarte → Rolle des Alten |
-| **Der Schilfkönig** (Hecht) | Sumpf bei Regen oder in der Dämmerung | Königswobbler | Jagd ins Schilf, dann ein Tanz aus Sprung auf Sprung | Schilfkrone → Schilfkronen-Rolle |
-| **Der Schwarze Stör** | tagsüber, Fluss, ≥ 4 Blöcke tief | Strömungsköder | die Strömung zieht immer mit; lange Ruhe, dann Ausbrüche | Schwarze Knochenplatte → Strömungsrolle |
-| **Der Tiefenwächter** (mythisch) | verborgenes Wasser unter y 0, ohne Himmel | Tiefenlicht | lernt: wer ständig pumpt, bekommt Kopfstöße, wer nur kurbelt, Fluchten | Herz der Tiefe → Tiefenherz |
+| **Der Alte vom Grund** (Wels) | nachts, See oder Sumpf, ≥ 5 Blöcke tief | Uralter Grundköder | flüchtet ins Totholz, täuscht kurz vor der Landung Erschöpfung vor und explodiert | Uralte Welsbarte |
+| **Der Schilfkönig** (Hecht) | Sumpf bei Regen oder in der Dämmerung | Königswobbler | Jagd ins Schilf, dann ein Tanz aus Sprung auf Sprung | Schilfkrone |
+| **Der Schwarze Stör** | tagsüber, Fluss, ≥ 4 Blöcke tief | Strömungsköder | die Strömung zieht immer mit; lange Ruhe, dann Ausbrüche | Schwarze Knochenplatte |
+| **Der Tiefenwächter** (mythisch) | verborgenes Wasser unter y 0, ohne Himmel | Tiefenlicht | lernt: wer ständig Schnur gibt, bekommt Kopfstöße, wer nur kurbelt, Fluchten | Herz der Tiefe |
 
-Bosse sind nur mit starker Ausrüstung zu schaffen (Carbonschnur, kräftige Rolle).
+Bosse sind nur mit starker Ausrüstung zu schaffen (Carbon- oder Netheritrute, Diamantrolle, Angelschnur).
 
 ## Kescher und Zurücksetzen
 
@@ -248,31 +169,11 @@ Vor der Stufe beißen dort nur gewöhnliche und ungewöhnliche Fische. Täglich 
 
 **Fischmarkt:** Rechtsklick mit Fisch verkauft ihn, Schleichen verkauft alle. Preis nach Seltenheit, Gewicht, Kontrolle und Frische (Zustand); Wechselgeld bleibt als Guthaben.
 
-**Angelwerkstatt:** Rute in die Haupthand, in die andere Hand Smaragd (repariert ein Viertel), Perlmutt (verstärkt, bis 3×, je +6 % Hub und Last) oder ein Modul. Schleichen nimmt die Module ab.
+**Angelwerkstatt:** Rute in die Haupthand, in die andere Hand Smaragd (repariert ein Viertel) oder Perlmutt (verstärkt, bis 3×, je +6 % Last und Kraft).
 
-## Module, Verzauberungen und Hilfsmittel
+## Hilfsmittel
 
-Zwei Module pro Rute:
-
-| Modul | Wirkung |
-| --- | --- |
-| Feinbremse | +12 % Dehnung, schluckt Rucke |
-| Verstärkter Blank | +20 % Rutenlast |
-| Bisssensor | +20 % Gefühl beim Anschlag, längeres Bissfenster am Halter |
-| Leichtes Spulenlager | +10 % Wurfweite |
-| Keramikringe | 30 % weniger Abrieb |
-| Verbesserte Kugellager | +10 % Einzug, +5 % Kraft |
-| Verstärkte Hakenhalterung | +20 % Hakenfestigkeit |
-| Vorfachsystem | 25 % weniger Hindernisschaden |
-| Posenmodul | +10 % Gefühl, schnellere Bisse am Halter |
-| Sonarmodul | zeigt beim Warten alle 5 s die Fische um die Pose |
-| Schnurzähler | +10 % Schnur auf der Spule |
-| Bossmontage | nur gegen Bosse: +10 % Tragkraft, +15 % Last, +30 % Haken, Fluchten −10 % |
-| Futterkorb | wirkt wie ein Futterplatz am Köder |
-
-Neue Verzauberungen: **Ruhige Hand** (II, schlaffe Schnur kostet 20 % weniger Hakenhalt je Stufe), **Präzisionswurf** (III, +6 % Wurfweite und feinerer Anschlag je Stufe), **Drillkontrolle** (III, Fluchten −6 % je Stufe). Vanilla **Köder** verkürzt die Wartezeit am Rutenhalter, **Glück des Meeres** macht seltene Fische wahrscheinlicher.
-
-Hilfsmittel: **Futtermischung** (aufs Wasser werfen: 5 Minuten Futterplatz, füttert auch Fische im Netz), **Echolot**, **Köderbox** (packt alle Köder ein, legt leere Köderplätze automatisch nach), **Angelwerkzeug** (nimmt die ganze Montage auf einmal ab). Aus dem Boot angeln funktioniert wie vom Ufer; der Drill läuft vom Boot aus genauso.
+**Futtermischung** (aufs Wasser werfen: 5 Minuten Futterplatz, füttert auch Fische im Netz), **Echolot**, **Köderbox** (packt alle Köder ein, legt leere Köderplätze automatisch nach). Vanilla **Köder** verkürzt die Wartezeit am Rutenhalter, **Glück des Meeres** macht seltene Fische und Angelkisten wahrscheinlicher. Aus dem Boot angeln funktioniert wie vom Ufer.
 
 ## Rezepte
 
@@ -280,73 +181,31 @@ Alle Werkbankrezepte sind formlos.
 
 | Ergebnis | Zutaten |
 | --- | --- |
-| Flussrute | Angel, 2 Kupferbarren, Faden |
-| Eisenrute | Flussrute, 3 Eisenbarren, Leder |
-| Gezeitenrute | Eisenrute, 3 Prismarinscherben, Herz des Meeres, Diamant |
-| Carbonrute | Eisenrute, 3 Kohlefaser, Diamant |
 | Bambusrute | 3 Bambus, 2 Faden |
-| Spinnrute | Flussrute, Eisenbarren, Faden, Feder |
-| Karpfenrute | Eisenrute, 2 Eisenbarren, Leder, Schleimball |
-| Fliegenrute | Bambusrute, 2 Federn, Faden, Kupferbarren |
-| Big-Game-Rute | Carbonrute, Netheritplatten, Eisenblock, Leder |
+| Carbonrute | Bambusrute, 3 Kohlefaser, Diamant |
 | Netheritrute | Carbonrute, Netheritbarren, Lohenrute |
 | Kohlefaser | Kohleblock im Hochofen |
-| Spulen | Flach: Eisen + Kupfer · Tief: 2 Eisen + Kupfer · Leicht: Kupfer + Feder · Verstärkt: 2 Eisen + Obsidian · Schnell: Eisen + Redstone + Gold · Kraft: Eisen + Kolben + Kupfer |
-| 4 Fluorocarbon-Vorfach | Monofile Schnur, Glasscheibe |
-| 4 Stahlvorfach | Eisenbarren, Faden |
-| Haken | klein: 8 aus 1 Eisennugget · normal: 6 aus 2 Nuggets · groß: 4 aus 1 Eisenbarren · Drilling: 4 aus 3 Nuggets · Schon: 6 aus 2 Nuggets + Feuerstein · Karpfen: 4 aus Eisen + Feuerstein · Offset: 4 aus Eisen + Schleim · Circle: 4 aus Eisen + Kupfer |
-| Kupfer-Stationärrolle | 2 Kupferbarren, Eisennugget, Stock |
-| Eisen-Stationärrolle | 2 Eisenbarren, Eisennugget, Redstone |
-| Diamant-Stationärrolle | Eisenrolle, Diamant, Goldbarren, Redstone |
-| Baitcaster | 2 Eisenbarren, Goldbarren, Redstone, Quarz |
-| Multirolle | Eisenrolle, 2 Eisenbarren, Kupferblock |
-| Fliegenrolle | Eisenbarren, Leder, Faden, Stock |
-| Echorolle | Eisenrolle, Echosplitter, Amethystscherbe, Redstone |
-| Gezeitenrolle | Diamantrolle, Herz des Meeres, 2 Prismarinscherben |
-| Netheritrolle | Diamantrolle, Netheritbarren |
-| Rolle des Alten / Schilfkrone / Strömungsrolle / Tiefenherz | Multirolle / Baitcaster / Multirolle / Echorolle + Bosstrophäe + Gold / Smaragd / Prismarinkristalle / Diamant |
-| Monofile Schnur | 3 Faden, Schleimball |
-| Geflochtene Schnur | Monofile Schnur, 3 Faden |
-| Carbonschnur | Geflochtene Schnur, 2 Kohlefaser |
+| Kupferrolle | 2 Kupferbarren, Eisennugget, Stock |
+| Eisenrolle | Kupferrolle, 2 Eisenbarren, Redstone |
+| Diamantrolle | Eisenrolle, Diamant, Goldbarren, Redstone |
+| Angelschnur | 3 Faden, Schleimball |
 | 6 Regenwurm | Verrottetes Fleisch, Weizensamen |
-| 8 Made | 2 Verrottetes Fleisch |
-| 8 Mais | Weizen, Gelber Farbstoff |
-| 8 Brotflocke | Brot |
-| 6 Boilie | Ei, Weizen, Zucker, Knochenmehl |
 | 2 Köderfisch | Roher Kabeljau |
-| 4 Fischfetzen | Roher Lachs |
-| 6 Insektenlarve | Spinnenauge, Weizensamen |
-| 4 Garnele | Seetang, Roher Kabeljau, Knochenmehl |
 | 4 Leuchtköder | Regenwurm, Leuchttintenbeutel |
-| 4 Kraftköder | Roher Lachs, Seetang, Weizen |
-| Spinner | 2 Eisennuggets, Kupferbarren, Faden |
-| Blinker | Eisenbarren, Goldnugget |
-| Wobbler | Eichenbretter, Roter Farbstoff, 2 Eisennuggets |
-| Gummifisch | Schleimball, Hellgrüner Farbstoff, Eisennugget |
-| Popper | Eichenbretter, Weißer Farbstoff, Eisennugget, Feder |
-| Jig | Eisenbarren, Faden, Schleimball |
-| Streamer | Feder, Faden, Eisennugget, Grüner Farbstoff |
-| Trockenfliege | Feder, Faden, Eisennugget |
-| Nymphe | Feder, Faden, Eisennugget, Goldnugget |
 | 2 Uralter Grundköder | Rohes Rindfleisch, Spinnenauge, Schlamm, Leuchttintenbeutel |
-| Königswobbler | Wobbler, Smaragd, Goldbarren, Feder |
-| 2 Strömungsköder | Boilie, Prismarinkristalle, Ton, Knochenmehl |
+| Königswobbler | Köderfisch, Smaragd, Goldbarren, Feder |
+| 2 Strömungsköder | Regenwurm, Prismarinkristalle, Ton, Knochenmehl |
 | 2 Tiefenlicht | Leuchtköder, Echosplitter, Sculk |
-| Zauberbücher | Buch, Lapislazuli + Faden & Eisen (Schnurmeister) / Redstone & Amethyst (Kurbelkraft) / Prismarinkristalle & Leuchttinte (Wellenruhe) / Feder & Amethyst (Ruhige Hand) / Pfeil & Gold (Präzisionswurf) / Eisen & Leder (Drillkontrolle) |
-| Kescher | klein: 2 Stöcke, 3 Faden · Karpfen: kleiner Kescher, Eisen, 3 Faden · Großfisch: Karpfenkescher, Eisenblock, Geflochtene Schnur, Leder |
+| Kescher | klein: 2 Stöcke, 3 Faden · Karpfen: kleiner Kescher, Eisen, 3 Faden · Großfisch: Karpfenkescher, Eisenblock, Angelschnur, Leder |
 | 4 Futtermischung | Weizen, Brot, Knochenmehl, Erde |
 | Echolot | Kupferbarren, Redstone, Amethystscherbe, Glasscheibe |
 | Köderbox | Truhe, Kupferbarren |
-| Angelwerkzeug | Schere, Eisennugget, Stock |
 | Fischlexikon | Buch, Roher Kabeljau, Tintenbeutel |
 | Setzkescher | 4 Faden, 2 Stöcke |
 | Rutenhalter / Doppelständer / Rod Pod | 3 Stöcke + Eichenstufe / 2 Rutenhalter + Stock / 3 Eisen, Redstone, Notenblock |
 | Unterwasser-Netz | 2 Setzkescher, Eisengitter, Faden |
 | Fischmarkt | Fass, Smaragd, Eichenschild, Roher Kabeljau |
 | Angelwerkstatt | Schmiedetisch, Angel, Eisenbarren |
-| Module | Feinbremse: Kupfer, Schleim, Redstone · Blank: 2 Eisen, Kohlefaser · Bisssensor: Redstone, Kupfer, Glocke · Spulenlager: Gold, Feder, Kupfer · Keramikringe: 2 Ziegel, Quarz · Kugellager: Eisen, Goldnugget, Redstone, Kupfer · Hakenhalterung: Eisen, Eisenkette · Vorfachsystem: beide Vorfächer, Nugget · Pose: Feder, roter Farbstoff, Bretter · Sonar: Echolot, Kupfer · Schnurzähler: Uhr, Kupfer · Bossmontage: Perlmutt, Diamant, Carbonschnur · Futterkorb: Futtermischung, Eisengitter |
-
-Verzauberungen: **Schnurmeister** +8 % Tragkraft je Stufe, **Kurbelkraft** +8 % Einzug und Kraft, **Wellenruhe** Fluchten −12 %, dazu Ruhige Hand, Präzisionswurf und Drillkontrolle (siehe oben). Zauberbuch in die Haupthand, eingeholte Angel in die Nebenhand, rechtsklicken.
 
 Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“.
 
@@ -368,10 +227,10 @@ Alle Items stehen sortiert im Kreativtab „Atzen – Angeln“.
 
 ## Entwicklung und Prüfungen
 
-`./gradlew build` mit JDK 25 kompiliert Server- und Clientcode, baut die JAR und führt die JUnit-Prüfungen aus. Sie spielen den Drill ohne Minecraft mit einem Test-Angler durch: jede gewöhnliche Art mit passender Ausrüstung fangbar, große Fische zerreißen schwache Ausrüstung, Dauer-Kurbeln reicht bei großen Fischen nicht, jeder Boss ist mit bester Ausrüstung schaffbar und mit einfacher nicht, alle Aktionen werden angekündigt, eine zu feste Bremse reißt die Schnur. Dazu Setzkescher (keine Duplikate, Grenzen, schlechtes Wasser stresst und tötet erst bei Vernachlässigung), Kescher-Zielleiste, Fangdruck, Aufträge (für alle gleich), Erfahrung und Preise (Wiederholung lohnt nicht), Angelgebiete, Köderauswahl, Bossbedingungen, Maße, JSON-Dateien, Texturen, Übersetzungen und die Mixin-Ziele gegen Minecraft 26.2.
+`./gradlew build` mit JDK 25 kompiliert Server- und Clientcode, baut die JAR und führt die JUnit-Prüfungen aus. Sie spielen den Drill ohne Minecraft mit einem Test-Angler (nur R und F) durch: jede gewöhnliche Art mit passender Ausrüstung fangbar, Dauer-Kurbeln reicht bei großen Fischen nicht, Kurbeln gegen Fluchten reißt die Schnur, jeder Boss ist mit bester Ausrüstung schaffbar und mit einfacher kaum, alle Aktionen werden angekündigt, F öffnet die Bremse. Dazu Setzkescher (keine Duplikate, Grenzen, schlechtes Wasser stresst und tötet erst bei Vernachlässigung), Kescher-Zielleiste, Fangdruck, Aufträge (für alle gleich), Erfahrung und Preise (Wiederholung lohnt nicht), Angelgebiete, Köderauswahl, Bossbedingungen, Maße, JSON-Dateien, Texturen, Übersetzungen und die Mixin-Ziele gegen Minecraft 26.2.
 
 Ressourcen neu erzeugen: `node scripts/generate-resources.mjs` (Modelle, Rezepte, Übersetzungen), `python3 scripts/draw-textures.py` (alle Texturen, 64×64), `python3 scripts/sounds.py OUT` (Klänge).
 
-Spielbalance: `FishingBattle.java` (Drill), `Landing.java` (Kescher), `Valuation.java` (Erfahrung, Preise), `Pressure.java` (Fangdruck), `WaterConditions.java` (Haltung), `Boss.java`, `FishSpecimen.fighter()` (Fischkraft), `ReelType`/`LineType`/`RodType`/`BaitType` (Ausrüstung).
+Spielbalance: `FishingBattle.java` (Drill), `Landing.java` (Kescher), `Valuation.java` (Erfahrung, Preise), `Pressure.java` (Fangdruck), `WaterConditions.java` (Haltung), `Boss.java`, `FishSpecimen.fighter()` (Fischkraft), `ReelType`/`LineType`/`RodType`/`BaitType` (Ausrüstung), `FightHud.prompt()` (Anweisung im Drill).
 
 Lizenz: MIT, siehe `LICENSE`.

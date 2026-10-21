@@ -5,25 +5,29 @@ import java.util.Random;
 /**
  * The fight with a hooked fish, simulated by the server in fixed ticks; clients only say what the angler does.
  *
- * <p>It is a small line simulation, not a progress bar. The fish pulls with a force that depends on its size,
- * its stamina and what it is doing. The line carries that force as tension. The reel's drag slips when the
- * tension reaches it, so a fish pulling harder than the drag takes line; the line breaks when the tension
- * exceeds what it bears, which a drag set tighter than the line, a jolt on a stiff rig or a line worn on snags
- * can cause. The angler reels (only against a fish that pulls less than the reel), pumps (lifts the rod to pull
- * the fish closer, then reels while lowering it), sets the drag and steers sideways runs away from cover. A
- * slack line, head shakes and jumps work the hook loose. A fish is landed when it is close and worn out.
+ * <p>Two keys: <b>reel</b> (R) and <b>give line</b> (F). The fish pulls with a force that depends on its size,
+ * its stamina and what it is doing; the line carries that force as tension. The drag sets itself: it slips at
+ * {@link #DRAG_SHARE} of what line and rod bear, so a fish pulling harder takes line. Giving line opens the drag
+ * wide. The rules: reel while the fish holds or rests; stop reeling when it announces something or pulls away; give
+ * line in jumps and head shakes and when the line is about to break. Reeling against a slipping drag twists and
+ * wears the line until it snaps, a tight line in a jump or reeling in head shakes tears the hook out, and a slack
+ * line on a resting fish lets it fall out. A fish is landed when it is
+ * close and worn out.
  */
 public final class FishingBattle {
     public static final int MAX_TICKS = 20 * 60 * 8;
     public static final int BOSS_MAX_TICKS = 20 * 60 * 12;
-    public static final int DRAG_STEPS = 10;
     public static final double LANDING_DISTANCE = 4;
+    /** Where the automatic drag slips, as a share of what line and rod bear. */
+    public static final double DRAG_SHARE = 0.75;
+    /** The drag while the angler gives line. */
+    public static final double GIVE_SHARE = 0.3;
 
-    public enum Result { ACTIVE, CAUGHT, SNAPPED, BITTEN, SPOOLED, ROD_BROKEN, ESCAPED, TIMEOUT, CANCELLED }
+    public enum Result { ACTIVE, CAUGHT, SNAPPED, SPOOLED, ESCAPED, TIMEOUT, CANCELLED }
 
-    /** What the angler does this tick. Steer is -1 (left), 0 or 1 (right), seen from the angler. */
-    public record Input(boolean reeling, boolean lifting, int steer) {
-        public static final Input NONE = new Input(false, false, 0);
+    /** What the angler does this tick: reel in (R) or give line (F); both at once count as giving. */
+    public record Input(boolean reeling, boolean giving) {
+        public static final Input NONE = new Input(false, false);
     }
 
     private final Fighter fighter;
@@ -37,25 +41,20 @@ public final class FishingBattle {
     private int elapsed;
     private double tension;
     private double distance;
-    private double pumpSlack;
     private double stamina = 1;
     private double hookHold;
     private double condition = 1;
-    private double danger;
     private int sideDir = 1;
-    private double lift;
-    private int drag = 5;
-    private int backlash;
     private int bossPhase;
     private boolean faking;
     private boolean fakeDone;
     private boolean explosive;
     private int adaptCooldown;
-    private int liftTicks;
+    private int giveTicks;
     private int reelTicks;
+    private boolean giving;
     private boolean slack;
     private boolean twisting;
-    private int overloadTicks;
     private int landableTicks;
     private boolean landable;
     private int goodTicks;
@@ -66,7 +65,7 @@ public final class FishingBattle {
         this.rig = rig;
         this.random = new Random(seed);
         this.distance = Math.clamp(startDistance, 3, 40);
-        this.hookHold = Math.clamp(hookHold + rig.hookBonus(), 20, 100);
+        this.hookHold = Math.clamp(hookHold, 20, 100);
         this.tension = fighter.power() * 0.5;
         // The strike itself: the fish bolts straight out into open water before anything else.
         start(FishAction.RUN);
@@ -89,71 +88,37 @@ public final class FishingBattle {
         elapsed++;
         Boss.Phase phase = fighter.boss() == null ? null : fighter.boss().phase(bossPhase);
         if (adaptCooldown > 0) adaptCooldown--;
-        if (backlash > 0) backlash--;
-        advanceAction(input);
+        advanceAction();
+
+        giving = input.giving();
+        boolean reeling = input.reeling() && !giving;
+        if (giving) giveTicks++;
+        if (reeling) reelTicks++;
+        adapt();
 
         // the fish's pull
         double strength = fighter.power() * (0.3 + 0.7 * stamina) * (phase == null ? 1 : phase.power());
         double pull = strength * (warning > 0 ? 0.45 : action.pull());
         if (action == FishAction.SHAKE) pull *= 1 + 0.55 * Math.sin(elapsed * 1.3);
         if (action == FishAction.RUN) pull *= rig.runDamping() * (explosive ? 1.8 : 1);
-        if (rig.ability() == ReelAbility.FLY && fighter.weight() < 3) pull *= 0.8;
         if (phase != null) pull += fighter.power() * phase.current();
 
-        // the rod: lifting raises it over a second, letting go lowers it faster
-        double previousLift = lift;
-        double liftRate = 0.06 * Math.clamp(1.15 - rig.rodWeight() * 0.4, 0.7, 1.1);
-        lift = input.lifting() ? Math.min(1, lift + liftRate) : Math.max(0, lift - 0.1);
-        boolean rising = lift > previousLift, lowering = lift < previousLift;
-        boolean reeling = input.reeling() && backlash == 0;
-        if (input.lifting()) liftTicks++;
-        if (input.reeling()) reelTicks++;
-        adapt(input);
-
         double dragKg = dragKg();
-        double flyPump = rig.ability() == ReelAbility.FLY ? 1.6 : 1;
-        double target = pull;
-        if (reeling) target = pull * 1.15 + 0.3;
-        if (rising) target += 0.45 * rig.rodPower() * flyPump;
-        if (lowering && !reeling) target *= 0.3;
-        if (action == FishAction.SIDE && warning == 0 && input.steer() == -sideDir) target += 0.2 * strength;
+        double target = reeling ? pull * 1.15 + 0.3 : pull;
         boolean slipping = target > dragKg;
 
         // line out: a fish that pulls harder than the drag takes line
         boolean away = warning == 0 && (action == FishAction.RUN || action == FishAction.DIVE || action == FishAction.SIDE);
         if (away && pull > dragKg) {
-            double out = fighter.speed() * (phase == null ? 1 : phase.speed()) * (explosive ? 1.4 : 1)
+            distance += fighter.speed() * (phase == null ? 1 : phase.speed()) * (explosive ? 1.4 : 1)
                     * Math.clamp((pull - dragKg) / (0.35 * pull), 0, 1);
-            if (rig.ability() == ReelAbility.ANCHOR) out *= 0.65;
-            distance += out;
-            if (rig.ability() == ReelAbility.BAITCASTER && drag <= 3 && backlash == 0 && random.nextInt(60) == 0) {
-                backlash = 40;
-                shock(0.4 * strength);
-            }
         }
-        // line in: reeling, pumping, or the current reel on its own
-        if (!slipping) {
-            if (reeling) {
-                double gain = rig.reelSpeed() * Math.clamp((rig.reelForce() - pull) / rig.reelForce(), 0, 1) * (lowering ? 2 : 1);
-                double fromSlack = Math.min(pumpSlack, gain * 1.5);
-                pumpSlack -= fromSlack;
-                distance -= Math.max(0, gain - fromSlack / 1.5);
-            }
-            if (rising) {
-                double power = rig.rodPower() * flyPump;
-                double gain = 0.08 * Math.clamp((power + 0.3 * rig.reelForce() - pull) / power, 0, 1);
-                distance -= gain;
-                pumpSlack += gain;
-            }
-            if (rig.ability() == ReelAbility.CURRENT && !reeling && (action == FishAction.CALM || action == FishAction.TIRED)) {
-                distance -= rig.reelSpeed() * 0.4;
-            }
-        }
+        // line in: only against a fish that pulls less than the reel
+        if (reeling && !slipping) distance -= rig.reelSpeed() * Math.clamp((rig.reelForce() - pull) / rig.reelForce(), 0, 1);
         // Winding against a slipping drag twists the line and wears it down.
         twisting = reeling && slipping;
-        if (twisting) condition -= 0.0012 / rig.abrasion();
+        if (twisting) condition -= 0.004;
         distance = Math.max(1.5, distance);
-        if (!lowering && !rising && pumpSlack > 0 && !reeling) pumpSlack = Math.max(0, pumpSlack - 0.01);
 
         // tension follows the target, cushioned by rod and line
         double response = Math.clamp(0.3 + (1 - rig.rodFlex()) * 0.35 + (1 - rig.stretch()) * 0.35, 0.3, 1);
@@ -163,51 +128,24 @@ public final class FishingBattle {
         }
         tension = Math.max(0, tension);
 
-        // snags: a sideways run reaches cover unless the angler steers against it
-        if (action == FishAction.SIDE && warning == 0) {
-            if (input.steer() == -sideDir) danger = Math.max(0, danger - 2.5);
-            else danger += 1.4 * (phase == null ? 1 : phase.snags());
-            if (danger >= 100) {
-                condition -= 0.22 * rig.snagFactor() / rig.abrasion();
-                danger = 55;
-                shock(0.3 * strength);
-            }
-        } else {
-            danger = Math.max(0, danger - 0.5);
-        }
-
         if (tension > breakingLoad() || condition <= 0.05) {
             result = Result.SNAPPED;
             return;
         }
-        // the rod: overloaded above its rating, broken far above it
-        if (tension > rig.rodLoad()) overloadTicks++;
-        if (tension > rig.rodLoad() * 1.3) {
-            result = Result.ROD_BROKEN;
-            return;
-        }
-        // teeth: in a head shake a toothy fish can bite through a line without a steel leader
-        if (fighter.teeth() && !rig.toothGuard() && action == FishAction.SHAKE && warning == 0 && random.nextInt(250) == 0) {
-            result = Result.BITTEN;
-            return;
-        }
-        if (distance + pumpSlack > rig.capacity()) {
+        if (distance > rig.capacity()) {
             result = Result.SPOOLED;
             return;
         }
 
-        // the hook
-        // a rod held up keeps the line tight; a rod dropped without reeling leaves it hanging
-        slack = !reeling && !input.lifting() && (tension < 0.12 * fighter.power() || pumpSlack > 0.4);
-        double loss = 0;
-        if (slack) loss += (rig.ability() == ReelAbility.FORGIVING ? 0.4 : 0.7) * rig.slackLoss();
-        // a hook too weak for the load bends open
-        if (tension > rig.hookStrength()) loss += 0.6 + 2 * (tension / rig.hookStrength() - 1);
-        if (action == FishAction.SHAKE && warning == 0) loss += tension > 0.7 * breakingLoad() || slack ? 0.6 : 0.08;
+        // the hook: a slack line lets it fall out, reeling in head shakes and a tight line in a jump tear it out.
+        // Slack only counts while the fish holds still: then the line has to be kept tight with the reel.
+        boolean resting = warning == 0 && (action == FishAction.CALM || action == FishAction.TIRED);
+        slack = !reeling && resting && tension < 0.12 * fighter.power();
+        double loss = slack ? 0.6 : 0;
+        if (action == FishAction.SHAKE && warning == 0) loss += reeling || slack ? 0.6 : 0.08;
         if (action == FishAction.JUMP && warning == 0 && actionTicks > 4) {
-            if (rig.ability() == ReelAbility.JUMP_MASTER && lift < 0.2) loss += 0;
-            else if (lift > 0.2 || tension > 0.55 * breakingLoad()) loss += 2.2;
-            else if (slack) loss += 1;
+            if (fighter.boss() == Boss.REED_KING && giving) loss += 0.12; // the dance: hard to hold even when giving
+            else if (!giving && tension > 0.45 * breakingLoad()) loss += 2.2;
             else loss += 0.05;
         }
         hookHold -= loss;
@@ -216,22 +154,19 @@ public final class FishingBattle {
             return;
         }
 
-        // the fish tires against the line and gets its breath back when the line is light
-        double effort = Math.clamp(tension / fighter.power(), 0, 2);
-        boolean tide = rig.ability() == ReelAbility.TIDE && fighter.salt();
-        double drain = 0.0016 * effort * rig.staminaDrain() / fighter.endurance();
-        if (tide) drain *= 1.15;
-        if (rig.ability() == ReelAbility.ADAPT) drain *= 1.25;
+        // the fish tires against the line, and from its own runs; it gets its breath back when the line is light
+        double effort = Math.clamp(Math.max(tension, away ? 0.8 * pull : 0) / fighter.power(), 0, 2);
+        double drain = 0.003 * effort * rig.staminaDrain() / fighter.endurance();
         if (away && pull <= dragKg) drain *= 1.4; // a run against a drag that holds wears the fish out
         stamina -= drain;
-        if (effort < 0.25 && !tide) stamina += 0.0005 / fighter.endurance();
+        if (effort < 0.25 && resting) stamina += 0.0005 / fighter.endurance();
         stamina = Math.clamp(stamina, 0, 1);
         // A boss's strength is split into its phases; at each threshold it changes its behaviour and finds new strength.
         if (fighter.boss() != null && bossPhase < fighter.boss().phases() - 1
                 && stamina <= 1 - (bossPhase + 1.0) / fighter.boss().phases()) nextBossPhase();
 
         ticks++;
-        if (!slack && tension >= 0.25 * dragKg && tension <= 0.95 * dragKg) goodTicks++;
+        if (!slack && !twisting && tension >= 0.25 * dragKg && tension <= 0.95 * dragKg) goodTicks++;
         boolean lastPhase = fighter.boss() == null || bossPhase == fighter.boss().phases() - 1;
         boolean wasLandable = landable;
         landable = lastPhase && distance <= LANDING_DISTANCE && stamina <= landingStamina() && !faking && warning == 0
@@ -240,7 +175,7 @@ public final class FishingBattle {
         if (elapsed >= (fighter.boss() != null ? BOSS_MAX_TICKS : MAX_TICKS)) result = Result.TIMEOUT;
     }
 
-    private void advanceAction(Input input) {
+    private void advanceAction() {
         if (warning > 0) {
             if (--warning == 0) start(pending);
             return;
@@ -291,10 +226,7 @@ public final class FishingBattle {
     }
 
     private int warningTicks() {
-        int base = fighter.boss() == null ? 18 : fighter.boss().phase(bossPhase).warning();
-        if (rig.ability() == ReelAbility.ECHO) base += 20;
-        if (rig.ability() == ReelAbility.ADAPT) base += 10;
-        return base;
+        return fighter.boss() == null ? 20 : fighter.boss().phase(bossPhase).warning();
     }
 
     private void announce(FishAction next, int ticks) {
@@ -319,17 +251,17 @@ public final class FishingBattle {
         if (next == FishAction.RUN) shock(0.35 * fighter.power() * (0.3 + 0.7 * stamina));
     }
 
-    /** The Deep Warden answers the technique the angler leans on: pumping draws head shakes, winching draws runs. */
-    private void adapt(Input input) {
+    /** The Deep Warden answers the angler's habit: always reeling draws runs, always giving draws head shakes. */
+    private void adapt() {
         if (fighter.boss() != Boss.DEEP_WARDEN || adaptCooldown > 0 || warning > 0
                 || (action != FishAction.CALM && action != FishAction.TIRED)) return;
-        int total = liftTicks + reelTicks;
+        int total = giveTicks + reelTicks;
         if (total < 60) return;
-        if (input.lifting() && liftTicks > total * 0.5) {
-            announce(FishAction.SHAKE, 4);
+        if (giveTicks > total * 0.5) {
+            announce(FishAction.SHAKE, 6);
             adaptCooldown = 100;
-        } else if (input.reeling() && reelTicks > total * 0.75) {
-            announce(FishAction.RUN, 4);
+        } else if (reelTicks > total * 0.85) {
+            announce(FishAction.RUN, 6);
             adaptCooldown = 100;
         }
     }
@@ -337,20 +269,19 @@ public final class FishingBattle {
     private void nextBossPhase() {
         bossPhase++;
         stamina = Math.min(1, stamina + 0.12);
-        liftTicks = 0;
+        giveTicks = 0;
         reelTicks = 0;
-        announce(FishAction.RUN, 8);
+        announce(FishAction.RUN, 10);
     }
 
     private void shock(double kg) {
         double cushion = 1 - 0.5 * rig.rodFlex() - 0.6 * rig.stretch();
-        if (rig.ability() == ReelAbility.FINE_DRAG) cushion *= 0.55;
         tension += kg * Math.max(0.15, cushion);
         double dragKg = dragKg();
         if (tension > dragKg) tension = dragKg + (tension - dragKg) * 0.5;
     }
 
-    private double landingStamina() { return fighter.boss() != null ? 0.08 : 0.15; }
+    private double landingStamina() { return fighter.boss() != null ? 0.1 : 0.2; }
 
     /** Landing by hand (small fish): a close, worn-out fish; one with fight left in it can kick free. */
     public boolean land() {
@@ -372,13 +303,11 @@ public final class FishingBattle {
         return false;
     }
 
-    public void adjustDrag(int delta) { drag = Math.clamp(drag + Integer.signum(delta), 1, DRAG_STEPS); }
-
     public void cancel() { if (result == Result.ACTIVE) result = Result.CANCELLED; }
 
+    /** The drag sets itself below what line and rod bear; giving line opens it. */
     public double dragKg() {
-        double kg = drag / (double) DRAG_STEPS * rig.lineStrength() * rig.dragLimit();
-        return rig.ability() == ReelAbility.AUTO_DRAG ? Math.min(kg, 0.9 * breakingLoad()) : kg;
+        return Math.min(rig.lineStrength(), rig.rodLoad()) * (giving ? GIVE_SHARE : DRAG_SHARE);
     }
 
     public double breakingLoad() { return rig.lineStrength() * condition; }
@@ -391,24 +320,16 @@ public final class FishingBattle {
     public int elapsed() { return elapsed; }
     public double tension() { return tension; }
     public double tensionShare() { return tension / rig.lineStrength(); }
-    /** Tension against the rod's rating; above 1 the rod is overloaded. */
-    public double rodStrain() { return tension / rig.rodLoad(); }
-    /** Ticks the rod spent overloaded: it takes extra wear. */
-    public int overloadTicks() { return overloadTicks; }
     /** Ticks since the fish became landable, for the net's aim (see {@link Landing}). */
     public int landableTicks() { return landableTicks; }
     public double distance() { return distance; }
-    public double lineOut() { return distance + pumpSlack; }
     public double stamina() { return stamina; }
     public double hookHold() { return hookHold; }
     public double condition() { return condition; }
-    public double danger() { return danger; }
     public int sideDir() { return sideDir; }
-    public double lift() { return lift; }
-    public int drag() { return drag; }
+    public boolean giving() { return giving; }
     public boolean slack() { return slack; }
     public boolean landable() { return landable; }
-    public boolean tangled() { return backlash > 0; }
     /** Reeling while the drag slips: the line twists. */
     public boolean twisting() { return twisting; }
     public boolean faking() { return faking; }

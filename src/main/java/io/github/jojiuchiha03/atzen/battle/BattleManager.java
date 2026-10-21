@@ -6,8 +6,6 @@ import io.github.jojiuchiha03.atzen.Performance;
 import io.github.jojiuchiha03.atzen.ecology.Ecology;
 import io.github.jojiuchiha03.atzen.item.FishingTools;
 import io.github.jojiuchiha03.atzen.item.LandingNetItem;
-import io.github.jojiuchiha03.atzen.item.ModuleType;
-import io.github.jojiuchiha03.atzen.item.RodMods;
 import io.github.jojiuchiha03.atzen.progress.Area;
 import io.github.jojiuchiha03.atzen.progress.Progression;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -24,7 +22,6 @@ import io.github.jojiuchiha03.atzen.item.AtzenRodItem;
 import io.github.jojiuchiha03.atzen.item.BaitType;
 import io.github.jojiuchiha03.atzen.item.BattleEquipment;
 import io.github.jojiuchiha03.atzen.item.GearSlot;
-import io.github.jojiuchiha03.atzen.item.HookType;
 import io.github.jojiuchiha03.atzen.item.RodType;
 import io.github.jojiuchiha03.atzen.network.BattlePayload;
 import io.github.jojiuchiha03.atzen.network.ReelPayload;
@@ -110,7 +107,7 @@ public final class BattleManager {
                 : boss != null ? FishSpecies.of(boss).roll(random) : choose(player, level, hook.blockPosition(), rod, bait, random);
         Fighter fighter = specimen.fighter();
         int sinceBite = liveFish != null && nibble <= 0 ? fighter.strikeIdeal() : ((BiteTarget) hook).atzen$ticksSinceBite();
-        double hold = FishingBattle.strikeHold(sinceBite, fighter.strikeIdeal(), BattleEquipment.sensitivity(player, rod));
+        double hold = FishingBattle.strikeHold(sinceBite, fighter.strikeIdeal(), BattleEquipment.sensitivity(rod));
         if (!loaded.isEmpty()) consumeBait(player, rod);
         else if (!bait.isEmpty() && !player.hasInfiniteMaterials()) {
             ItemStack used = AtzenRodItem.use(bait);
@@ -143,7 +140,7 @@ public final class BattleManager {
         Habitat habitat = Habitat.at(level, pos);
         boolean open = Area.of(habitat).open(Progression.level(player));
         int luck = BattleEquipment.luck(player, rod);
-        boolean chum = Ecology.nearChum(level, pos) || RodMods.has(rod, ModuleType.FEEDER);
+        boolean chum = Ecology.nearChum(level, pos);
         double pressure = Ecology.factor(level, pos);
         FishSpecies species = FishSpecies.choose(habitat, random, candidate -> {
             double appeal = BattleEquipment.appeal(bait, rod, candidate, night);
@@ -171,18 +168,7 @@ public final class BattleManager {
     private Session begin(ServerPlayer player, FishingHook hook, ItemStack rod, InteractionHand hand, ItemStack bait, BaitType baitType,
                           FishSpecimen specimen, AtzenFishEntity liveFish, double hold, Vec3 anchor, Random random) {
         Fighter fighter = specimen.fighter();
-        if (baitType == BaitType.POPPER && fighter.boss() == null) {
-            // A popper on the surface: hooked fish come up and jump more.
-            int[] weights = fighter.weights().clone();
-            weights[FishAction.JUMP.ordinal()] += 3;
-            fighter = new Fighter(fighter.power(), fighter.endurance(), fighter.speed(), fighter.weight(), weights,
-                    fighter.strikeIdeal(), fighter.salt(), fighter.teeth(), null);
-        }
-        RodType rodType = BattleEquipment.rodType(rod);
-        // A circle hook sets itself; a fish far too small for the rod is hardly felt.
-        if (AtzenItems.hook(AtzenRodItem.get(rod, GearSlot.HOOK)) == HookType.CIRCLE) hold = Math.max(hold, 85);
-        if (fighter.weight() < rodType.fishMin()) hold -= 15;
-        Rig rig = BattleEquipment.rig(player, rod, bait, fighter.boss() != null);
+        Rig rig = BattleEquipment.rig(rod, bait);
         FishingBattle battle = new FishingBattle(fighter, rig, Math.sqrt(anchor.distanceToSqr(player.position())), hold, random.nextLong());
         Session session = new Session(++nextId, player, hook, rod, hand, battle, specimen, liveFish, anchor, false);
         session.strike = (int) Math.round(hold);
@@ -334,7 +320,7 @@ public final class BattleManager {
         Vec3 side = new Vec3(-dir.z, 0, dir.x);
         FishAction action = battle.action();
         boolean warning = battle.pending() != null;
-        double lateralTarget = action == FishAction.SIDE && !warning ? battle.sideDir() * (1 + battle.danger() / 100 * 4) : 0;
+        double lateralTarget = action == FishAction.SIDE && !warning ? battle.sideDir() * 3 : 0;
         session.lateral += (lateralTarget - session.lateral) * 0.08;
         double reach = Math.max(1.2, Math.sqrt(Math.max(0, battle.distance() * battle.distance() - 2)));
         Vec3 flat = eye.add(dir.scale(reach)).add(side.scale(session.lateral));
@@ -406,9 +392,7 @@ public final class BattleManager {
         if (payload.cancel()) session.battle.cancel();
         // Updating intent never advances the simulation; packet spam cannot speed up a catch.
         session.reeling = payload.reeling();
-        session.lifting = payload.lifting();
-        session.steer = Math.clamp(payload.steer(), -1, 1);
-        if (payload.dragDelta() != 0) session.battle.adjustDrag(payload.dragDelta());
+        session.giving = payload.giving();
         session.inputAge = 0;
     }
 
@@ -489,20 +473,16 @@ public final class BattleManager {
                         }
                     }
                     // an overloaded rod wears faster
-                    session.rod.hurtAndBreak(damage + session.battle.overloadTicks() / 20, player, session.hand);
+                    session.rod.hurtAndBreak(damage, player, session.hand);
                 } finally {
                     if (session.hook != null) completing.remove(session.hook.getUUID());
                 }
             } else {
                 if (session.hook != null) session.hook.discard();
-                if (result == FishingBattle.Result.SNAPPED || result == FishingBattle.Result.SPOOLED
-                        || result == FishingBattle.Result.BITTEN) {
+                if (result == FishingBattle.Result.SNAPPED || result == FishingBattle.Result.SPOOLED) {
                     AtzenRodItem.loseLure(session.rod);
                 }
-                if (result == FishingBattle.Result.ROD_BROKEN) {
-                    // The blank cracks: a quarter of its life is gone.
-                    session.rod.hurtAndBreak(Math.max(1, session.rod.getMaxDamage() / 4), player, session.hand);
-                } else if (result != FishingBattle.Result.CANCELLED) {
+                if (result != FishingBattle.Result.CANCELLED) {
                     session.rod.hurtAndBreak(1, player, session.hand);
                 }
             }
@@ -510,7 +490,7 @@ public final class BattleManager {
         // The outcome for everyone around: the catch, a snapping line, a fish that got away.
         var outcome = switch (result) {
             case CAUGHT -> AtzenSounds.CATCH;
-            case SNAPPED, SPOOLED, BITTEN, ROD_BROKEN -> AtzenSounds.SNAP;
+            case SNAPPED, SPOOLED -> AtzenSounds.SNAP;
             case ESCAPED, TIMEOUT -> AtzenSounds.ESCAPE;
             default -> SoundEvents.FISHING_BOBBER_RETRIEVE;
         };
@@ -583,7 +563,7 @@ public final class BattleManager {
         FishSpecimen specimen = species.roll(random);
         // Training runs on the tackle in hand, so gear can be tried out.
         ItemStack rod = player.getMainHandItem();
-        Rig rig = rod.getItem() instanceof AtzenRodItem ? BattleEquipment.rig(player, rod, AtzenRodItem.bait(rod)) : Rig.VANILLA;
+        Rig rig = rod.getItem() instanceof AtzenRodItem ? BattleEquipment.rig(rod, AtzenRodItem.bait(rod)) : Rig.VANILLA;
         Session session = new Session(++nextId, player, null, ItemStack.EMPTY, InteractionHand.MAIN_HAND,
                 new FishingBattle(specimen.fighter(), rig, 12, 85, random.nextLong()), specimen, null, player.position(), true);
         session.strike = 85;
@@ -660,20 +640,6 @@ public final class BattleManager {
         return 1;
     }
 
-    /** Sonar module: anglers waiting at a float hear how many fish are around it. */
-    public void sonar(MinecraftServer server) {
-        if (server.overworld().getGameTime() % 100 != 0) return;
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            FishingHook hook = player.fishing;
-            if (hook == null || sessions.containsKey(player.getUUID())) continue;
-            ItemStack rod = player.getMainHandItem().getItem() instanceof AtzenRodItem ? player.getMainHandItem() : player.getOffhandItem();
-            if (!RodMods.has(rod, ModuleType.SONAR)) continue;
-            int count = player.level().getEntitiesOfClass(AtzenFishEntity.class, hook.getBoundingBox().inflate(12),
-                    fish -> !fish.isBattleDummy()).size();
-            player.sendSystemMessage(Component.translatable("message.atzen.sonar_float", count), true);
-        }
-    }
-
     private static final class Session {
         final int id;
         final ServerPlayer player;
@@ -692,8 +658,7 @@ public final class BattleManager {
         int actionStart;
         int strike;
         boolean reeling;
-        boolean lifting;
-        int steer;
+        boolean giving;
         int inputAge;
         /** Training: no rod, no loot, landed automatically. */
         final boolean practice;
@@ -717,9 +682,9 @@ public final class BattleManager {
             this.fishPos = anchor;
         }
 
-        /** Input goes stale after a second without packets: a frozen client neither reels nor pumps. */
+        /** Input goes stale after a second without packets: a frozen client neither reels nor gives line. */
         FishingBattle.Input input() {
-            return inputAge <= 20 ? new FishingBattle.Input(reeling, lifting, steer) : FishingBattle.Input.NONE;
+            return inputAge <= 20 ? new FishingBattle.Input(reeling, giving) : FishingBattle.Input.NONE;
         }
     }
 }
